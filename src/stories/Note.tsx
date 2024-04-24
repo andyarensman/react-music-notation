@@ -8,8 +8,11 @@ interface NoteProps {
   };
 }
 
-const Note = ({}: NoteProps) => {
-  return <p></p>;
+export const Note = ({ pitch }: NoteProps) => {
+  return (
+    <p>
+      {pitch.step}
+      {pitch.octave}
+    </p>
+  );
 };
-
-export default Note;
