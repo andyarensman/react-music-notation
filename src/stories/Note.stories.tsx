@@ -15,5 +15,6 @@ export const Primary: Story = {
       step: "A",
       octave: 4,
     },
+    noteValue: "half",
   },
 };
