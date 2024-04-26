@@ -1,0 +1,9 @@
+@font-face {
+  font-family: "Leland";
+  src: url("../font/Leland.otf") format("opentype");
+}
+
+.note {
+  font-family: "Leland", sans-serif; /* Use Leland font */
+  font-size: 32px;
+}

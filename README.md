@@ -35,3 +35,4 @@ export default {
 - [Leland music fonts](https://github.com/MuseScoreFonts/Leland)
 - [standard music font layout](https://w3c.github.io/smufl/latest/index.html)
 - [musicXML wiki](https://www.w3.org/2021/06/musicxml40/)
+- [Tool for viewing all font symbols](https://fontdrop.info/)
