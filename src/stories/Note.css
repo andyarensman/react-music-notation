@@ -2,6 +2,9 @@
   font-family: "Leland";
   src: url("../font/Leland.otf") format("opentype");
 }
+.note-container {
+  position: relative;
+}
 
 .note {
   font-family: "Leland", sans-serif; /* Use Leland font */

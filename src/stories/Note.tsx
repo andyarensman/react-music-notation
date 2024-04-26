@@ -1,5 +1,6 @@
 import React from "react";
 import "./Note.css";
+import { Staff } from "./Staff";
 
 interface NoteProps {
   pitch: {
@@ -23,12 +24,13 @@ interface NoteProps {
 
 export const Note = ({ pitch, noteValue }: NoteProps) => {
   return (
-    <p className={"note"}>
-      {"\uE050"}
-      {"\uE1D3"}
-      {noteValue}
-      {pitch.step}
-      {pitch.octave}
-    </p>
+    <div className="note-container">
+      <p className={"note"}>
+        {"\uE050"}
+        {"\uE1D3"}
+        {"\uE1D2"}
+      </p>
+      <Staff />
+    </div>
   );
 };

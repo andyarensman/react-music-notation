@@ -1,0 +1,23 @@
+.staff-container {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0;
+  z-index: -1;
+  width: 100%;
+}
+
+.staff {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 36px;
+  border-right: 1px solid black;
+}
+
+.line {
+  width: 100%;
+  border-bottom: 1px solid black;
+}
