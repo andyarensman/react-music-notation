@@ -93,3 +93,42 @@ export const dynamicGlyphs = {
   rf: "\uE53C",
   rfz: "\uE53D",
 };
+
+export const articulationGlyphs = {
+  accent: {
+    above: "\uE4A0",
+    below: "\uE4A1",
+  },
+  staccato: {
+    above: "\uE4A2",
+    below: "\uE4A3",
+  },
+  tenuto: {
+    above: "\uE4A4",
+    below: "\uE4A5",
+  },
+  staccatissimo: {
+    above: "\uE4A6",
+    below: "\uE4A7",
+  },
+  marcato: {
+    above: "\uE4AC",
+    below: "\uE4AD",
+  },
+  marcatoStaccato: {
+    above: "\uE4AE",
+    below: "\uE4AF",
+  },
+  accentStaccato: {
+    above: "\uE4B0",
+    below: "\uE4B1",
+  },
+  tenutoStaccato: {
+    above: "\uE4B2",
+    below: "\uE4B3",
+  },
+  accentTenuto: {
+    above: "\uE4B4",
+    below: "\uE4B5",
+  },
+};
