@@ -1,6 +1,7 @@
 import React from "react";
 import "./Note.css";
 import { Staff } from "./Staff";
+import { clefGlyphs, noteGlyphs } from "./helpers/glyphs";
 
 interface NoteProps {
   pitch: {
@@ -26,9 +27,9 @@ export const Note = ({ pitch, noteValue }: NoteProps) => {
   return (
     <div className="note-container">
       <p className={"note"}>
-        {"\uE050"}
-        {"\uE1D3"}
-        {"\uE1D2"}
+        {clefGlyphs.gClef}
+        {noteGlyphs.halfNote.downStem}
+        {noteGlyphs.eighthNote.upStem}
       </p>
       <Staff />
     </div>
