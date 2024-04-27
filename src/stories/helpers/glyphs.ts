@@ -1,0 +1,95 @@
+export const noteGlyphs = {
+  dotted: "u/E1E7",
+  wholeNote: "u/E1D2",
+  wholeRest: "u/E4E3",
+  halfNote: {
+    upStem: "u/E1D3",
+    downStem: "u/E1D4",
+    noStem: "u/E0A3",
+    rest: "u/E4E4",
+  },
+  quarterNote: {
+    upStem: "u/E1D5",
+    downStem: "u/E1D6",
+    noStem: "u/E0A4",
+    rest: "u/E4E5",
+  },
+  eighthNote: {
+    upStem: "u/E1D7",
+    downStem: "u/E1D8",
+    noStem: "u/E0A4",
+    NoFlagUpStem: "u/E1D5",
+    NoFlagDownStem: "u/E1D6",
+    rest: "u/E4E6",
+  },
+  sixteenthNote: {
+    upStem: "u/E1D9",
+    downStem: "u/E1DA",
+    noStem: "u/E0A4",
+    NoFlagUpStem: "u/E1D5",
+    NoFlagDownStem: "u/E1D6",
+    rest: "u/E4E7",
+  },
+};
+
+export const clefGlyphs = {
+  gClef: "u/E050",
+  fClef: "u/E062",
+  cClef: "u/E05C",
+};
+
+export const timeSignatureGlyphs = {
+  zero: "u/E080",
+  one: "u/E081",
+  two: "u/E082",
+  three: "u/E083",
+  four: "u/E084",
+  five: "u/E085",
+  six: "u/E086",
+  seven: "u/E087",
+  eight: "u/E088",
+  nine: "u/E089",
+  commonTime: "u/E08A",
+  cutTime: "u/E08B",
+};
+
+export const accidentalGlyphs = {
+  sharp: "u/E262",
+  flat: "u/E260",
+  natural: "u/E261",
+  doubleSharp: "u/E263",
+  doubleFlat: "u/E264",
+};
+
+export const dynamicGlyphs = {
+  p: "u/E520",
+  m: "u/E521",
+  f: "u/E522",
+  r: "u/E523",
+  s: "u/E524",
+  z: "u/E525",
+  n: "u/E526",
+  p6: "u/E527",
+  p5: "u/E528",
+  p4: "u/E529",
+  p3: "u/E52A",
+  pp: "u/E52B",
+  mp: "u/E52C",
+  mf: "u/E52D",
+  pf: "u/E52E",
+  ff: "u/E52F",
+  f3: "u/E530",
+  f4: "u/E531",
+  f5: "u/E532",
+  f6: "u/E533",
+  fp: "u/E534",
+  fz: "u/E535",
+  sf: "u/E536",
+  sfp: "u/E537",
+  sfpp: "u/E538",
+  sfz: "u/E539",
+  sfzp: "u/E53A",
+  sffz: "u/E53B",
+  rf: "u/E53C",
+  rfz: "u/E53D",
+};
