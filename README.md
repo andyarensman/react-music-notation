@@ -37,3 +37,4 @@ export default {
 - [musicXML wiki](https://www.w3.org/2021/06/musicxml40/)
 - [Tool for viewing all font symbols](https://fontdrop.info/)
 - [May need this for font conversion](https://www.fontsquirrel.com/tools/webfont-generator)
+- [Subset web fonts](https://web.dev/learn/performance/optimize-web-fonts#:~:text=Note%3A%20The%20only%20time%20you,font%20formats%20other%20than%20WOFF2.)

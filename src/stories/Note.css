@@ -1,12 +1,20 @@
-@font-face {
+/* @font-face {
   font-family: "Leland";
   src: url("../font/Leland.otf") format("opentype");
+} */
+
+@font-face {
+  font-family: "lelandregular";
+  src: url("../fonts/leland-webfont.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
 }
+
 .note-container {
   position: relative;
 }
 
 .note {
-  font-family: "Leland", sans-serif; /* Use Leland font */
+  font-family: "lelandregular"; /* Use Leland font */
   font-size: 32px;
 }
