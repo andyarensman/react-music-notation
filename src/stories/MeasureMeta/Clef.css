@@ -1,0 +1,12 @@
+@font-face {
+  font-family: "lelandregular";
+  src: url("../fonts/leland-webfont.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.clef-container {
+  font-family: "lelandregular"; /* Use Leland font */
+  font-size: 32px;
+  margin: 0px;
+}
