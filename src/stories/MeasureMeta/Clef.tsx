@@ -1,5 +1,6 @@
 import React from "react";
 import "./Clef.css";
+import "../../global.css";
 import { clefGlyphs } from "../../helpers/glyphs";
 
 interface ClefProps {
@@ -7,5 +8,5 @@ interface ClefProps {
 }
 
 export const Clef = ({ clef }: ClefProps) => {
-  return <div className="clef-container">{clefGlyphs[clef]}</div>;
+  return <div className="clef-container leland">{clefGlyphs[clef]}</div>;
 };
