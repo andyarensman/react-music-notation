@@ -14,10 +14,11 @@ interface MeasureProps {
 export const Measure = ({}: MeasureProps) => {
   return (
     <div className="measure-container">
-      <Clef clef={"gClef"} />
-      <Note pitch={{ step: "A", octave: 4 }} noteValue="half" />
-      <Note pitch={{ step: "A", octave: 4 }} noteValue="half" />
       <Staff />
+      <div className="data-container">
+        <Note pitch={{ step: "A", octave: 4 }} noteValue="half" />
+        <Note pitch={{ step: "A", octave: 4 }} noteValue="half" />
+      </div>
     </div>
   );
 };

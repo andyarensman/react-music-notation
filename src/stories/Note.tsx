@@ -27,11 +27,7 @@ interface NoteProps {
 export const Note = ({ pitch, noteValue }: NoteProps) => {
   return (
     <div className="note-container">
-      <p className={"leland"}>
-        {noteGlyphs.halfNote.downStem}
-        {noteGlyphs.eighthNote.upStem}
-      </p>
-      {/* <Staff /> */}
+      <div className={"leland note"}>{noteGlyphs.wholeNote}</div>
     </div>
   );
 };

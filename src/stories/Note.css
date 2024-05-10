@@ -3,4 +3,6 @@
 }
 
 .note {
+  position: absolute;
+  top: 0px; /* negative for higher. not sure units*/
 }
