@@ -49,8 +49,8 @@ export const timeSignatureGlyphs = {
   seven: "\uE087",
   eight: "\uE088",
   nine: "\uE089",
-  commonTime: "\uE08A",
-  cutTime: "\uE08B",
+  common: "\uE08A",
+  cut: "\uE08B",
 };
 
 export const accidentalGlyphs = {

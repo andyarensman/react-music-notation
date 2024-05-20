@@ -1,0 +1,22 @@
+.time-signature-container {
+  position: relative;
+  margin-right: 15px;
+}
+
+.normal-time-signature-container {
+  position: relative;
+  width: 15px;
+  margin-right: 15px;
+}
+
+.number-container {
+  position: absolute;
+}
+
+.number-top {
+  top: -9px;
+}
+
+.number-bottom {
+  top: 9px;
+}

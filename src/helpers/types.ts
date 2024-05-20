@@ -14,3 +14,15 @@ export type KeyRange =
   | 5
   | 6
   | 7;
+
+export type SingleDigitString =
+  | "zero"
+  | "one"
+  | "two"
+  | "three"
+  | "four"
+  | "five"
+  | "six"
+  | "seven"
+  | "eight"
+  | "nine";
