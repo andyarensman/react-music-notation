@@ -3,6 +3,56 @@
 }
 
 .note {
-  position: absolute;
-  top: 0px; /* negative for higher. not sure units*/
+  position: absolute; /*! Need to figure out ledger lines */
+}
+
+.line-above-1 {
+  top: -27px;
+}
+
+.space-above-1 {
+  top: -22px;
+}
+
+.line-5 {
+  top: -18px;
+}
+
+.space-5 {
+  top: -13px;
+}
+
+.line-4 {
+  top: -9px;
+}
+
+.space-4 {
+  top: -4px;
+}
+
+.line-3 {
+  top: 0px; /* Default middle */
+}
+
+.space-2 {
+  top: 5px;
+}
+
+.line-2 {
+  top: 9px;
+}
+
+.space-1 {
+  top: 14px;
+}
+
+.line-1 {
+  top: 18px;
+}
+.space-below-1 {
+  top: 23px;
+}
+
+.line-below-1 {
+  top: 28px; /*! Need to figure out ledger lines */
 }

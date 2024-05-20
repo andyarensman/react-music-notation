@@ -10,9 +10,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  height: 36px;
+  height: 37px;
   border-right: 1px solid black;
-  margin: 46.5px 0;
+  margin: 46px 0;
 }
 
 .line {
