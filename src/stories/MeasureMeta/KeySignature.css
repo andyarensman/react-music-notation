@@ -1,0 +1,73 @@
+.key-signature-container {
+  position: relative;
+  display: flex;
+  margin-right: 15px;
+}
+
+.accidental-container {
+  position: relative;
+  flex-grow: 1;
+  width: 8px;
+}
+
+.accidental {
+  position: absolute;
+}
+
+/* all for treble clef right now */
+
+.sharp-0 {
+  top: -18px;
+}
+
+.sharp-1 {
+  top: -4px;
+}
+
+.sharp-2 {
+  top: -22px;
+}
+
+.sharp-3 {
+  top: -9px;
+}
+
+.sharp-4 {
+  top: 5px;
+}
+
+.sharp-5 {
+  top: -13px;
+}
+
+.sharp-6 {
+  top: 0px;
+}
+
+.flat-0 {
+  top: 0px;
+}
+
+.flat-1 {
+  top: -13px;
+}
+
+.flat-2 {
+  top: 5px;
+}
+
+.flat-3 {
+  top: -9px;
+}
+
+.flat-4 {
+  top: 9px;
+}
+
+.flat-5 {
+  top: -4px;
+}
+
+.flat-6 {
+  top: 14px;
+}

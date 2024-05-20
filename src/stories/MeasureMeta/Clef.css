@@ -1,6 +1,6 @@
 .clef-container {
   flex-grow: 0;
-  width: 40px; /* adjust for spacing after clef */
+  width: 30px; /* adjust for spacing after clef */
   position: relative;
 }
 
