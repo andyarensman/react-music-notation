@@ -16,6 +16,7 @@ export const Measure = ({}: MeasureProps) => {
     <div className="measure-container">
       <Staff />
       <div className="data-container">
+        <Clef clef="gClef" />
         <Note pitch={{ position: "line-1" }} noteValue="half" />
         <Note pitch={{ position: "space-4" }} noteValue="half" />
       </div>

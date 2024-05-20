@@ -8,5 +8,9 @@ interface ClefProps {
 }
 
 export const Clef = ({ clef }: ClefProps) => {
-  return <div className="clef-container leland">{clefGlyphs[clef]}</div>;
+  return (
+    <div className="clef-container leland">
+      <div className={"clef " + clef}>{clefGlyphs[clef]}</div>
+    </div>
+  );
 };

@@ -1,0 +1,20 @@
+.clef-container {
+  flex-grow: 0;
+  width: 40px; /* adjust for spacing after clef */
+  position: relative;
+}
+
+.clef {
+  position: absolute;
+}
+
+.gClef {
+  top: 10px;
+}
+.fClef {
+  top: -9px;
+}
+
+.cClef {
+  top: 0px;
+}
