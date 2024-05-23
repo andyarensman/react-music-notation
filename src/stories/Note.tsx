@@ -38,11 +38,30 @@ interface NoteProps {
     | "1024th";
 }
 
+const noteTranslations = {
+  whole: "wholeNote",
+  half: "halfNote",
+  quarter: "quarterNote",
+  eighth: "eighthNote",
+  "16th": "sixteenthNote",
+};
+
+const noteFlexValue = {
+  whole: 16,
+  half: 8,
+  quarter: 4,
+  eighth: 2,
+  "16th": 1,
+};
+
 export const Note = ({ pitch, noteValue }: NoteProps) => {
   return (
-    <div className="note-container">
+    <div
+      className="note-container"
+      style={{ flexGrow: noteFlexValue[noteValue] }}
+    >
       <div className={"leland note " + pitch.position}>
-        {noteGlyphs.halfNote.downStem}
+        {noteGlyphs[noteTranslations[noteValue]]["downStem"]}
       </div>
     </div>
   );

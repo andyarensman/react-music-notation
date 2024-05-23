@@ -1,7 +1,11 @@
 export const noteGlyphs = {
   dotted: "\uE1E7",
-  wholeNote: "\uE1D2",
-  wholeRest: "\uE4E3",
+  wholeNote: {
+    upStem: "\uE1D2",
+    downStem: "\uE1D2",
+    noStem: "\uE1D2",
+    rest: "\uE4E3",
+  },
   halfNote: {
     upStem: "\uE1D3",
     downStem: "\uE1D4",

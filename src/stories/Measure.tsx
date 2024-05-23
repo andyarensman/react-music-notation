@@ -26,7 +26,9 @@ export const Measure = ({}: MeasureProps) => {
         </div>
         <div className="notes-container">
           <Note pitch={{ position: "line-1" }} noteValue="half" />
-          <Note pitch={{ position: "space-4" }} noteValue="half" />
+          <Note pitch={{ position: "space-4" }} noteValue="eighth" />
+          <Note pitch={{ position: "space-4" }} noteValue="eighth" />
+          <Note pitch={{ position: "space-4" }} noteValue="quarter" />
         </div>
       </div>
     </div>
