@@ -19,11 +19,15 @@ export const Measure = ({}: MeasureProps) => {
     <div className="measure-container">
       <Staff />
       <div className="data-container">
-        <Clef clef="gClef" />
-        <KeySignature fifths={4} />
-        <TimeSignature beat="three" beatType="four" />
-        <Note pitch={{ position: "line-1" }} noteValue="half" />
-        <Note pitch={{ position: "space-4" }} noteValue="half" />
+        <div className="meta-container">
+          <Clef clef="gClef" />
+          <KeySignature fifths={4} />
+          <TimeSignature beat="four" beatType="four" />
+        </div>
+        <div className="notes-container">
+          <Note pitch={{ position: "line-1" }} noteValue="half" />
+          <Note pitch={{ position: "space-4" }} noteValue="half" />
+        </div>
       </div>
     </div>
   );

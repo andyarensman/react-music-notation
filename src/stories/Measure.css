@@ -11,6 +11,22 @@
   width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
+  justify-content: flex-start;
   height: 129px;
+  gap: 15px;
+}
+
+.meta-container,
+.notes-container {
+  position: relative;
+  height: 129px;
+  display: flex;
+  flex-direction: row;
+}
+
+.meta-container {
+}
+
+.notes-container {
+  flex-grow: 1;
 }
