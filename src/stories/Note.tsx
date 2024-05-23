@@ -1,8 +1,7 @@
 import React from "react";
 import "./Note.css";
 import "../global.css";
-import { Staff } from "./Staff";
-import { clefGlyphs, noteGlyphs } from "../helpers/glyphs";
+import { noteGlyphs } from "../helpers/glyphs";
 
 interface NoteProps {
   pitch: {
@@ -24,18 +23,13 @@ interface NoteProps {
       | "space-below-1"
       | "line-below-1";
   };
-  noteValue:
-    | "whole"
-    | "half"
-    | "quarter"
-    | "eighth"
-    | "16th"
-    | "32nd"
-    | "64th"
-    | "128th"
-    | "256th"
-    | "512th"
-    | "1024th";
+  noteValue: "whole" | "half" | "quarter" | "eighth" | "16th";
+  // | "32nd"
+  // | "64th"
+  // | "128th"
+  // | "256th"
+  // | "512th"
+  // | "1024th";
 }
 
 const noteTranslations = {

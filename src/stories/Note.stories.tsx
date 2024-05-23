@@ -14,6 +14,7 @@ export const Primary: Story = {
     pitch: {
       step: "A",
       octave: 4,
+      position: "line-3",
     },
     noteValue: "half",
   },

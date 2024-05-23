@@ -1,7 +1,7 @@
 import React from "react";
-import "./Staff.css";
+import "./StaffLines.css";
 
-export const Staff = () => {
+export const StaffLines = () => {
   return (
     <div className="staff-container">
       <div className="staff">

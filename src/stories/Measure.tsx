@@ -1,6 +1,6 @@
 import React from "react";
 import "./Measure.css";
-import { Staff } from "./Staff";
+import { StaffLines } from "./StaffLines";
 import { Note } from "./Note";
 import { Clef } from "./MeasureMeta/Clef";
 import { KeyRange } from "../helpers/types";
@@ -17,7 +17,7 @@ interface MeasureProps {
 export const Measure = ({}: MeasureProps) => {
   return (
     <div className="measure-container">
-      <Staff />
+      <StaffLines />
       <div className="data-container">
         <div className="meta-container">
           <Clef clef="gClef" />
