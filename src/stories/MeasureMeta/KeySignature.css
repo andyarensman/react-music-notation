@@ -17,7 +17,7 @@
 /* all for treble clef right now */
 
 .sharp-0 {
-  top: -18px;
+  top: -16px;
 }
 
 .sharp-1 {
@@ -25,19 +25,19 @@
 }
 
 .sharp-2 {
-  top: -22px;
+  top: -20px;
 }
 
 .sharp-3 {
-  top: -9px;
+  top: -8px;
 }
 
 .sharp-4 {
-  top: 5px;
+  top: 4px;
 }
 
 .sharp-5 {
-  top: -13px;
+  top: -12px;
 }
 
 .sharp-6 {
@@ -49,19 +49,19 @@
 }
 
 .flat-1 {
-  top: -13px;
+  top: -12px;
 }
 
 .flat-2 {
-  top: 5px;
+  top: 4px;
 }
 
 .flat-3 {
-  top: -9px;
+  top: -8px;
 }
 
 .flat-4 {
-  top: 9px;
+  top: 8px;
 }
 
 .flat-5 {
@@ -69,5 +69,5 @@
 }
 
 .flat-6 {
-  top: 14px;
+  top: 12px;
 }

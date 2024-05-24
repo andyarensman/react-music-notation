@@ -14,7 +14,7 @@ type Story = StoryObj<typeof Staff>;
 export const Primary: Story = {
   render: (args) => (
     <Staff>
-      <Measure clef="gClef">
+      <Measure clef="gClef" fifths={3}>
         <Note pitch={{ position: "line-4" }} noteValue="half" />
         <Note pitch={{ position: "line-4" }} noteValue="half" />
       </Measure>
