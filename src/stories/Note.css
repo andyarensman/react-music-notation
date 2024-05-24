@@ -8,23 +8,23 @@
 }
 
 .line-above-1 {
-  top: -27px;
+  top: -24px;
 }
 
 .space-above-1 {
-  top: -22px;
+  top: -20px;
 }
 
 .line-5 {
-  top: -18px;
+  top: -16px;
 }
 
 .space-4 {
-  top: -13px;
+  top: -12px;
 }
 
 .line-4 {
-  top: -9px;
+  top: -8px;
 }
 
 .space-3 {
@@ -36,24 +36,24 @@
 }
 
 .space-2 {
-  top: 5px;
+  top: 4px;
 }
 
 .line-2 {
-  top: 9px;
+  top: 8px;
 }
 
 .space-1 {
-  top: 14px;
+  top: 12px;
 }
 
 .line-1 {
-  top: 18px;
+  top: 16px;
 }
 .space-below-1 {
-  top: 23px;
+  top: 20px;
 }
 
 .line-below-1 {
-  top: 28px; /*! Need to figure out ledger lines */
+  top: 24px; /*! Need to figure out ledger lines */
 }
