@@ -1,10 +1,37 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import type { TypeWithDeepControls } from "storybook-addon-deep-controls";
 
 import { Measure } from "./Measure";
 import { Note } from "./Note";
 
-const meta: Meta<typeof Measure> = {
+const singleDigits = [
+  "zero",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+];
+
+const meta: TypeWithDeepControls<Meta<typeof Measure>> = {
   component: Measure,
+  parameters: {
+    deepControls: { enabled: true },
+  },
+  argTypes: {
+    "time.beat": {
+      control: "select",
+      options: singleDigits,
+    },
+    "time.beatType": {
+      control: "select",
+      options: singleDigits,
+    },
+  },
 };
 
 export default meta;
