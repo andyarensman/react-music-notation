@@ -38,3 +38,4 @@ export default {
 - [Tool for viewing all font symbols](https://fontdrop.info/)
 - [May need this for font conversion](https://www.fontsquirrel.com/tools/webfont-generator)
 - [Subset web fonts](https://web.dev/learn/performance/optimize-web-fonts#:~:text=Note%3A%20The%20only%20time%20you,font%20formats%20other%20than%20WOFF2.)
+- [Deep Controls Addon docs](https://www.npmjs.com/package/storybook-addon-deep-controls)
