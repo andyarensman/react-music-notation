@@ -10,5 +10,12 @@ export default meta;
 type Story = StoryObj<typeof Measure>;
 
 export const Primary: Story = {
-  render: () => <Measure />,
+  args: {
+    clef: "gClef",
+    fifths: 5,
+    time: {
+      beat: "four",
+      beatType: "four",
+    },
+  },
 };
