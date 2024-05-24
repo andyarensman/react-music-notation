@@ -9,17 +9,17 @@ import { TimeSignature, TimeSignatureProps } from "./MeasureMeta/TimeSignature";
 
 interface MeasureProps {
   measureNumber?: number;
+  clef?: "gClef" | "fClef" | "cClef";
   fifths?: KeyRange;
   time?: TimeSignatureProps;
-  clef?: "gClef" | "fClef" | "cClef";
   children?: ReactNode;
 }
 
 export const Measure = ({
   measureNumber,
+  clef,
   fifths,
   time,
-  clef,
   children,
 }: MeasureProps) => {
   return (
