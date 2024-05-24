@@ -1,35 +1,37 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import "./Measure.css";
 import { StaffLines } from "./StaffLines";
 import { Note } from "./Note";
 import { Clef } from "./MeasureMeta/Clef";
 import { KeyRange } from "../helpers/types";
 import { KeySignature } from "./MeasureMeta/KeySignature";
-import { TimeSignature } from "./MeasureMeta/TimeSignature";
+import { TimeSignature, TimeSignatureProps } from "./MeasureMeta/TimeSignature";
 
 interface MeasureProps {
   measureNumber?: number;
-  // fifths?: KeyRange;
-  time?: { beats: number; beatType: number };
-  clef?: { sign: "G" | "F" | "C" | "percussion" };
+  clef?: "gClef" | "fClef" | "cClef";
+  fifths?: KeyRange;
+  time?: TimeSignatureProps;
+  children?: ReactNode;
 }
 
-export const Measure = ({}: MeasureProps) => {
+export const Measure = ({
+  measureNumber,
+  clef,
+  fifths,
+  time,
+  children,
+}: MeasureProps) => {
   return (
     <div className="measure-container">
       <StaffLines />
       <div className="data-container">
         <div className="meta-container">
-          <Clef clef="gClef" />
-          <KeySignature fifths={4} />
-          <TimeSignature beat="four" beatType="four" />
+          {clef && <Clef clef={clef} />}
+          {fifths && <KeySignature fifths={fifths} />}
+          {time && <TimeSignature {...time} />}
         </div>
-        <div className="notes-container">
-          <Note pitch={{ position: "line-1" }} noteValue="half" />
-          <Note pitch={{ position: "space-4" }} noteValue="eighth" />
-          <Note pitch={{ position: "space-4" }} noteValue="eighth" />
-          <Note pitch={{ position: "space-4" }} noteValue="quarter" />
-        </div>
+        <div className="notes-container">{children}</div>
       </div>
     </div>
   );

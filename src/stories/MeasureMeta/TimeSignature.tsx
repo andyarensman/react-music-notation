@@ -16,7 +16,7 @@ interface TimeSymbol {
   beatType?: never;
 }
 
-type TimeSignatureProps = BeatAndBeatType | TimeSymbol;
+export type TimeSignatureProps = BeatAndBeatType | TimeSymbol;
 
 export const TimeSignature = ({
   beat,
