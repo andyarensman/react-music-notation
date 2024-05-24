@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactElement } from "react";
 import "./Measure.css";
 import { StaffLines } from "./StaffLines";
 import { Note } from "./Note";
@@ -12,7 +12,7 @@ interface MeasureProps {
   clef?: "gClef" | "fClef" | "cClef";
   fifths?: KeyRange;
   time?: TimeSignatureProps;
-  children?: ReactNode;
+  children?: ReactElement<typeof Note> | ReactElement<typeof Note>[];
 }
 
 export const Measure = ({

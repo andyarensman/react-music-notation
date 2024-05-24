@@ -8,6 +8,7 @@ const meta: Meta<typeof Measure> = {
 };
 
 export default meta;
+
 type Story = StoryObj<typeof Measure>;
 
 export const Primary: Story = {
@@ -18,13 +19,12 @@ export const Primary: Story = {
       beat: "four",
       beatType: "four",
     },
+    children: [
+      <Note pitch={{ position: "line-4" }} noteValue="half" />,
+      <Note pitch={{ position: "line-4" }} noteValue="half" />,
+    ],
   },
   render: function Render(args) {
-    return (
-      <Measure {...args}>
-        <Note pitch={{ position: "line-4" }} noteValue="half" />
-        <Note pitch={{ position: "line-4" }} noteValue="half" />
-      </Measure>
-    );
+    return <Measure {...args}>{args.children}</Measure>;
   },
 };

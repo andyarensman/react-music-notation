@@ -11,5 +11,5 @@ export default meta;
 type Story = StoryObj<typeof Clef>;
 
 export const Primary: Story = {
-  render: () => <Clef />,
+  render: () => <Clef clef="gClef" />,
 };
