@@ -29,6 +29,16 @@ export default {
 - Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
 - Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
 
+## Sizing:
+
+To determine the position of note heads, you take the font size of the Leland font and divide it by 8. So we are currently using font size 32px, which equates to 4px being the height of the note heads.I don't think pixels should be cut in half, so right now the font size options are 2:16, 3:24, 4:32, 5:40, 6:48, etc. This means I will likely need to limit the user to these font ratios.
+
+To determine the sizing of the staff lines, you need to first double the note head size. We're at 4, so that gives us 8. We need to split this up by our line thickness and the gap between the lines. I want the lines `.line` to be 1px in thickness right now, so the gap `.staff` should be 7px. Larger font sizes may require thicker lines, which will need some testing.
+
+The height of the leland font is not 32px, it is much larger at 129px (for this font size). We will use that as cushioning so we need to take the total height of our staff lines, subtract it from 129, and divide it by 2 to get our top and bottom border. The total height of the staff lines is 33px, so that gives us 48px margins for `.staff`.
+
+Things are mostly looking good now except for the C Clef which seems to be slightly off center.
+
 ## Resources:
 
 - [video about musescore font](https://www.youtube.com/watch?v=XGo4PJd1lng)
