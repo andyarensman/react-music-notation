@@ -42,17 +42,24 @@ export const clefGlyphs = {
   cClef: "\uE05C",
 };
 
-export const timeSignatureGlyphs = {
-  zero: "\uE080",
-  one: "\uE081",
-  two: "\uE082",
-  three: "\uE083",
-  four: "\uE084",
-  five: "\uE085",
-  six: "\uE086",
-  seven: "\uE087",
-  eight: "\uE088",
-  nine: "\uE089",
+interface TimeSignatureNumberGlyphs {
+  [key: number]: string;
+}
+
+export const timeSignatureNumberGlyphs: TimeSignatureNumberGlyphs = {
+  0: "\uE080",
+  1: "\uE081",
+  2: "\uE082",
+  3: "\uE083",
+  4: "\uE084",
+  5: "\uE085",
+  6: "\uE086",
+  7: "\uE087",
+  8: "\uE088",
+  9: "\uE089",
+};
+
+export const timeSignatureSymbolGlyphs = {
   common: "\uE08A",
   cut: "\uE08B",
 };

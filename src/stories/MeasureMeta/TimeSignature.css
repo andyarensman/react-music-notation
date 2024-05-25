@@ -5,12 +5,17 @@
 
 .normal-time-signature-container {
   position: relative;
-  width: 15px;
   margin-right: 15px;
+}
+
+.symbol-container {
+  width: 15px;
 }
 
 .number-container {
   position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .number-top {

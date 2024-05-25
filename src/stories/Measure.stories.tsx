@@ -4,19 +4,6 @@ import type { TypeWithDeepControls } from "storybook-addon-deep-controls";
 import { Measure } from "./Measure";
 import { Note } from "./Note";
 
-const singleDigits = [
-  "zero",
-  "one",
-  "two",
-  "three",
-  "four",
-  "five",
-  "six",
-  "seven",
-  "eight",
-  "nine",
-];
-
 const meta: Meta<typeof Measure> = {
   component: Measure,
   parameters: {
@@ -33,8 +20,8 @@ export const TraditionalTime: TypeWithDeepControls<Story> = {
     clef: "gClef",
     fifths: 5,
     time: {
-      beat: "four",
-      beatType: "four",
+      beat: 4,
+      beatType: 4,
     },
     children: [
       <Note pitch={{ position: "line-4" }} noteValue="half" />,
@@ -43,12 +30,10 @@ export const TraditionalTime: TypeWithDeepControls<Story> = {
   },
   argTypes: {
     "time.beat": {
-      control: "select",
-      options: singleDigits,
+      control: "number",
     },
     "time.beatType": {
-      control: "select",
-      options: singleDigits,
+      control: "number",
     },
   },
   render: function Render(args) {

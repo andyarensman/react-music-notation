@@ -1,12 +1,14 @@
 import React from "react";
 import "./TimeSignature.css";
 import "../../global.css";
-import { SingleDigitString } from "../../helpers/types";
-import { timeSignatureGlyphs } from "../../helpers/glyphs";
+import {
+  timeSignatureNumberGlyphs,
+  timeSignatureSymbolGlyphs,
+} from "../../helpers/glyphs";
 
 interface BeatAndBeatType {
-  beat: SingleDigitString;
-  beatType: SingleDigitString;
+  beat: number;
+  beatType: number;
   timeSymbol?: never;
 }
 
@@ -23,20 +25,34 @@ export const TimeSignature = ({
   beatType,
   timeSymbol,
 }: TimeSignatureProps) => {
+  const beatArray = beat != null ? beat.toString().split("").map(Number) : null;
+  const beatTypeArray =
+    beatType != null ? beatType.toString().split("").map(Number) : null;
+
+  let width = 12;
+
+  if (beatArray && beatTypeArray) {
+    const maxLength = Math.max(beatArray.length, beatTypeArray.length);
+    if (maxLength > 0) width *= maxLength;
+  }
+
   return (
     <>
       {timeSymbol && (
-        <div className="time-signature-container leland">
-          {timeSignatureGlyphs[timeSymbol]}
+        <div className="time-signature-container leland symbol-container">
+          {timeSignatureSymbolGlyphs[timeSymbol]}
         </div>
       )}
-      {beat && (
-        <div className="normal-time-signature-container leland">
+      {beatArray && beatTypeArray && (
+        <div
+          className="normal-time-signature-container leland"
+          style={{ width: `${width}px` }}
+        >
           <div className="number-container number-top">
-            {timeSignatureGlyphs[beat]}
+            {beatArray.map((n) => timeSignatureNumberGlyphs[n])}
           </div>
           <div className="number-container number-bottom">
-            {timeSignatureGlyphs[beatType]}
+            {beatTypeArray.map((n) => timeSignatureNumberGlyphs[n])}
           </div>
         </div>
       )}
