@@ -1,7 +1,7 @@
 import React from "react";
 import "./Note.css";
 import "../global.css";
-import { noteGlyphs } from "../helpers/glyphs";
+import { NoteGlyphs, noteGlyphs } from "../helpers/glyphs";
 
 interface NoteProps {
   pitch: {
@@ -32,7 +32,7 @@ interface NoteProps {
   // | "1024th";
 }
 
-const noteTranslations = {
+const noteTranslations: Record<NoteProps["noteValue"], keyof NoteGlyphs> = {
   whole: "wholeNote",
   half: "halfNote",
   quarter: "quarterNote",
@@ -40,7 +40,7 @@ const noteTranslations = {
   "16th": "sixteenthNote",
 };
 
-const noteFlexValue = {
+const noteFlexValue: Record<NoteProps["noteValue"], number> = {
   whole: 16,
   half: 8,
   quarter: 4,

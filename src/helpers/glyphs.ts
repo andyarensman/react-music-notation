@@ -1,5 +1,21 @@
-export const noteGlyphs = {
-  dotted: "\uE1E7",
+interface NoteDetails {
+  upStem: string;
+  downStem: string;
+  noStem: string;
+  rest: string;
+  NoFlagUpStem?: string;
+  NoFlagDownStem?: string;
+}
+
+export interface NoteGlyphs {
+  wholeNote: NoteDetails;
+  halfNote: NoteDetails;
+  quarterNote: NoteDetails;
+  eighthNote: NoteDetails;
+  sixteenthNote: NoteDetails;
+}
+
+export const noteGlyphs: NoteGlyphs = {
   wholeNote: {
     upStem: "\uE1D2",
     downStem: "\uE1D2",
@@ -34,6 +50,9 @@ export const noteGlyphs = {
     NoFlagDownStem: "\uE1D6",
     rest: "\uE4E7",
   },
+};
+export const dottedGlyph = {
+  dotted: "\uE1E7",
 };
 
 export const clefGlyphs = {
