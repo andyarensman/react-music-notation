@@ -30,6 +30,8 @@ interface NoteProps {
   // | "256th"
   // | "512th"
   // | "1024th";
+  stem?: "upStem" | "downStem" | "noStem";
+  rest?: boolean;
 }
 
 const noteTranslations: Record<NoteProps["noteValue"], keyof NoteGlyphs> = {
