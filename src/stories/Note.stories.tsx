@@ -16,13 +16,12 @@ type Story = StoryObj<typeof Note>;
 
 export const Primary: TypeWithDeepControls<Story> = {
   args: {
-    pitch: {
-      position: "line-3",
-    },
+    position: "line-3",
     noteValue: "half",
+    rest: false,
   },
   argTypes: {
-    "pitch.position": {
+    position: {
       control: "select",
       options: [
         "line-above-1",
@@ -39,6 +38,10 @@ export const Primary: TypeWithDeepControls<Story> = {
         "space-below-1",
         "line-below-1",
       ],
+    },
+    noteValue: {
+      control: "select",
+      options: ["whole", "half", "quarter", "eighth", "16th"],
     },
   },
   render: function Render(args) {

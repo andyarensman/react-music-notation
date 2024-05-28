@@ -15,28 +15,28 @@ export const Primary: Story = {
   render: (args) => (
     <Staff>
       <Measure clef="gClef" fifths={3}>
-        <Note pitch={{ position: "line-4" }} noteValue="half" />
-        <Note pitch={{ position: "line-4" }} noteValue="half" />
+        <Note position="line-4" noteValue="half" />
+        <Note position="line-4" noteValue="half" />
       </Measure>
       <Measure>
-        <Note pitch={{ position: "line-4" }} noteValue="half" />
-        <Note pitch={{ position: "line-4" }} noteValue="half" />
+        <Note position="line-4" noteValue="half" />
+        <Note position="line-4" noteValue="half" />
       </Measure>
       <Measure>
-        <Note pitch={{ position: "line-4" }} noteValue="half" />
-        <Note pitch={{ position: "line-4" }} noteValue="half" />
+        <Note position="line-4" noteValue="half" />
+        <Note position="line-4" noteValue="half" />
       </Measure>
       <Measure>
-        <Note pitch={{ position: "line-4" }} noteValue="half" />
-        <Note pitch={{ position: "line-4" }} noteValue="half" />
+        <Note position="line-4" noteValue="half" />
+        <Note position="line-4" noteValue="half" />
       </Measure>
       <Measure>
-        <Note pitch={{ position: "line-4" }} noteValue="half" />
-        <Note pitch={{ position: "line-4" }} noteValue="half" />
+        <Note position="line-4" noteValue="half" />
+        <Note position="line-4" noteValue="half" />
       </Measure>
       <Measure>
-        <Note pitch={{ position: "line-4" }} noteValue="half" />
-        <Note pitch={{ position: "line-4" }} noteValue="half" />
+        <Note position="line-4" noteValue="half" />
+        <Note position="line-4" noteValue="half" />
       </Measure>
     </Staff>
   ),
