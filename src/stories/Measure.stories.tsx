@@ -24,8 +24,8 @@ export const TraditionalTime: TypeWithDeepControls<Story> = {
       beatType: 4,
     },
     children: [
-      <Note pitch={{ position: "line-4" }} noteValue="half" />,
-      <Note pitch={{ position: "line-4" }} noteValue="half" />,
+      <Note position="line-4" noteValue="half" />,
+      <Note position="line-4" noteValue="half" />,
     ],
   },
   argTypes: {
@@ -49,8 +49,8 @@ export const SymbolTime: TypeWithDeepControls<Story> = {
       timeSymbol: "common",
     },
     children: [
-      <Note pitch={{ position: "line-4" }} noteValue="half" />,
-      <Note pitch={{ position: "line-4" }} noteValue="half" />,
+      <Note position="line-4" noteValue="half" />,
+      <Note position="line-4" noteValue="half" />,
     ],
   },
   argTypes: {

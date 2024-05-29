@@ -1,44 +1,30 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Note } from "./Note";
+import { NoteStack } from "./NoteStack";
 import { Measure } from "./Measure";
 import { TypeWithDeepControls } from "storybook-addon-deep-controls";
 
-const meta: Meta<typeof Note> = {
-  component: Note,
+const meta: Meta<typeof NoteStack> = {
+  component: NoteStack,
   parameters: {
     deepControls: { enabled: true },
   },
 };
 
 export default meta;
-type Story = StoryObj<typeof Note>;
+type Story = StoryObj<typeof NoteStack>;
 
 export const Primary: TypeWithDeepControls<Story> = {
   args: {
-    position: "line-3",
     noteValue: "half",
-    rest: false,
+    pitches: [
+      { position: "line-1" },
+      { position: "line-2" },
+      { position: "line-3" },
+      { position: "space-4" },
+    ],
   },
   argTypes: {
-    position: {
-      control: "select",
-      options: [
-        "line-above-1",
-        "space-above-1",
-        "line-5",
-        "space-4",
-        "line-4",
-        "space-3",
-        "line-3",
-        "space-2",
-        "line-2",
-        "space-1",
-        "line-1",
-        "space-below-1",
-        "line-below-1",
-      ],
-    },
     noteValue: {
       control: "select",
       options: ["whole", "half", "quarter", "eighth", "16th"],
@@ -47,7 +33,7 @@ export const Primary: TypeWithDeepControls<Story> = {
   render: function Render(args) {
     return (
       <Measure>
-        <Note {...args} />
+        <NoteStack {...args} />
       </Measure>
     );
   },
