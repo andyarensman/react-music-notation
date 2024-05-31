@@ -7,6 +7,20 @@
   position: absolute; /*! Need to figure out ledger lines */
 }
 
+.sharp,
+.flat,
+.natural {
+  left: -10px;
+}
+
+.doubleSharp {
+  left: -12px;
+}
+
+.doubleFlat {
+  left: -13px;
+}
+
 .line-above-1 {
   top: -24px;
 }

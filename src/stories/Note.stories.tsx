@@ -43,6 +43,10 @@ export const Primary: TypeWithDeepControls<Story> = {
       control: "select",
       options: ["whole", "half", "quarter", "eighth", "16th"],
     },
+    "pitch.alter": {
+      control: "select",
+      options: ["sharp", "flat", "natural", "doubleSharp", "doubleFlat"],
+    },
   },
   render: function Render(args) {
     return (

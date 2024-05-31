@@ -1,11 +1,16 @@
 import React from "react";
 import "./Note.css";
 import "../global.css";
-import { NoteGlyphs, noteGlyphs } from "../helpers/glyphs";
+import { NoteGlyphs, accidentalGlyphs, noteGlyphs } from "../helpers/glyphs";
 import { PitchPosition } from "./Note";
 
 interface Note {
   position: PitchPosition;
+  pitch?: {
+    step?: "A" | "B" | "C" | "D" | "E" | "F" | "G";
+    alter?: "sharp" | "flat" | "natural" | "doubleSharp" | "doubleFlat";
+    octave?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+  };
 }
 
 interface NoteStackProps {
@@ -39,9 +44,18 @@ export const NoteStack = ({ pitches, noteValue }: NoteStackProps) => {
       style={{ flexGrow: noteFlexValue[noteValue] }}
     >
       {pitches.map((pitch) => (
-        <div className={"leland note " + pitch.position}>
-          {noteGlyphs[noteTranslations[noteValue]]["noStem"]}
-        </div>
+        <>
+          {pitch.pitch && pitch.pitch.alter && (
+            <div
+              className={`leland note ${pitch.pitch.alter} ${pitch.position}`}
+            >
+              {accidentalGlyphs[pitch.pitch.alter]}
+            </div>
+          )}
+          <div className={"leland note " + pitch.position}>
+            {noteGlyphs[noteTranslations[noteValue]]["noStem"]}
+          </div>
+        </>
       ))}
     </div>
   );

@@ -19,7 +19,7 @@ export const Primary: TypeWithDeepControls<Story> = {
     noteValue: "half",
     pitches: [
       { position: "line-1" },
-      { position: "line-2" },
+      { position: "line-2", pitch: { alter: "sharp" } },
       { position: "line-3" },
       { position: "space-4" },
     ],

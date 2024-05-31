@@ -1,7 +1,7 @@
 import React from "react";
 import "./Note.css";
 import "../global.css";
-import { NoteGlyphs, noteGlyphs } from "../helpers/glyphs";
+import { NoteGlyphs, accidentalGlyphs, noteGlyphs } from "../helpers/glyphs";
 
 export type PitchPosition =
   | "line-above-1"
@@ -39,7 +39,7 @@ interface RestProps extends BaseNoteProps {
 interface NoteValueProps extends BaseNoteProps {
   pitch?: {
     step?: "A" | "B" | "C" | "D" | "E" | "F" | "G";
-    alter?: -1 | 1;
+    alter?: "sharp" | "flat" | "natural" | "doubleSharp" | "doubleFlat";
     octave?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
   };
   position: PitchPosition;
@@ -83,12 +83,18 @@ export const Note = (props: NoteProps) => {
   const { noteValue, rest } = props;
   const position = props.position || "line-3";
   const stem = !rest ? props.stem || getDefaultStem(position) : undefined;
+  const pitch = !rest ? props.pitch : null;
 
   return (
     <div
       className="note-container"
       style={{ flexGrow: noteFlexValue[noteValue] }}
     >
+      {pitch && pitch.alter && (
+        <div className={`leland note ${pitch.alter} ${position}`}>
+          {accidentalGlyphs[pitch.alter]}
+        </div>
+      )}
       <div className={"leland note " + position}>
         {rest
           ? noteGlyphs[noteTranslations[noteValue]]["rest"]
