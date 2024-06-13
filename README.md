@@ -39,6 +39,10 @@ The height of the leland font is not 32px, it is much larger at 129px (for this 
 
 Things are mostly looking good now except for the C Clef which seems to be slightly off center.
 
+## Beaming:
+
+I'm not quite sure how this will work. Wether it will be within the note component or within the measure component. SVG is probably the only way to do it. Not sure how the view window will work either.
+
 ## Resources:
 
 - [video about musescore font](https://www.youtube.com/watch?v=XGo4PJd1lng)
