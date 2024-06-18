@@ -85,6 +85,13 @@ export const Note = (props: NoteProps) => {
   const stem = !rest ? props.stem || getDefaultStem(position) : undefined;
   const pitch = !rest ? props.pitch : null;
 
+  //beaming
+  const beamThickness = 3;
+  const topLeftY = 90;
+  const topRightY = 90;
+  const bottomLeftY = topLeftY + beamThickness;
+  const bottomRightY = topRightY + beamThickness;
+
   return (
     <div
       className="note-container"
@@ -99,6 +106,13 @@ export const Note = (props: NoteProps) => {
         {rest
           ? noteGlyphs[noteTranslations[noteValue]]["rest"]
           : noteGlyphs[noteTranslations[noteValue]][stem!]}
+      </div>
+      <div className="beam">
+        <svg viewBox="0 0 100 129" preserveAspectRatio="none" className="beam">
+          <polygon
+            points={`0,${topLeftY} 100,${topRightY} 100,${bottomRightY} 0,${bottomLeftY}`}
+          />
+        </svg>
       </div>
     </div>
   );
