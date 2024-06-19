@@ -29,6 +29,12 @@ interface BaseNoteProps {
   dotted?: 1;
 }
 
+interface Beam {
+  amount: 1 | 2;
+  status: "start" | "continue" | "end";
+  hook?: "forward" | "backward";
+}
+
 interface RestProps extends BaseNoteProps {
   rest: true;
   pitch?: never;
@@ -45,6 +51,7 @@ interface NoteValueProps extends BaseNoteProps {
   position: PitchPosition;
   stem?: "upStem" | "downStem" | "noStem";
   rest?: false;
+  beam?: Beam;
 }
 
 type NoteProps = RestProps | NoteValueProps;
@@ -84,6 +91,11 @@ export const Note = (props: NoteProps) => {
   const position = props.position || "line-3";
   const stem = !rest ? props.stem || getDefaultStem(position) : undefined;
   const pitch = !rest ? props.pitch : null;
+  let beam: Beam | undefined;
+
+  if ("beam" in props) {
+    beam = props.beam;
+  }
 
   //beaming
   const beamThickness = 3;
@@ -105,15 +117,23 @@ export const Note = (props: NoteProps) => {
       <div className={"leland note " + position}>
         {rest
           ? noteGlyphs[noteTranslations[noteValue]]["rest"]
-          : noteGlyphs[noteTranslations[noteValue]][stem!]}
+          : !beam
+            ? noteGlyphs[noteTranslations[noteValue]][stem!]
+            : noteGlyphs[noteTranslations["quarter"]][stem!]}
       </div>
-      <div className="beam">
-        <svg viewBox="0 0 100 129" preserveAspectRatio="none" className="beam">
-          <polygon
-            points={`0,${topLeftY} 100,${topRightY} 100,${bottomRightY} 0,${bottomLeftY}`}
-          />
-        </svg>
-      </div>
+      {beam && (beam.status === "start" || beam.status === "continue") && (
+        <div className="beam">
+          <svg
+            viewBox="0 0 100 129"
+            preserveAspectRatio="none"
+            className="beam"
+          >
+            <polygon
+              points={`0,${topLeftY} 100,${topRightY} 100,${bottomRightY} 0,${bottomLeftY}`}
+            />
+          </svg>
+        </div>
+      )}
     </div>
   );
 };
