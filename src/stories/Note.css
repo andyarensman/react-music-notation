@@ -1,6 +1,7 @@
 .note-container {
   position: relative;
   /* flex-grow: 1; */
+  flex-basis: 0;
 }
 
 .note {
@@ -10,6 +11,7 @@
 .beam {
   height: 129px;
   width: 100%;
+  display: flex;
 }
 
 .sharp,

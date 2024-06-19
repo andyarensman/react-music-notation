@@ -45,12 +45,6 @@ I'm not quite sure how this will work. Wether it will be within the note compone
 
 To account for the upward stem being off from from the left edge of the container, I can user positive margin on the left and negative margin on the right.
 
-Problems
-
-- For some reason, the beaming is messing up flex grow.
-
-Resources
-
 - [Make Awesome SVG Animations with CSS // 7 Useful Techniques](https://www.youtube.com/watch?v=UTHgr6NLeEw)
 - [SVG image without aspect ratio](https://stackoverflow.com/questions/50226255/scale-svg-image-without-aspect-ratio)
 
