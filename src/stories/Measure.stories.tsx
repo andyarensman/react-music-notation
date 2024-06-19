@@ -27,11 +27,13 @@ export const TraditionalTime: TypeWithDeepControls<Story> = {
       <Note
         position="line-3"
         noteValue="eighth"
+        stem="upStem"
         beam={{ amount: 1, status: "start" }}
       />,
       <Note
         position="line-3"
         noteValue="eighth"
+        stem="upStem"
         beam={{ amount: 1, status: "end" }}
       />,
       <Note position="line-3" noteValue="quarter" />,

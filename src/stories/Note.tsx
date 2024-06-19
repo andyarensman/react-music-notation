@@ -18,6 +18,38 @@ export type PitchPosition =
   | "space-below-1"
   | "line-below-1";
 
+const BeamBelowPositions = {
+  "line-above-1": 64,
+  "space-above-1": 68,
+  "line-5": 72,
+  "space-4": 76,
+  "line-4": 80,
+  "space-3": 84,
+  "line-3": 88,
+  "space-2": 92,
+  "line-2": 96,
+  "space-1": 100,
+  "line-1": 104,
+  "space-below-1": 108,
+  "line-below-1": 112,
+};
+
+const BeamAbovePositions = {
+  "line-above-1": 12,
+  "space-above-1": 16,
+  "line-5": 20,
+  "space-4": 24,
+  "line-4": 28,
+  "space-3": 32,
+  "line-3": 36,
+  "space-2": 40,
+  "line-2": 44,
+  "space-1": 48,
+  "line-1": 52,
+  "space-below-1": 56,
+  "line-below-1": 60,
+};
+
 interface BaseNoteProps {
   noteValue: "whole" | "half" | "quarter" | "eighth" | "16th";
   // | "32nd"
@@ -98,9 +130,9 @@ export const Note = (props: NoteProps) => {
   }
 
   //beaming
-  const beamThickness = 3;
-  const topLeftY = 90;
-  const topRightY = 90;
+  const beamThickness = 4;
+  const topLeftY = 36;
+  const topRightY = 36;
   const bottomLeftY = topLeftY + beamThickness;
   const bottomRightY = topRightY + beamThickness;
 
