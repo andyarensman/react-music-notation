@@ -25,7 +25,7 @@ export const TraditionalTime: TypeWithDeepControls<Story> = {
     },
     children: [
       <Note
-        position="line-3"
+        position="space-3"
         noteValue="eighth"
         stem="upStem"
         beam={{ amount: 1, status: "start" }}
