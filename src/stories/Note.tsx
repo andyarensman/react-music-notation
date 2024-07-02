@@ -154,7 +154,7 @@ export const Note = (props: NoteProps) => {
             : noteGlyphs[noteTranslations["quarter"]][stem!]}
       </div>
       {beam && (beam.status === "start" || beam.status === "continue") && (
-        <div className="beam">
+        <div className={"beam " + (stem === "upStem" ? "beam-above" : "")}>
           <svg
             viewBox="0 0 100 129"
             preserveAspectRatio="none"
