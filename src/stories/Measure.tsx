@@ -1,7 +1,7 @@
-import React, { ReactElement } from "react";
+import React, { Children, ReactElement } from "react";
 import "./Measure.css";
 import { StaffLines } from "./StaffLines";
-import { Note } from "./Note";
+import { Note, NoteProps } from "./Note";
 import { Clef } from "./MeasureMeta/Clef";
 import { KeyRange } from "../helpers/types";
 import { KeySignature } from "./MeasureMeta/KeySignature";
@@ -22,6 +22,25 @@ export const Measure = ({
   time,
   children,
 }: MeasureProps) => {
+  const notesArray = Children.toArray(children);
+
+  const editedNotesArray = notesArray.map((note, index) => {
+    if (
+      React.isValidElement(note) &&
+      note.props.beam &&
+      note.props.beam.status === "start"
+    ) {
+      // let the current note know what the position of the next note is
+      const nextNote = notesArray[index + 1] as
+        | ReactElement<NoteProps>
+        | undefined;
+      if (React.isValidElement(nextNote)) {
+        note.props.beam.nextNotePostion = nextNote.props.position;
+      }
+    }
+    return note;
+  });
+
   return (
     <div className="measure-container">
       <StaffLines />
@@ -31,7 +50,7 @@ export const Measure = ({
           {fifths && <KeySignature fifths={fifths} />}
           {time && <TimeSignature {...time} />}
         </div>
-        <div className="notes-container">{children}</div>
+        <div className="notes-container">{editedNotesArray}</div>
       </div>
     </div>
   );

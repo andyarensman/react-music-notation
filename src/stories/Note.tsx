@@ -70,6 +70,7 @@ interface Beam {
   amount: 1 | 2;
   status: "start" | "continue" | "end";
   hook?: "forward" | "backward";
+  nextNotePostion?: PitchPosition;
 }
 
 interface RestProps extends BaseNoteProps {
@@ -91,7 +92,7 @@ interface NoteValueProps extends BaseNoteProps {
   beam?: Beam;
 }
 
-type NoteProps = RestProps | NoteValueProps;
+export type NoteProps = RestProps | NoteValueProps;
 
 const noteTranslations: Record<NoteProps["noteValue"], keyof NoteGlyphs> = {
   whole: "wholeNote",
@@ -137,7 +138,10 @@ export const Note = (props: NoteProps) => {
   //beaming
   const beamThickness = 4;
   const topLeftY = stem ? BeamPositions[stem][position] : 0;
-  const topRightY = 36;
+  const topRightY =
+    stem && beam?.nextNotePostion
+      ? BeamPositions[stem][beam?.nextNotePostion]
+      : 0;
   const bottomLeftY = topLeftY + beamThickness;
   const bottomRightY = topRightY + beamThickness;
 
