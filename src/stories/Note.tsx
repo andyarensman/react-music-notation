@@ -18,6 +18,43 @@ export type PitchPosition =
   | "space-below-1"
   | "line-below-1";
 
+interface BeamPositionsType {
+  [key: string]: { [key: string]: number };
+}
+
+const BeamPositions: BeamPositionsType = {
+  upStem: {
+    "line-above-1": 12,
+    "space-above-1": 16,
+    "line-5": 20,
+    "space-4": 24,
+    "line-4": 28,
+    "space-3": 32,
+    "line-3": 36,
+    "space-2": 40,
+    "line-2": 44,
+    "space-1": 48,
+    "line-1": 52,
+    "space-below-1": 56,
+    "line-below-1": 60,
+  },
+  downStem: {
+    "line-above-1": 64,
+    "space-above-1": 68,
+    "line-5": 72,
+    "space-4": 76,
+    "line-4": 80,
+    "space-3": 84,
+    "line-3": 88,
+    "space-2": 92,
+    "line-2": 96,
+    "space-1": 100,
+    "line-1": 104,
+    "space-below-1": 108,
+    "line-below-1": 112,
+  },
+};
+
 interface BaseNoteProps {
   noteValue: "whole" | "half" | "quarter" | "eighth" | "16th";
   // | "32nd"
@@ -27,6 +64,13 @@ interface BaseNoteProps {
   // | "512th"
   // | "1024th";
   dotted?: 1;
+}
+
+interface Beam {
+  amount: 1 | 2;
+  status: "start" | "continue" | "end";
+  hook?: "forward" | "backward";
+  nextNotePostion?: PitchPosition;
 }
 
 interface RestProps extends BaseNoteProps {
@@ -45,9 +89,10 @@ interface NoteValueProps extends BaseNoteProps {
   position: PitchPosition;
   stem?: "upStem" | "downStem" | "noStem";
   rest?: false;
+  beam?: Beam;
 }
 
-type NoteProps = RestProps | NoteValueProps;
+export type NoteProps = RestProps | NoteValueProps;
 
 const noteTranslations: Record<NoteProps["noteValue"], keyof NoteGlyphs> = {
   whole: "wholeNote",
@@ -84,6 +129,21 @@ export const Note = (props: NoteProps) => {
   const position = props.position || "line-3";
   const stem = !rest ? props.stem || getDefaultStem(position) : undefined;
   const pitch = !rest ? props.pitch : null;
+  let beam: Beam | undefined;
+
+  if ("beam" in props) {
+    beam = props.beam;
+  }
+
+  //beaming
+  const beamThickness = 4;
+  const topLeftY = stem ? BeamPositions[stem][position] : 0;
+  const topRightY =
+    stem && beam?.nextNotePostion
+      ? BeamPositions[stem][beam?.nextNotePostion]
+      : 0;
+  const bottomLeftY = topLeftY + beamThickness;
+  const bottomRightY = topRightY + beamThickness;
 
   return (
     <div
@@ -98,8 +158,23 @@ export const Note = (props: NoteProps) => {
       <div className={"leland note " + position}>
         {rest
           ? noteGlyphs[noteTranslations[noteValue]]["rest"]
-          : noteGlyphs[noteTranslations[noteValue]][stem!]}
+          : !beam
+            ? noteGlyphs[noteTranslations[noteValue]][stem!]
+            : noteGlyphs[noteTranslations["quarter"]][stem!]}
       </div>
+      {beam && (beam.status === "start" || beam.status === "continue") && (
+        <div className={"beam " + (stem === "upStem" ? "beam-above" : "")}>
+          <svg
+            viewBox="0 0 100 129"
+            preserveAspectRatio="none"
+            className="beam"
+          >
+            <polygon
+              points={`0,${topLeftY} 100,${topRightY} 100,${bottomRightY} 0,${bottomLeftY}`}
+            />
+          </svg>
+        </div>
+      )}
     </div>
   );
 };

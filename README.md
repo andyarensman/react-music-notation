@@ -39,6 +39,15 @@ The height of the leland font is not 32px, it is much larger at 129px (for this 
 
 Things are mostly looking good now except for the C Clef which seems to be slightly off center.
 
+## Beaming:
+
+I'm not quite sure how this will work. Wether it will be within the note component or within the measure component. SVG is probably the only way to do it. Not sure how the view window will work either.
+
+To account for the upward stem being off from from the left edge of the container, I can user positive margin on the left and negative margin on the right.
+
+- [Make Awesome SVG Animations with CSS // 7 Useful Techniques](https://www.youtube.com/watch?v=UTHgr6NLeEw)
+- [SVG image without aspect ratio](https://stackoverflow.com/questions/50226255/scale-svg-image-without-aspect-ratio)
+
 ## Resources:
 
 - [video about musescore font](https://www.youtube.com/watch?v=XGo4PJd1lng)

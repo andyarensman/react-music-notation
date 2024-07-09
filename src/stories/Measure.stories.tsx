@@ -24,8 +24,20 @@ export const TraditionalTime: TypeWithDeepControls<Story> = {
       beatType: 4,
     },
     children: [
-      <Note position="line-4" noteValue="half" />,
-      <Note position="line-4" noteValue="half" />,
+      <Note
+        position="space-1"
+        noteValue="eighth"
+        stem="upStem"
+        beam={{ amount: 1, status: "start" }}
+      />,
+      <Note
+        position="space-2"
+        noteValue="eighth"
+        stem="upStem"
+        beam={{ amount: 1, status: "end" }}
+      />,
+      <Note position="line-3" noteValue="quarter" />,
+      <Note position="line-3" noteValue="half" />,
     ],
   },
   argTypes: {
