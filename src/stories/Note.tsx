@@ -144,7 +144,7 @@ export const Note = (props: NoteProps) => {
       : 0;
   const bottomLeftY = topLeftY + beamThickness;
   const bottomRightY = topRightY + beamThickness;
-  const nextBeamOffset = 6;
+  const nextBeamOffset = stem === "upStem" ? 6 : -6; //beamThickness + beamThickness / 2
 
   return (
     <div

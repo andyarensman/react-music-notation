@@ -25,15 +25,15 @@ export const TraditionalTime: TypeWithDeepControls<Story> = {
     },
     children: [
       <Note
-        position="space-1"
+        position="line-above-1"
         noteValue="eighth"
-        stem="upStem"
-        beam={{ amount: 2, status: "start" }}
+        stem="downStem"
+        beam={{ amount: 1, status: "start" }}
       />,
       <Note
-        position="space-2"
+        position="line-above-1"
         noteValue="eighth"
-        stem="upStem"
+        stem="downStem"
         beam={{ amount: 1, status: "end" }}
       />,
       <Note
