@@ -144,6 +144,7 @@ export const Note = (props: NoteProps) => {
       : 0;
   const bottomLeftY = topLeftY + beamThickness;
   const bottomRightY = topRightY + beamThickness;
+  const nextBeamOffset = 6;
 
   return (
     <div
@@ -172,6 +173,13 @@ export const Note = (props: NoteProps) => {
             <polygon
               points={`0,${topLeftY} 100,${topRightY} 100,${bottomRightY} 0,${bottomLeftY}`}
             />
+            {beam.amount > 1 ? (
+              <polygon
+                points={`0,${topLeftY + nextBeamOffset} 100,${topRightY + nextBeamOffset} 100,${bottomRightY + nextBeamOffset} 0,${bottomLeftY + nextBeamOffset}`}
+              />
+            ) : (
+              ""
+            )}
           </svg>
         </div>
       )}
