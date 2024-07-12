@@ -55,6 +55,22 @@ const BeamPositions: BeamPositionsType = {
   },
 };
 
+const StemPositions = {
+  "line-above-1": 40,
+  "space-above-1": 44,
+  "line-5": 48,
+  "space-4": 52,
+  "line-4": 56,
+  "space-3": 60,
+  "line-3": 64,
+  "space-2": 68,
+  "line-2": 72,
+  "space-1": 76,
+  "line-1": 80,
+  "space-below-1": 84,
+  "line-below-1": 88,
+};
+
 interface BaseNoteProps {
   noteValue: "whole" | "half" | "quarter" | "eighth" | "16th";
   // | "32nd"
@@ -137,14 +153,19 @@ export const Note = (props: NoteProps) => {
 
   //beaming
   const beamThickness = 4;
-  const topLeftY = stem ? BeamPositions[stem][position] : 0;
+  const topLeftY =
+    stem && stem !== "noStem" ? BeamPositions[stem][position] : 0;
   const topRightY =
-    stem && beam?.nextNotePostion
+    stem && stem !== "noStem" && beam?.nextNotePostion
       ? BeamPositions[stem][beam?.nextNotePostion]
       : 0;
   const bottomLeftY = topLeftY + beamThickness;
   const bottomRightY = topRightY + beamThickness;
   const nextBeamOffset = stem === "upStem" ? 6 : -6; //beamThickness + beamThickness / 2
+
+  //stems
+  const stemStart = StemPositions[position];
+  const stemEnd = stemStart + 28; //3 and a half spaces. should be minus if downstem
 
   return (
     <div
@@ -180,6 +201,18 @@ export const Note = (props: NoteProps) => {
             ) : (
               ""
             )}
+          </svg>
+        </div>
+      )}
+      {stem === "noStem" && (
+        <div className="beam">
+          <svg
+            viewBox="0 0 100 129"
+            preserveAspectRatio="none"
+            className="beam"
+          >
+            {/* Change Color */}
+            <line x1="0" y1={stemStart} x2="0" y2={stemEnd} stroke="red" />
           </svg>
         </div>
       )}

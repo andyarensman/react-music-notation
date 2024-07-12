@@ -87,3 +87,45 @@ export const SymbolTime: TypeWithDeepControls<Story> = {
     return <Measure {...args}>{args.children}</Measure>;
   },
 };
+
+export const Testing: TypeWithDeepControls<Story> = {
+  args: {
+    clef: "gClef",
+    fifths: 5,
+    time: {
+      beat: 4,
+      beatType: 4,
+    },
+    children: [
+      <Note position="space-4" noteValue="quarter" />,
+      <Note position="space-4" noteValue="quarter" stem="noStem" />,
+      <Note position="line-5" noteValue="quarter" />,
+      <Note position="line-5" noteValue="quarter" stem="noStem" />,
+      <Note position="space-4" noteValue="quarter" />,
+      <Note position="space-4" noteValue="quarter" />,
+      <Note
+        position="space-4"
+        noteValue="eighth"
+        stem="downStem"
+        beam={{ amount: 1, status: "start" }}
+      />,
+      <Note
+        position="space-4"
+        noteValue="eighth"
+        stem="downStem"
+        beam={{ amount: 1, status: "end" }}
+      />,
+    ],
+  },
+  argTypes: {
+    "time.beat": {
+      control: "number",
+    },
+    "time.beatType": {
+      control: "number",
+    },
+  },
+  render: function Render(args) {
+    return <Measure {...args}>{args.children}</Measure>;
+  },
+};
