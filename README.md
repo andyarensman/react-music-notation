@@ -48,6 +48,49 @@ To account for the upward stem being off from from the left edge of the containe
 - [Make Awesome SVG Animations with CSS // 7 Useful Techniques](https://www.youtube.com/watch?v=UTHgr6NLeEw)
 - [SVG image without aspect ratio](https://stackoverflow.com/questions/50226255/scale-svg-image-without-aspect-ratio)
 
+### Beaming Rules
+
+- When notes are in a space, the stem length is 3 1/2 spaces
+- When notes are on a line, the stem is shortened to 3 1/4 spaces
+- Beam angles usually cross no more than one stave-line
+- The outer notes of the group determine the beam direction and angle.
+- The beam is horizontal when the group begins and ends with the same note, there is a repeated pattern of pitches, or an inner note is closer to the beam than either of the outer notes (important). Concave is horizontal, convex is sloped
+
+### Brainstorming Beaming Algorithm
+
+For upstems:
+
+- Find the first in beam and add to array until the last beam
+- When stems are up, find the highest note in the beamed set (vice versa). This note has the shortest possible stem length
+- Find the position of the first and last notes (if more than two notes)
+- if the highest note is between the outer notes, straight beam
+- If there is an angle, find it by using the formula:
+
+  ```js
+  \\ x is the base, and y is the height
+  const hypotenuse = Math.sqrt(x * x + y * y);
+  const angleRadians = Math.acos(x / hypotenuse);
+  ```
+
+- Next determine the height of each inner note's beam starting point by using the angle and distance:
+
+  ```js
+  const y = x * Math.tan(angleRadians);
+  ```
+
+- This y value will be added on to the normal height of the stem
+
+### Random Notes
+
+- Maybe beaming should be a parent component rather than a prop for ease? If not, maybe for other things like tuplets or chords.
+
+  ```js
+  <Beam>
+    <Note>
+    <Note>
+  </Beam>
+  ```
+
 ## Resources:
 
 - [video about musescore font](https://www.youtube.com/watch?v=XGo4PJd1lng)
