@@ -1,4 +1,9 @@
-import React, { Children, ReactElement, useEffect, useState } from "react";
+import React, {
+  Children,
+  ReactElement,
+  ReactNode,
+  isValidElement,
+} from "react";
 import { Note, NoteProps } from "./Note";
 
 interface BeamContainerProps {
@@ -14,24 +19,19 @@ const noteFlexValue: Record<NoteProps["noteValue"], number> = {
   "16th": 1,
 };
 
+//! I don't fully understand wha't happening here, need to review
+const isNoteElement = (child: ReactNode): child is ReactElement<NoteProps> => {
+  return isValidElement(child) && child.props.noteValue !== undefined;
+};
+
 export const BeamContainer = ({ children }: BeamContainerProps) => {
-  const [beamFlex, setBeamFlex] = useState(0);
-
   // Handle the flexGrow
-  useEffect(() => {
-    //! I don't fully understand wha't happening here, need to review
-    const isNoteElement = (
-      child: React.ReactNode
-    ): child is React.ReactElement<NoteProps> => {
-      return React.isValidElement(child) && child.props.noteValue !== undefined;
-    };
 
-    const totalFlexGrowth = Children.toArray(children)
-      .filter(isNoteElement)
-      .reduce((sum, child) => sum + noteFlexValue[child.props.noteValue], 0);
+  const totalFlexGrowth = Children.toArray(children)
+    .filter(isNoteElement)
+    .reduce((sum, child) => sum + noteFlexValue[child.props.noteValue], 0);
 
-    setBeamFlex(totalFlexGrowth);
-  }, [children]);
-
-  return <div style={{ flexGrow: beamFlex }}>{children}</div>;
+  return (
+    <div style={{ flexGrow: totalFlexGrowth, display: "flex" }}>{children}</div>
+  );
 };

@@ -3,6 +3,7 @@ import type { TypeWithDeepControls } from "storybook-addon-deep-controls";
 
 import { Measure } from "./Measure";
 import { Note } from "./Note";
+import { BeamContainer } from "./BeamContainer";
 
 const meta: Meta<typeof Measure> = {
   component: Measure,
@@ -81,6 +82,40 @@ export const SymbolTime: TypeWithDeepControls<Story> = {
     "time.timeSymbol": {
       control: "radio",
       options: ["common", "cut"],
+    },
+  },
+  render: function Render(args) {
+    return <Measure {...args}>{args.children}</Measure>;
+  },
+};
+
+export const BeamingContainerTest: TypeWithDeepControls<Story> = {
+  args: {
+    clef: "gClef",
+    fifths: 5,
+    time: {
+      beat: 4,
+      beatType: 4,
+    },
+    children: [
+      <Note position="space-4" noteValue="quarter" />,
+      <Note position="space-4" noteValue="quarter" stem="noStem" />,
+      <Note position="line-5" noteValue="quarter" />,
+      <Note position="line-5" noteValue="quarter" stem="noStem" />,
+      <Note position="space-4" noteValue="quarter" />,
+      <Note position="space-4" noteValue="quarter" />,
+      <BeamContainer>
+        <Note position="space-4" noteValue="eighth" stem="downStem" />
+        <Note position="space-4" noteValue="eighth" stem="downStem" />
+      </BeamContainer>,
+    ],
+  },
+  argTypes: {
+    "time.beat": {
+      control: "number",
+    },
+    "time.beatType": {
+      control: "number",
     },
   },
   render: function Render(args) {
