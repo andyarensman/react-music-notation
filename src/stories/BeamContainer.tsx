@@ -7,6 +7,7 @@ import React, {
 import { Note } from "./Note";
 import { noteFlexValue } from "../helpers/helpers";
 import { NoteProps } from "../helpers/types";
+import "./Note.css";
 
 interface BeamContainerProps {
   children?: ReactElement<typeof Note> | ReactElement<typeof Note>[];
@@ -19,12 +20,30 @@ const isNoteElement = (child: ReactNode): child is ReactElement<NoteProps> => {
 
 export const BeamContainer = ({ children }: BeamContainerProps) => {
   // Handle the flexGrow
+  const beamedNotesArray = Children.toArray(children).filter(isNoteElement);
+  const totalFlexGrowth = beamedNotesArray.reduce(
+    (sum, child) => sum + noteFlexValue[child.props.noteValue],
+    0
+  );
 
-  const totalFlexGrowth = Children.toArray(children)
-    .filter(isNoteElement)
-    .reduce((sum, child) => sum + noteFlexValue[child.props.noteValue], 0);
+  //handle width of Beam
+  const finalChildFlex =
+    noteFlexValue[
+      beamedNotesArray[beamedNotesArray.length - 1].props.noteValue
+    ];
+  const beamWidthPercentage =
+    ((totalFlexGrowth - finalChildFlex) / totalFlexGrowth) * 100;
 
   return (
-    <div style={{ flexGrow: totalFlexGrowth, display: "flex" }}>{children}</div>
+    <div
+      style={{ flexGrow: totalFlexGrowth, display: "flex" }}
+      className="beam-container"
+    >
+      {children}
+      <div
+        className="beam-new"
+        style={{ width: `${beamWidthPercentage}%` }}
+      ></div>
+    </div>
   );
 };

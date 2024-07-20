@@ -8,10 +8,20 @@
   position: absolute; /*! Need to figure out ledger lines */
 }
 
+.beam-container {
+  position: relative;
+}
+
 .beam {
   height: 129px;
   width: 100%;
   display: flex;
+}
+
+.beam-new {
+  position: absolute;
+  height: 129px;
+  border: 1px solid red; /*! Temporary */
 }
 
 .beam-above {

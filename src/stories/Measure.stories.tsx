@@ -105,6 +105,7 @@ export const BeamingContainerTest: TypeWithDeepControls<Story> = {
       <BeamContainer>
         <Note position="space-4" noteValue="eighth" stem="downStem" />
         <Note position="space-4" noteValue="eighth" stem="downStem" />
+        <Note position="space-4" noteValue="eighth" stem="downStem" />
       </BeamContainer>,
     ],
   },
