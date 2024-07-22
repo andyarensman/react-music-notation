@@ -60,9 +60,9 @@ To account for the upward stem being off from from the left edge of the containe
 
 For upstems:
 
-- Find the first in beam and add to array until the last beam
-- When stems are up, find the highest note in the beamed set (vice versa). This note has the shortest possible stem length
+- Find the first in beam and add to array until the last beam (Children.toArray)
 - Find the position of the first and last notes (if more than two notes)
+- When stems are up, find the highest note in the beamed set (vice versa). This note has the shortest possible stem length
 - if the highest note is between the outer notes, straight beam
 - If there is an angle, find it by using the formula:
 
