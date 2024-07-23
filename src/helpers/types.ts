@@ -1,3 +1,5 @@
+import { ReactElement } from "react";
+
 export type KeyRange =
   | -7
   | -6
@@ -68,3 +70,5 @@ interface NoteValueProps extends BaseNoteProps {
 }
 
 export type NoteProps = RestProps | NoteValueProps;
+
+export type NoteElement = ReactElement<NoteValueProps>; //Nonrest
