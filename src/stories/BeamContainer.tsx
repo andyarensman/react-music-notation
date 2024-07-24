@@ -6,8 +6,9 @@ import React, {
 } from "react";
 import { Note } from "./Note";
 import { noteFlexValue } from "../helpers/helpers";
-import { NoteProps } from "../helpers/types";
+import { NoteProps, NoteValueProps } from "../helpers/types";
 import "./Note.css";
+import { beamCreator } from "../helpers/beamCreator";
 
 interface BeamContainerProps {
   children?: ReactElement<typeof Note> | ReactElement<typeof Note>[];
@@ -20,7 +21,9 @@ const isNoteElement = (child: ReactNode): child is ReactElement<NoteProps> => {
 
 export const BeamContainer = ({ children }: BeamContainerProps) => {
   // Handle the flexGrow
-  const beamedNotesArray = Children.toArray(children).filter(isNoteElement);
+  const beamedNotesArray = Children.toArray(children).filter(
+    isNoteElement
+  ) as ReactElement<NoteValueProps>[];
   const totalFlexGrowth = beamedNotesArray.reduce(
     (sum, child) => sum + noteFlexValue[child.props.noteValue],
     0
@@ -34,6 +37,18 @@ export const BeamContainer = ({ children }: BeamContainerProps) => {
   const beamWidthPercentage =
     ((totalFlexGrowth - finalChildFlex) / totalFlexGrowth) * 100;
 
+  //get the topLeft and topRight values for Beam
+  const beamValues = beamCreator(beamedNotesArray, "upStem");
+
+  //beaming values
+  const beamThickness = 4;
+  const topLeftY = beamValues.topLeftY;
+  const topRightY = beamValues.topRightY;
+  const bottomLeftY = topLeftY + beamThickness;
+  const bottomRightY = topRightY + beamThickness;
+
+  //! const nextBeamOffset = stem === "upStem" ? 6 : -6; //beamThickness + beamThickness / 2
+
   return (
     <div
       style={{ flexGrow: totalFlexGrowth, display: "flex" }}
@@ -41,9 +56,15 @@ export const BeamContainer = ({ children }: BeamContainerProps) => {
     >
       {children}
       <div
-        className="beam-new"
+        className="beam-new beam-above" /*! Beam-above should be conditional */
         style={{ width: `${beamWidthPercentage}%` }}
-      ></div>
+      >
+        <svg viewBox="0 0 100 129" preserveAspectRatio="none" className="beam">
+          <polygon
+            points={`0,${topLeftY} 100,${topRightY} 100,${bottomRightY} 0,${bottomLeftY}`}
+          />
+        </svg>
+      </div>
     </div>
   );
 };

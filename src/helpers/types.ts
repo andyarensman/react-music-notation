@@ -57,7 +57,7 @@ interface RestProps extends BaseNoteProps {
   stem?: never;
 }
 
-interface NoteValueProps extends BaseNoteProps {
+export interface NoteValueProps extends BaseNoteProps {
   pitch?: {
     step?: "A" | "B" | "C" | "D" | "E" | "F" | "G";
     alter?: "sharp" | "flat" | "natural" | "doubleSharp" | "doubleFlat";

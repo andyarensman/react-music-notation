@@ -10,7 +10,7 @@ function findExtremeAndCheckPositions(
   const firstIndex = arr.indexOf(extremeValue);
   const lastIndex = arr.lastIndexOf(extremeValue);
 
-  const isBetween = firstIndex > 0 && lastIndex < arr.length - 1;
+  const isBetween = firstIndex >= 0 && lastIndex <= arr.length - 1;
 
   return { extremeValue, isBetween };
 }
@@ -31,7 +31,7 @@ export function beamCreator(
   const lastNote = beamPositionsArray[lastNoteIndex];
 
   //if there's only two notes, return the beam
-  if ((beamPositionsArray.length = 2)) {
+  if (beamPositionsArray.length === 2) {
     return { topLeftY: firstNote, topRightY: lastNote };
   }
 
