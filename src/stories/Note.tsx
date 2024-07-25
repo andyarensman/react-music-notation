@@ -75,18 +75,18 @@ export const Note = (props: NoteProps) => {
           </svg>
         </div>
       )}
-      {stem === "noStem" && (
+      {/* {stem === "noStem" && (
         <div className="beam">
           <svg
             viewBox="0 0 100 129"
             preserveAspectRatio="none"
             className="beam"
           >
-            {/* Change Color */}
+            
             <line x1="0" y1={stemStart} x2="0" y2={stemEnd} stroke="red" />
           </svg>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

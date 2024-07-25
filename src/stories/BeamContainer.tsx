@@ -2,6 +2,7 @@ import React, {
   Children,
   ReactElement,
   ReactNode,
+  cloneElement,
   isValidElement,
 } from "react";
 import { Note } from "./Note";
@@ -30,6 +31,15 @@ export const BeamContainer = ({ stem, children }: BeamContainerProps) => {
     0
   );
 
+  //update the children
+  const updatedBeamedNotesArray = beamedNotesArray.map((noteElement, index) =>
+    cloneElement(noteElement, {
+      ...noteElement.props,
+      stem: "noStem",
+      key: index,
+    })
+  );
+
   //handle width of Beam
   const finalChildFlex =
     noteFlexValue[
@@ -55,7 +65,7 @@ export const BeamContainer = ({ stem, children }: BeamContainerProps) => {
       style={{ flexGrow: totalFlexGrowth, display: "flex" }}
       className="beam-container"
     >
-      {children}
+      {updatedBeamedNotesArray}
       <div
         className={"beam-new " + (stem === "upStem" ? "beam-above" : "")}
         style={{ width: `${beamWidthPercentage}%` }}
