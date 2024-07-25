@@ -12,6 +12,7 @@ import { beamCreator } from "../helpers/beamCreator";
 
 interface BeamContainerProps {
   children?: ReactElement<typeof Note> | ReactElement<typeof Note>[];
+  stem: "upStem" | "downStem";
 }
 
 //! I don't fully understand wha't happening here, need to review
@@ -19,7 +20,7 @@ const isNoteElement = (child: ReactNode): child is ReactElement<NoteProps> => {
   return isValidElement(child) && child.props.noteValue !== undefined;
 };
 
-export const BeamContainer = ({ children }: BeamContainerProps) => {
+export const BeamContainer = ({ stem, children }: BeamContainerProps) => {
   // Handle the flexGrow
   const beamedNotesArray = Children.toArray(children).filter(
     isNoteElement
@@ -38,7 +39,7 @@ export const BeamContainer = ({ children }: BeamContainerProps) => {
     ((totalFlexGrowth - finalChildFlex) / totalFlexGrowth) * 100;
 
   //get the topLeft and topRight values for Beam
-  const beamValues = beamCreator(beamedNotesArray, "upStem");
+  const beamValues = beamCreator(beamedNotesArray, stem);
 
   //beaming values
   const beamThickness = 4;
@@ -47,7 +48,7 @@ export const BeamContainer = ({ children }: BeamContainerProps) => {
   const bottomLeftY = topLeftY + beamThickness;
   const bottomRightY = topRightY + beamThickness;
 
-  //! const nextBeamOffset = stem === "upStem" ? 6 : -6; //beamThickness + beamThickness / 2
+  const nextBeamOffset = stem === "upStem" ? 6 : -6; //beamThickness + beamThickness / 2
 
   return (
     <div
@@ -56,7 +57,7 @@ export const BeamContainer = ({ children }: BeamContainerProps) => {
     >
       {children}
       <div
-        className="beam-new beam-above" /*! Beam-above should be conditional */
+        className={"beam-new " + (stem === "upStem" ? "beam-above" : "")}
         style={{ width: `${beamWidthPercentage}%` }}
       >
         <svg viewBox="0 0 100 129" preserveAspectRatio="none" className="beam">

@@ -10,7 +10,12 @@ function findExtremeAndCheckPositions(
   const firstIndex = arr.indexOf(extremeValue);
   const lastIndex = arr.lastIndexOf(extremeValue);
 
-  const isBetween = firstIndex >= 0 && lastIndex <= arr.length - 1;
+  let isBetween: boolean;
+  if (stemDirecton === "upStem") {
+    isBetween = firstIndex >= 0 && lastIndex <= arr.length - 1; //upstem
+  } else {
+    isBetween = firstIndex <= 0 && lastIndex >= arr.length - 1;
+  }
 
   return { extremeValue, isBetween };
 }
