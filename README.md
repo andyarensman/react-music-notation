@@ -82,14 +82,8 @@ For upstems:
 
 ### Random Notes
 
-- Maybe beaming should be a parent component rather than a prop for ease? If not, maybe for other things like tuplets or chords. In order for this to work, the flexGrowth value needs to be passed up to the Beam parent to preserve the spacing of the notes in the measure (see the useEffect hook in BeamContainer.tsx).
-
-  ```js
-  <Beam>
-    <Note>
-    <Note>
-  </Beam>
-  ```
+- The rules for beaming need to be adjusted more - inner notes can be too short still
+- I'm not sure how to test if my angles are correct for calculating the beam triangle
 
 ## Resources:
 

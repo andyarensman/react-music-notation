@@ -4,6 +4,9 @@ import React, {
   ReactNode,
   cloneElement,
   isValidElement,
+  useEffect,
+  useRef,
+  useState,
 } from "react";
 import { Note } from "./Note";
 import { noteFlexValue } from "../helpers/helpers";
@@ -16,12 +19,38 @@ interface BeamContainerProps {
   stem: "upStem" | "downStem";
 }
 
-//! I don't fully understand wha't happening here, need to review
+//! I don't fully understand what's happening here, need to review
 const isNoteElement = (child: ReactNode): child is ReactElement<NoteProps> => {
   return isValidElement(child) && child.props.noteValue !== undefined;
 };
 
 export const BeamContainer = ({ stem, children }: BeamContainerProps) => {
+  const refContainer = useRef<HTMLDivElement>(null);
+  const [beamContainerWidth, setContainerBeamWidth] = useState<number>(0);
+  const [angleRadians, setAngleRadians] = useState<number>(0);
+
+  //Get the current container width
+  useEffect(() => {
+    const handleResize = (entries: ResizeObserverEntry[]) => {
+      if (entries[0].target === refContainer.current) {
+        setContainerBeamWidth(entries[0].contentRect.width);
+      }
+    };
+
+    const resizeObserver = new ResizeObserver(handleResize);
+
+    if (refContainer.current) {
+      resizeObserver.observe(refContainer.current);
+    }
+
+    return () => {
+      if (refContainer.current) {
+        resizeObserver.unobserve(refContainer.current);
+      }
+      resizeObserver.disconnect();
+    };
+  }, []);
+
   // Handle the flexGrow
   const beamedNotesArray = Children.toArray(children).filter(
     isNoteElement
@@ -60,6 +89,16 @@ export const BeamContainer = ({ stem, children }: BeamContainerProps) => {
 
   const nextBeamOffset = stem === "upStem" ? 6 : -6; //beamThickness + beamThickness / 2
 
+  //set the Radians
+  useEffect(() => {
+    const beamHeight = topLeftY - topRightY;
+    const hypotenuse = Math.sqrt(
+      beamContainerWidth * beamContainerWidth + beamHeight * beamHeight
+    );
+    const newAngleRadians = Math.acos(beamContainerWidth / hypotenuse);
+    setAngleRadians(newAngleRadians);
+  }, [topLeftY, topRightY, beamContainerWidth]);
+
   return (
     <div
       style={{ flexGrow: totalFlexGrowth, display: "flex" }}
@@ -69,12 +108,16 @@ export const BeamContainer = ({ stem, children }: BeamContainerProps) => {
       <div
         className={"beam-new " + (stem === "upStem" ? "beam-above" : "")}
         style={{ width: `${beamWidthPercentage}%` }}
+        ref={refContainer}
       >
         <svg viewBox="0 0 100 129" preserveAspectRatio="none" className="beam">
           <polygon
             points={`0,${topLeftY} 100,${topRightY} 100,${bottomRightY} 0,${bottomLeftY}`}
           />
         </svg>
+      </div>
+      <div style={{ position: "absolute" }}>
+        {angleRadians * (180 / Math.PI)}
       </div>
     </div>
   );
