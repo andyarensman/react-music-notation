@@ -82,11 +82,18 @@ export const BeamContainer = ({ stem, children }: BeamContainerProps) => {
 
   //set the Radians
   useEffect(() => {
+    // const beamHeight = topLeftY - topRightY;
+    // const hypotenuse = Math.sqrt(
+    //   beamContainerWidth * beamContainerWidth + beamHeight * beamHeight
+    // );
+    // const newAngleRadians = Math.acos(beamContainerWidth / hypotenuse);
+    // setAngleRadians(newAngleRadians);
     const beamHeight = topLeftY - topRightY;
-    const hypotenuse = Math.sqrt(
-      beamContainerWidth * beamContainerWidth + beamHeight * beamHeight
+
+    const newAngleRadians = Math.abs(
+      Math.atan2(beamHeight, beamContainerWidth)
     );
-    const newAngleRadians = Math.acos(beamContainerWidth / hypotenuse);
+
     setAngleRadians(newAngleRadians);
   }, [topLeftY, topRightY, beamContainerWidth]);
 
@@ -94,10 +101,17 @@ export const BeamContainer = ({ stem, children }: BeamContainerProps) => {
 
   let widthCounter = 0;
   let positiveBeamAngle = topRightY < topLeftY;
+  const beamFlexAmount =
+    totalFlexGrowth -
+    noteFlexValue[
+      beamedNotesArray[beamedNotesArray.length - 1].props.noteValue
+    ];
+
   const updatedBeamedNotesArray = beamedNotesArray.map((noteElement, index) => {
     //get the total distance from the left
     const exactHeight = widthCounter * Math.tan(angleRadians);
     const stemAdditionalValue = Math.round(exactHeight * 100) / 100;
+
     let stemEndValue: number;
     if (positiveBeamAngle) {
       stemEndValue = topLeftY - stemAdditionalValue;
@@ -107,7 +121,8 @@ export const BeamContainer = ({ stem, children }: BeamContainerProps) => {
 
     //increment width counter. percentage of beamContainerWidth. totalFlexGrowth
     const currentNoteFlexValue = noteFlexValue[noteElement.props.noteValue];
-    const fraction = currentNoteFlexValue / totalFlexGrowth;
+
+    const fraction = currentNoteFlexValue / beamFlexAmount;
     widthCounter += beamContainerWidth * fraction;
 
     return cloneElement(noteElement, {
