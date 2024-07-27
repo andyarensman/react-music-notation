@@ -7,15 +7,9 @@ function findExtremeAndCheckPositions(
 ): { extremeValue: number; isBetween: boolean } {
   const extremeValue =
     stemDirecton === "upStem" ? Math.min(...arr) : Math.max(...arr);
-  const firstIndex = arr.indexOf(extremeValue);
-  const lastIndex = arr.lastIndexOf(extremeValue);
 
-  let isBetween: boolean;
-  if (stemDirecton === "upStem") {
-    isBetween = firstIndex >= 0 && lastIndex <= arr.length - 1; //upstem
-  } else {
-    isBetween = firstIndex <= 0 && lastIndex >= arr.length - 1;
-  }
+  const middleArray = arr.slice(1, -1);
+  const isBetween = middleArray.includes(extremeValue);
 
   return { extremeValue, isBetween };
 }
