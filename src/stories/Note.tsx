@@ -12,7 +12,7 @@ import {
 import { Beam, NoteProps } from "../helpers/types";
 
 export const Note = (props: NoteProps) => {
-  const { noteValue, rest } = props;
+  const { noteValue, rest, stemEndValue } = props;
   const position = props.position || "line-3";
   const stem = !rest ? props.stem || getDefaultStem(position) : undefined;
   const pitch = !rest ? props.pitch : null;
@@ -75,6 +75,7 @@ export const Note = (props: NoteProps) => {
           </svg>
         </div>
       )}
+      <div style={{ position: "absolute" }}>{stemEndValue}</div>
       {/* {stem === "noStem" && (
         <div className="beam">
           <svg

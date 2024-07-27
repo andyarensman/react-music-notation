@@ -55,6 +55,7 @@ interface RestProps extends BaseNoteProps {
   pitch?: never;
   position?: PitchPosition;
   stem?: never;
+  stemEndValue?: never;
 }
 
 export interface NoteValueProps extends BaseNoteProps {
@@ -67,6 +68,7 @@ export interface NoteValueProps extends BaseNoteProps {
   stem?: "upStem" | "downStem" | "noStem";
   rest?: false;
   beam?: Beam;
+  stemEndValue?: number;
 }
 
 export type NoteProps = RestProps | NoteValueProps;

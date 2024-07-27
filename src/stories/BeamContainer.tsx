@@ -60,15 +60,6 @@ export const BeamContainer = ({ stem, children }: BeamContainerProps) => {
     0
   );
 
-  //update the children
-  const updatedBeamedNotesArray = beamedNotesArray.map((noteElement, index) =>
-    cloneElement(noteElement, {
-      ...noteElement.props,
-      stem: "noStem",
-      key: index,
-    })
-  );
-
   //handle width of Beam
   const finalChildFlex =
     noteFlexValue[
@@ -99,6 +90,34 @@ export const BeamContainer = ({ stem, children }: BeamContainerProps) => {
     setAngleRadians(newAngleRadians);
   }, [topLeftY, topRightY, beamContainerWidth]);
 
+  //assign stem values to each child. topLeftY is my base value
+
+  let widthCounter = 0;
+  let positiveBeamAngle = topRightY < topLeftY;
+  const updatedBeamedNotesArray = beamedNotesArray.map((noteElement, index) => {
+    //get the total distance from the left
+    const exactHeight = widthCounter * Math.tan(angleRadians);
+    const stemAdditionalValue = Math.round(exactHeight * 100) / 100;
+    let stemEndValue: number;
+    if (positiveBeamAngle) {
+      stemEndValue = topLeftY - stemAdditionalValue;
+    } else {
+      stemEndValue = topLeftY + stemAdditionalValue;
+    }
+
+    //increment width counter. percentage of beamContainerWidth. totalFlexGrowth
+    const currentNoteFlexValue = noteFlexValue[noteElement.props.noteValue];
+    const fraction = currentNoteFlexValue / totalFlexGrowth;
+    widthCounter += beamContainerWidth * fraction;
+
+    return cloneElement(noteElement, {
+      ...noteElement.props,
+      stem: "noStem",
+      key: index,
+      stemEndValue: stemEndValue,
+    });
+  });
+
   return (
     <div
       style={{ flexGrow: totalFlexGrowth, display: "flex" }}
@@ -116,9 +135,9 @@ export const BeamContainer = ({ stem, children }: BeamContainerProps) => {
           />
         </svg>
       </div>
-      <div style={{ position: "absolute" }}>
+      {/* <div style={{ position: "absolute" }}>
         {angleRadians * (180 / Math.PI)}
-      </div>
+      </div> */}
     </div>
   );
 };
