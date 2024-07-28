@@ -75,19 +75,29 @@ export const Note = (props: NoteProps) => {
           </svg>
         </div>
       )}
-      <div style={{ position: "absolute" }}>{stemEndValue}</div>
-      {/* {stem === "noStem" && (
-        <div className="beam">
+      {/* <div style={{ position: "absolute" }}>{stemEndValue}</div> */}
+      {stem === "noStem" && stemEndValue && (
+        <div
+          className={
+            "stem-container " + (stemEndValue < stemStart ? "stem-above" : "")
+          }
+        >
           <svg
             viewBox="0 0 100 129"
             preserveAspectRatio="none"
-            className="beam"
+            className="stem"
           >
-            
-            <line x1="0" y1={stemStart} x2="0" y2={stemEnd} stroke="red" />
+            <line
+              x1="0"
+              y1={stemStart}
+              x2="0"
+              y2={stemEndValue}
+              stroke="black"
+              strokeWidth="2px"
+            />
           </svg>
         </div>
-      )} */}
+      )}
     </div>
   );
 };

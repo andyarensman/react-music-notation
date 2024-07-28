@@ -12,19 +12,22 @@
   position: relative;
 }
 
-.beam {
+.beam,
+.stem {
   height: 129px;
   width: 100%;
   display: flex;
 }
 
-.beam-new {
+.beam-new,
+.stem-container {
   position: absolute;
   height: 129px;
   /* outline: 1px solid red; */
 }
 
-.beam-above {
+.beam-above,
+.stem-above {
   margin-right: -10px;
   margin-left: 10px;
 }
