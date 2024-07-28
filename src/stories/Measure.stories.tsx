@@ -25,30 +25,10 @@ export const TraditionalTime: TypeWithDeepControls<Story> = {
       beatType: 4,
     },
     children: [
-      <Note
-        position="space-1"
-        noteValue="16th"
-        stem="upStem"
-        beam={{ amount: 2, status: "start" }}
-      />,
-      <Note
-        position="space-1"
-        noteValue="16th"
-        stem="upStem"
-        beam={{ amount: 1, status: "end" }}
-      />,
-      <Note
-        position="space-1"
-        noteValue="eighth"
-        stem="upStem"
-        beam={{ amount: 1, status: "start" }}
-      />,
-      <Note
-        position="space-2"
-        noteValue="eighth"
-        stem="upStem"
-        beam={{ amount: 1, status: "end" }}
-      />,
+      <Note position="space-1" noteValue="16th" stem="upStem" />,
+      <Note position="space-1" noteValue="16th" stem="upStem" />,
+      <Note position="space-1" noteValue="eighth" stem="upStem" />,
+      <Note position="space-2" noteValue="eighth" stem="upStem" />,
       <Note position="line-3" noteValue="quarter" />,
       <Note position="line-3" noteValue="half" />,
     ],
@@ -142,18 +122,8 @@ export const Testing: TypeWithDeepControls<Story> = {
       <Note position="line-5" noteValue="quarter" stem="noStem" />,
       <Note position="space-4" noteValue="quarter" />,
       <Note position="space-4" noteValue="quarter" />,
-      <Note
-        position="space-4"
-        noteValue="eighth"
-        stem="downStem"
-        beam={{ amount: 1, status: "start" }}
-      />,
-      <Note
-        position="space-4"
-        noteValue="eighth"
-        stem="downStem"
-        beam={{ amount: 1, status: "end" }}
-      />,
+      <Note position="space-4" noteValue="eighth" stem="downStem" />,
+      <Note position="space-4" noteValue="eighth" stem="downStem" />,
     ],
   },
   argTypes: {

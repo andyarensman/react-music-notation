@@ -43,13 +43,6 @@ interface BaseNoteProps {
   dotted?: 1;
 }
 
-export interface Beam {
-  amount: 1 | 2;
-  status: "start" | "continue" | "end";
-  hook?: "forward" | "backward";
-  nextNotePostion?: PitchPosition;
-}
-
 interface RestProps extends BaseNoteProps {
   rest: true;
   pitch?: never;
@@ -67,7 +60,6 @@ export interface NoteValueProps extends BaseNoteProps {
   position: PitchPosition;
   stem?: "upStem" | "downStem" | "noStem";
   rest?: false;
-  beam?: Beam;
   stemEndValue?: number;
 }
 
