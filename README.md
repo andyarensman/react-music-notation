@@ -84,6 +84,7 @@ For upstems:
 
 - The rules for beaming need to be adjusted more - inner notes can be too short still
 - The stems and/or beams need to be tweaked more. The beam is calculated from the top part of the beam, so up and down are in different places by the thickness of the beam. The beam also stops before it hits the last note, so need to adjust it by the thickness of the stem?
+- width of the stem should probably be relative to the note head somehow
 
 ## Resources:
 
