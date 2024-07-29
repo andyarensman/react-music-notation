@@ -145,9 +145,15 @@ export const BeamContainer = ({ stem, children }: BeamContainerProps) => {
         ref={refContainer}
       >
         <svg viewBox="0 0 100 129" preserveAspectRatio="none" className="beam">
-          <polygon
-            points={`0,${topLeftY} 100,${topRightY} 100,${bottomRightY} 0,${bottomLeftY}`}
-          />
+          {stem === "upStem" ? (
+            <polygon
+              points={`0,${topLeftY} 100,${topRightY} 100,${bottomRightY} 0,${bottomLeftY}`}
+            />
+          ) : (
+            <polygon
+              points={`0,${topLeftY - 4} 100,${topRightY - 4} 100,${bottomRightY - 4} 0,${bottomLeftY - 4}`}
+            />
+          )}
         </svg>
       </div>
       {/* <div style={{ position: "absolute" }}>
