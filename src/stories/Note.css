@@ -111,6 +111,20 @@
   left: calc(var(--staff-space) * 2.1);
 }
 
+.aug-dot.aug-dot-shifted {
+  /* clears noteheads flipped to the right of a chord stem */
+  left: calc(var(--staff-space) * 2.55);
+}
+
 .aug-dot.aug-dot-on-line {
   transform: translateY(calc(var(--staff-space) * -0.5));
+}
+
+/* Chord noteheads a second apart sit on opposite sides of the stem */
+.notehead-flip-right {
+  left: calc(var(--staff-space) * 1.2);
+}
+
+.notehead-flip-left {
+  left: calc(var(--staff-space) * -1.15);
 }

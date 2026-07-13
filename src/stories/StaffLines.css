@@ -10,7 +10,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-right: var(--staff-line-thickness) solid black;
+  /* barlines are drawn by Measure (see MeasureMeta/Barline) */
   /* (glyph line box - staff height) / 2, so the staff centers in the 16.125
      staff-space tall line box the Leland font produces */
   margin: calc((var(--staff-space) * 12.125 - var(--staff-line-thickness)) / 2)

@@ -55,6 +55,21 @@ export const dottedGlyph = {
   dotted: "\uE1E7",
 };
 
+// Standalone flags for chord stems (single-note glyphs have flags built in)
+export const flagGlyphs: Record<
+  "eighth" | "16th",
+  { upStem: string; downStem: string }
+> = {
+  eighth: {
+    upStem: "\uE240",
+    downStem: "\uE241",
+  },
+  "16th": {
+    upStem: "\uE242",
+    downStem: "\uE243",
+  },
+};
+
 export const clefGlyphs = {
   gClef: "\uE050",
   fClef: "\uE062",

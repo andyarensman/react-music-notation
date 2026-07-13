@@ -17,7 +17,7 @@ import { BeamContainer } from "./BeamContainer";
   - the whole score scales via --staff-space and reflows via flex wrapping
 */
 const meta: Meta = {
-  title: "Demo",
+  title: "Demo/Phase 1",
 };
 
 export default meta;

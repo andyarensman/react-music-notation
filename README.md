@@ -29,18 +29,35 @@ export default {
 - Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
 - Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
 
-## MVP Scope
+## Scope
 
-In scope (see the `Demo` stories in Storybook for all of it at once):
+Each completed phase has a kitchen-sink story under `Demo` in Storybook.
 
-- Single staff, single voice, one note per rhythmic slot
+Phase 1 (MVP):
+
+- Single staff, single voice
 - G, F, and C clefs; key signatures -7..7 placed per clef; numeric and common/cut time signatures
 - Note values whole through 16th, rests, dotted notes, accidentals
 - Ledger lines up to two above/below the staff
 - Beaming for uniform groups of 8ths or 16ths (explicit `BeamContainer` wrapping)
 - Sizing via `--staff-space` and responsive measure wrapping via flex
 
-Explicitly out for now: chords/multi-voice (`NoteStack` is an unfinished experiment), multi-staff systems, ties/slurs/tuplets, 32nd+ notes, articulations/dynamics (glyph tables exist in `glyphs.ts`), mixed-value beam groups, automatic beam grouping from the time signature, pitch-to-position derivation, MusicXML/MIDI, playback, print layout, and npm packaging (no lib build/exports yet — deliberately deferred).
+Phase 2:
+
+- Chords via `NoteStack`: shared stem sized to the outer noteheads, seconds
+  flipped across the stem, accidentals stacked into non-colliding columns,
+  standalone flag glyphs for unbeamed 8th/16th chords, beamable
+- Pitch -> position derivation: notes can take `pitch={{ step, octave }}`
+  instead of `position`; the measure's clef (provided via context, carried
+  across measures by `Staff`) determines placement
+- Accidentals reserve horizontal space instead of overlapping the previous note
+- Barline types on `Measure`: regular, double, final, repeat end, plus
+  `startRepeat` for the left side
+- Mixed beam groups: 8ths and 16ths share a primary beam; 16th runs get a
+  secondary beam segment and lone 16ths get a partial stub (dotted-8th + 16th
+  works)
+
+Still out: multi-voice (two voices on one staff), multi-staff systems, ties/slurs/tuplets, 32nd+ notes, articulations/dynamics (glyph tables exist in `glyphs.ts`), automatic beam grouping from the time signature, MusicXML/MIDI, playback, print layout, and npm packaging (no lib build/exports yet — deliberately deferred).
 
 ## Sizing:
 
@@ -89,14 +106,15 @@ To account for the upward stem being off from from the left edge of the containe
 - If that closest note is an inner note (concave group), or the outer notes match, the beam is horizontal at the anchor.
 - Otherwise the beam slopes from the anchor toward the other outer note, with the rise clamped to one staff-space (beams shouldn't cross more than one staff line). This is what fixed the "inner notes too short" problem — steep intervals no longer drag the beam through the group.
 - Inner stem heights are plain linear interpolation between the beam ends. Because every note is `flex-basis: 0`, horizontal positions are exactly proportional to flex-grow values, so the interpolation ratio is `prefixFlex / beamSpanFlex` — no trigonometry, no ResizeObserver, no measuring the DOM.
-- Uniform groups of 16ths get a second beam offset a quarter staff-space toward the noteheads.
+- Secondary (16th) beams sit a quarter staff-space toward the noteheads: runs of consecutive 16ths share a segment, and an isolated 16th gets a partial stub half a 16th wide pointing back toward the previous note (or forward when it starts the group). Since stem x positions are flex ratios, segment endpoints are too.
+- Chords participate in beams: `BeamContainer` uses the chord's notehead nearest the beam as its effective position, and `NoteStack` runs its stem from the notehead farthest from the beam to the `stemEndValue` it receives.
 
-Not implemented yet: partial/fractional beams for mixed 8th+16th groups (they currently share a single beam), and the "repeated pattern of pitches goes horizontal" rule.
+Not implemented yet: the "repeated pattern of pitches goes horizontal" rule.
 
 ### Random Notes
 
-- Accidentals don't reserve horizontal space, so an accidental directly after a very tight group (e.g. 16ths) can collide with the previous note. Collision-aware spacing is a post-MVP problem.
-- flex-grow spacing is proportional to duration, which is legible but not engraving-grade spacing (real engraving uses a logarithmic-ish scale).
+- Accidentals now reserve horizontal space (a margin on the note container). One caveat: inside a `BeamContainer`, that margin shifts the real stem position but the beam's flex-ratio interpolation doesn't know about it, so a beamed note with an accidental can have its stem meet the beam slightly off. Rare in practice; fix would be folding margins into the flex math.
+- flex-grow spacing is proportional to duration, which is legible but not engraving-grade spacing (real engraving uses a logarithmic-ish scale). Very tight 16th groups can nearly touch at default sizes.
 
 ## Resources:
 

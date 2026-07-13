@@ -1,0 +1,52 @@
+.barline {
+  /* spans exactly the five staff lines */
+  top: calc((var(--staff-space) * 12.125 - var(--staff-line-thickness)) / 2);
+  height: calc(var(--staff-space) * 4 + var(--staff-line-thickness));
+  display: flex;
+  flex-direction: row;
+  gap: calc(var(--staff-space) * 0.3);
+}
+
+.barline-end {
+  position: absolute;
+  right: 0;
+}
+
+.barline-start {
+  position: relative;
+  margin-right: calc(var(--staff-space) * 1.25);
+}
+
+.barline-line {
+  width: var(--staff-line-thickness);
+  height: 100%;
+  background-color: black;
+}
+
+.barline-line-thick {
+  width: calc(var(--staff-space) * 0.5);
+}
+
+/* Repeat dots sit in the middle two spaces of the staff */
+.barline-dots {
+  position: relative;
+  width: calc(var(--staff-space) * 0.4);
+}
+
+.barline-dots::before,
+.barline-dots::after {
+  content: "";
+  position: absolute;
+  width: calc(var(--staff-space) * 0.4);
+  height: calc(var(--staff-space) * 0.4);
+  border-radius: 50%;
+  background-color: black;
+}
+
+.barline-dots::before {
+  top: calc(var(--staff-space) * 1.3);
+}
+
+.barline-dots::after {
+  top: calc(var(--staff-space) * 2.3);
+}

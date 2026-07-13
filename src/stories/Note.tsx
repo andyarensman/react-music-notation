@@ -1,3 +1,4 @@
+import { useContext } from "react";
 import "./Note.css";
 import "../global.css";
 import { accidentalGlyphs, dottedGlyph, noteGlyphs } from "../helpers/glyphs";
@@ -6,13 +7,16 @@ import {
   getLedgerLines,
   getNoteFlex,
   noteTranslations,
+  resolvePosition,
   StemPositions,
 } from "../helpers/helpers";
 import { NoteProps } from "../helpers/types";
+import { ClefContext } from "./ClefContext";
 
 export const Note = (props: NoteProps) => {
+  const clef = useContext(ClefContext);
   const { noteValue, rest, dotted, stemEndValue } = props;
-  const position = props.position || "line-3";
+  const position = resolvePosition(props, clef);
   const stem = !rest ? props.stem || getDefaultStem(position) : undefined;
   const pitch = !rest ? props.pitch : null;
 
@@ -21,8 +25,24 @@ export const Note = (props: NoteProps) => {
   const isWide = noteValue === "whole";
   const dotOnLine = position.startsWith("line");
 
+  // Reserve horizontal room for the accidental so it doesn't overlap the
+  // previous note; double accidentals are wider
+  const accidentalMargin = pitch?.alter
+    ? pitch.alter.startsWith("double")
+      ? 1.75
+      : 1.5
+    : 0;
+
   return (
-    <div className="note-container" style={{ flexGrow: getNoteFlex(props) }}>
+    <div
+      className="note-container"
+      style={{
+        flexGrow: getNoteFlex(props),
+        marginLeft: accidentalMargin
+          ? `calc(var(--staff-space) * ${accidentalMargin})`
+          : undefined,
+      }}
+    >
       {ledgerLines.map((ledger) => (
         <div
           key={ledger}

@@ -1,5 +1,5 @@
 import { NoteGlyphs } from "./glyphs";
-import { ClefType, NoteProps, PitchPosition } from "./types";
+import { ClefType, NoteProps, Pitch, PitchPosition } from "./types";
 
 export const noteFlexValue: Record<NoteProps["noteValue"], number> = {
   whole: 16,
@@ -11,8 +11,10 @@ export const noteFlexValue: Record<NoteProps["noteValue"], number> = {
 
 // Horizontal space a note takes up, as a flex-grow value. A dot adds half
 // the note's duration.
-export const getNoteFlex = (props: NoteProps): number =>
-  noteFlexValue[props.noteValue] * (props.dotted ? 1.5 : 1);
+export const getNoteFlex = (props: {
+  noteValue: NoteProps["noteValue"];
+  dotted?: 1;
+}): number => noteFlexValue[props.noteValue] * (props.dotted ? 1.5 : 1);
 
 /*
   The tables below are y-coordinates inside the stem/beam svg viewBox
@@ -96,6 +98,122 @@ export const noteTranslations: Record<
   quarter: "quarterNote",
   eighth: "eighthNote",
   "16th": "sixteenthNote",
+};
+
+// Every renderable position, top of the range to bottom. line-3 (the middle
+// line) sits at index 8; each index step is half a staff-space.
+export const pitchPositionOrder: PitchPosition[] = [
+  "line-above-2",
+  "space-above-2",
+  "line-above-1",
+  "space-above-1",
+  "line-5",
+  "space-4",
+  "line-4",
+  "space-3",
+  "line-3",
+  "space-2",
+  "line-2",
+  "space-1",
+  "line-1",
+  "space-below-1",
+  "line-below-1",
+  "space-below-2",
+  "line-below-2",
+];
+
+const MIDDLE_LINE_INDEX = 8;
+
+export const positionIndex = (position: PitchPosition): number =>
+  pitchPositionOrder.indexOf(position);
+
+const stepIndex: Record<NonNullable<Pitch["step"]>, number> = {
+  C: 0,
+  D: 1,
+  E: 2,
+  F: 3,
+  G: 4,
+  A: 5,
+  B: 6,
+};
+
+// Diatonic index (octave * 7 + step) of the pitch sitting on the middle line
+const clefMiddleLinePitch: Record<ClefType, number> = {
+  gClef: 34, // B4
+  fClef: 22, // D3
+  cClef: 28, // C4
+};
+
+// Derive a staff position from a pitch and clef. Returns undefined when the
+// pitch is missing step or octave (e.g. accidental-only pitches).
+export const derivePosition = (
+  pitch: Pitch | undefined,
+  clef: ClefType
+): PitchPosition | undefined => {
+  if (!pitch || pitch.step === undefined || pitch.octave === undefined) {
+    return undefined;
+  }
+  const diatonicIndex = pitch.octave * 7 + stepIndex[pitch.step];
+  const stepsAboveMiddle = diatonicIndex - clefMiddleLinePitch[clef];
+  const arrayIndex = MIDDLE_LINE_INDEX - stepsAboveMiddle;
+  const clamped = Math.min(
+    pitchPositionOrder.length - 1,
+    Math.max(0, arrayIndex)
+  );
+  if (clamped !== arrayIndex) {
+    console.warn(
+      `Pitch ${pitch.step}${pitch.octave} is outside the renderable range for ${clef}; clamping to ${pitchPositionOrder[clamped]}`
+    );
+  }
+  return pitchPositionOrder[clamped];
+};
+
+// position wins, then pitch-derived, then the middle line
+export const resolvePosition = (
+  note: { position?: PitchPosition; pitch?: Pitch },
+  clef: ClefType
+): PitchPosition =>
+  note.position ?? derivePosition(note.pitch, clef) ?? "line-3";
+
+// Chord stem direction: the notehead farthest from the middle line decides;
+// ties go down, matching getDefaultStem for single notes
+export const getChordStem = (
+  positions: PitchPosition[]
+): "upStem" | "downStem" => {
+  const indices = positions.map(positionIndex);
+  const above = MIDDLE_LINE_INDEX - Math.min(...indices);
+  const below = Math.max(...indices) - MIDDLE_LINE_INDEX;
+  return below > above ? "upStem" : "downStem";
+};
+
+// How many beams/flags a note value carries
+export const getBeamCount = (noteValue: NoteProps["noteValue"]): number => {
+  if (noteValue === "16th") return 2;
+  if (noteValue === "eighth") return 1;
+  return 0;
+};
+
+/*
+  Assign accidentals to horizontal columns so they don't overlap vertically.
+  Input is the position indices of the accidental-bearing notes, top first;
+  output is a column per note (0 = closest to the chord). Accidentals within
+  6 half-steps (~ a sharp's height) of one in a column move a column left.
+*/
+export const assignAccidentalColumns = (indices: number[]): number[] => {
+  const columns: number[][] = [];
+  return indices.map((index) => {
+    for (let column = 0; column < columns.length; column++) {
+      const clashes = columns[column].some(
+        (other) => Math.abs(other - index) < 6
+      );
+      if (!clashes) {
+        columns[column].push(index);
+        return column;
+      }
+    }
+    columns.push([index]);
+    return columns.length - 1;
+  });
 };
 
 export const getDefaultStem = (

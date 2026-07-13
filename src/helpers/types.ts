@@ -57,16 +57,26 @@ interface RestProps extends BaseNoteProps {
   stemEndValue?: never;
 }
 
+export interface Pitch {
+  step?: "A" | "B" | "C" | "D" | "E" | "F" | "G";
+  alter?: "sharp" | "flat" | "natural" | "doubleSharp" | "doubleFlat";
+  octave?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+}
+
 export interface NoteValueProps extends BaseNoteProps {
-  pitch?: {
-    step?: "A" | "B" | "C" | "D" | "E" | "F" | "G";
-    alter?: "sharp" | "flat" | "natural" | "doubleSharp" | "doubleFlat";
-    octave?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
-  };
-  position: PitchPosition;
+  pitch?: Pitch;
+  // When omitted, the position is derived from pitch.step/octave and the
+  // measure's clef
+  position?: PitchPosition;
   stem?: "upStem" | "downStem" | "noStem";
   rest?: false;
   stemEndValue?: number;
+}
+
+// One notehead within a NoteStack chord
+export interface StackedNote {
+  pitch?: Pitch;
+  position?: PitchPosition;
 }
 
 export type NoteProps = RestProps | NoteValueProps;

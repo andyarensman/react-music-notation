@@ -1,5 +1,5 @@
 import { BeamPositions } from "./helpers";
-import { NoteElement } from "./types";
+import { PitchPosition } from "./types";
 
 // One staff-space in svg viewBox units. Beam slants shouldn't cross more
 // than one staff line, so the rise is clamped to this.
@@ -8,15 +8,18 @@ const MAX_BEAM_SLANT = 8;
 const clampSlant = (value: number): number =>
   Math.max(-MAX_BEAM_SLANT, Math.min(MAX_BEAM_SLANT, value));
 
-// Returns topLeftY and topRightY (the beam edge at the stem tips) for the
-// beam svg, in viewBox units.
+/*
+  Returns topLeftY and topRightY (the beam edge at the stem tips) for the
+  beam svg, in viewBox units. positions are each beamed note's effective
+  position — for chords, the notehead nearest the beam.
+*/
 export function beamCreator(
-  notesToBeamArray: NoteElement[], //!The NoteElement does not include rests - may change in future
+  positions: PitchPosition[],
   stemDirection: "upStem" | "downStem"
 ): { topLeftY: number; topRightY: number } {
   // Standard beam position of each note (a standard-length stem away)
-  const beamPositionsArray = notesToBeamArray.map(
-    (note) => BeamPositions[stemDirection][note.props.position]
+  const beamPositionsArray = positions.map(
+    (position) => BeamPositions[stemDirection][position]
   );
 
   const firstBeam = beamPositionsArray[0];
