@@ -1,39 +1,14 @@
-# React + TypeScript + Vite
+# React Music Notation
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React components for rendering Western music notation (sheet music) in the browser. A score is composed the way you'd compose any other UI — `<Staff><Measure><Note /></Measure></Staff>` — instead of being handed to a canvas or SVG engraving engine. Layout is built entirely from CSS flex and grid (not fixed engraving coordinates), so notation reflows and wraps like other web content, and the whole thing scales from a single `--staff-space` CSS custom property. Glyphs come from the [Leland](https://github.com/MuseScoreFonts/Leland) SMuFL music font. The data model (pitches as `{ step, octave }`, key signatures as `fifths`, time signatures as `beat`/`beatType`) is loosely inspired by MusicXML vocabulary, though this library only renders notation — it doesn't read or write MusicXML.
 
-Currently, two official plugins are available:
+The library is not yet packaged for npm (no build/exports configured). That's deliberate: the component API is still moving between phases, and Storybook is the intended way to explore it for now.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Status
 
-## Expanding the ESLint configuration
+The project is built in phases; each completed phase has a kitchen-sink story under **Demo** in Storybook (`Demo/Phase 1` through `Demo/Phase 4`).
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: "latest",
-    sourceType: "module",
-    project: ["./tsconfig.json", "./tsconfig.node.json"],
-    tsconfigRootDir: __dirname,
-  },
-};
-```
-
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
-
-## Scope
-
-Each completed phase has a kitchen-sink story under `Demo` in Storybook.
-
-Phase 1 (MVP):
+**Phase 1 (MVP)**
 
 - Single staff, single voice
 - G, F, and C clefs; key signatures -7..7 placed per clef; numeric and common/cut time signatures
@@ -42,130 +17,297 @@ Phase 1 (MVP):
 - Beaming for uniform groups of 8ths or 16ths (explicit `BeamContainer` wrapping)
 - Sizing via `--staff-space` and responsive measure wrapping via flex
 
-Phase 2:
+**Phase 2**
 
-- Chords via `NoteStack`: shared stem sized to the outer noteheads, seconds
-  flipped across the stem, accidentals stacked into non-colliding columns,
-  standalone flag glyphs for unbeamed 8th/16th chords, beamable
-- Pitch -> position derivation: notes can take `pitch={{ step, octave }}`
-  instead of `position`; the measure's clef (provided via context, carried
-  across measures by `Staff`) determines placement
+- Chords via `NoteStack`: shared stem sized to the outer noteheads, seconds flipped across the stem, accidentals stacked into non-colliding columns, standalone flag glyphs for unbeamed 8th/16th chords, beamable
+- Pitch → position derivation: notes can take `pitch={{ step, octave }}` instead of `position`; the measure's clef (provided via context, carried across measures by `Staff`) determines placement
 - Accidentals reserve horizontal space instead of overlapping the previous note
-- Barline types on `Measure`: regular, double, final, repeat end, plus
-  `startRepeat` for the left side
-- Mixed beam groups: 8ths and 16ths share a primary beam; 16th runs get a
-  secondary beam segment and lone 16ths get a partial stub (dotted-8th + 16th
-  works)
+- Barline types on `Measure`: regular, double, final, repeat end, plus `startRepeat` for the left side
+- Mixed beam groups: 8ths and 16ths share a primary beam; 16th runs get a secondary beam segment and lone 16ths get a partial stub (dotted-8th + 16th works)
 
-Phase 3:
+**Phase 3**
 
-- Grand staff (piano-style): `GrandStaff` + `GrandMeasure` stack a treble and
-  bass measure with a brace and barlines spanning both staves; grand measures
-  wrap together as a unit
-- Onset-grid alignment: each grand measure lays both staves on a shared CSS
-  grid whose columns are the union of both staves' note onsets, so notes that
-  sound together sit at the same x even when the hands have different rhythms
-  (see `layout.tsx`)
-- Minimum note spacing so dense rhythms can't crush together (beam groups
-  reserve their minimum as a unit to keep stem positions exactly
-  flex-proportional)
+- Grand staff (piano-style): `GrandStaff` + `GrandMeasure` stack a treble and bass measure with a brace and barlines spanning both staves; grand measures wrap together as a unit
+- Onset-grid alignment: each grand measure lays both staves on a shared CSS grid whose columns are the union of both staves' note onsets, so notes that sound together sit at the same x even when the hands have different rhythms (see `layout.tsx`)
+- Minimum note spacing so dense rhythms can't crush together (beam groups reserve their minimum as a unit to keep stem positions exactly flex-proportional)
 
-Phase 4:
+**Phase 4**
 
-- Two voices per staff via `Voice`: stems forced per voice (up/down), events
-  laid on the measure's shared onset grid so voices align with each other and
-  (in a grand measure) with the other staff; beams inherit the voice's stem
-  direction; rests default high in the up voice and low in the down voice
-- Ties: `tie="start"/"stop"` on Note draws a filled lens curve to the next
-  note. Direction is opposite the stem for single-voice music; inside a Voice
-  the tie curves toward the voice's outer side (standard multi-voice rule);
-  `tieDirection` overrides either
+- Two voices per staff via `Voice`: stems forced per voice (up/down), events laid on the measure's shared onset grid so voices align with each other and (in a grand measure) with the other staff; beams inherit the voice's stem direction; rests default high in the up voice and low in the down voice
+- Ties: `tie="start"`/`"stop"` on `Note` draws a filled lens curve to the next note. Direction is opposite the stem for single-voice music; inside a `Voice` the tie curves toward the voice's outer side (standard multi-voice rule); `tieDirection` overrides either
 
-Still out: cross-staff beaming, slurs, tuplets, cross-measure ties, ties on chord members, 32nd+ notes, articulations/dynamics (glyph tables exist in `glyphs.ts`), automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), MusicXML/MIDI, playback, print layout, and npm packaging (no lib build/exports yet — deliberately deferred).
+**Still out**: cross-staff beaming, slurs, tuplets, cross-measure ties, ties on chord members, 32nd+ notes, articulations/dynamics (glyph tables already exist in `glyphs.ts`), automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), MusicXML/MIDI import or export, playback, print layout, and npm packaging (no lib build/exports yet — deliberately deferred).
 
-### Grand staff notes
+## Getting started
 
-- The onset grid works because CSS grid `fr` columns are proportional exactly
-  like `flex-grow` with `flex-basis: 0` — all the beam geometry keeps working
-  unchanged inside a column span. Events are wrapped in `.grid-event` items
-  spanning their onset columns; a beam group whose internal notes are
-  flex-proportional lines up with the outer grid automatically.
-- The two staves overlap their Leland line boxes by 6 staff-spaces, leaving a
-  6 staff-space gap between the staves. The system barline and the brace both
-  derive from that.
-- Known limitations: the brace only renders on the first system (re-bracing
-  wrapped rows needs real system layout, as does restating clefs per system);
-  `repeatEnd` barlines render per staff so the dots sit on each staff, other
-  barline types span both staves; a grand measure whose staves have
-  mismatched total durations falls back to unaligned flow for the events past
-  the mismatch.
+```
+npm install
+npm run storybook
+```
 
-## Sizing:
+Storybook runs at `http://localhost:6006`. The phase kitchen-sink demos live under **Demo**; individual component stories (Note, NoteStack, Measure, Staff, GrandStaff, Voice, Barline, Clef, KeySignature, TimeSignature, StaffLines) are grouped by component name.
 
-To determine the position of note heads, you take the font size of the Leland font and divide it by 8. So we are currently using font size 32px, which equates to 4px being the height of the note heads.I don't think pixels should be cut in half, so right now the font size options are 2:16, 3:24, 4:32, 5:40, 6:48, etc. This means I will likely need to limit the user to these font ratios.
+## Usage
 
-To determine the sizing of the staff lines, you need to first double the note head size. We're at 4, so that gives us 8. We need to split this up by our line thickness and the gap between the lines. I want the lines `.line` to be 1px in thickness right now, so the gap `.staff` should be 7px. Larger font sizes may require thicker lines, which will need some testing.
+The examples below are trimmed from the actual `Demo*.stories.tsx` files and use the real prop types (`src/helpers/types.ts`).
 
-The height of the leland font is not 32px, it is much larger at 129px (for this font size). We will use that as cushioning so we need to take the total height of our staff lines, subtract it from 129, and divide it by 2 to get our top and bottom border. The total height of the staff lines is 33px, so that gives us 48px margins for `.staff`.
+### A single measure
 
-### The --staff-space system
+```tsx
+<Staff>
+  <Measure clef="gClef" fifths={2} time={{ beat: 4, beatType: 4 }}>
+    <Note position="line-4" noteValue="quarter" dotted={1} />
+    <Note position="space-3" noteValue="eighth" />
+  </Measure>
+</Staff>
+```
 
-All of the sizing above is now driven by two CSS custom properties declared in `src/global.css`:
+`Measure` accepts `clef` (`"gClef" | "fClef" | "cClef"`), `fifths` (a `KeyRange`, `-7`..`7`; positive draws sharps, negative flats), and `time` (either `{ beat, beatType }` or `{ timeSymbol: "common" | "cut" }`). `position` is one of the 17 `PitchPosition` strings (`"line-above-2"` … `"line-3"` (middle line) … `"line-below-2"`).
 
-- `--staff-space` (default `8px`) — the distance from the center of one staff line to the center of the next. This is the master knob: font-size is `4 * staff-space`, each pitch-position step is `staff-space / 2`, the Leland line box is `16.125 * staff-space` (the 129px above), and the staff margin is `(12.125 * staff-space - line-thickness) / 2`.
-- `--staff-line-thickness` (default `1px`) — staff lines, ledger lines, and barlines. Kept separate because hairlines shouldn't scale linearly at small sizes; bump it manually for very large staves.
+### Pitches instead of positions
 
-Override `--staff-space` on any container to scale all notation inside it as a unit (see the Demo stories). Sizes that keep the derived values on whole/half pixels (6, 8, 10, 12, 16...) render crispest.
+A `Note` can take `pitch={{ step, octave }}` instead of an explicit `position`. The measure's clef — provided through `ClefContext` and carried across measures that don't restate it by `Staff` — determines where the pitch lands (`derivePosition` in `helpers.ts`). Explicit `position` always wins if both are given; if neither is given, the note falls back to the middle line.
 
-The stem/beam SVGs use `viewBox="0 0 100 129"` with `preserveAspectRatio="none"`, so the `StemPositions`/`BeamPositions` tables in `helpers.ts` are resolution-independent viewBox coordinates (1 staff-space = 8 units) and never need to change with sizing. Stems use `vector-effect: non-scaling-stroke` with a CSS `stroke-width` of `0.15 * staff-space` — without that, the non-uniform viewBox stretch would make stem thickness vary with measure width.
+```tsx
+<Measure clef="gClef">
+  <Note pitch={{ step: "G", alter: "sharp", octave: 5 }} noteValue="quarter" />
+</Measure>
+```
 
-The C Clef centering issue mentioned previously appears resolved — verified against screenshots at multiple sizes; the center notch sits on the middle line.
+### Chords (`NoteStack`)
 
-## Beaming:
+```tsx
+<NoteStack
+  noteValue="quarter"
+  pitches={[
+    { pitch: { step: "C", octave: 3, alter: "sharp" } },
+    { pitch: { step: "D", octave: 3, alter: "flat" } },
+  ]}
+/>
+```
 
-I'm not quite sure how this will work. Wether it will be within the note component or within the measure component. SVG is probably the only way to do it. Not sure how the view window will work either.
+`pitches` is an array of `StackedNote` (`{ pitch }` or `{ position }`). `NoteStack` derives one shared stem sized to the outer noteheads, flips seconds to the far side of the stem, and stacks accidentals into non-overlapping columns (`assignAccidentalColumns` in `helpers.ts`). Whole-note chords render stemless; other values pick a stem direction from the notehead farthest from the middle line unless `stem` is passed explicitly. Unbeamed 8th/16th chords get a standalone flag glyph (chords don't have flags built into their notehead glyph the way single notes do).
 
-To account for the upward stem being off from from the left edge of the container, I can user positive margin on the left and negative margin on the right.
+### Beams (`BeamContainer`)
+
+```tsx
+<BeamContainer stem="upStem">
+  <Note position="space-2" noteValue="eighth" />
+  <Note position="line-2" noteValue="eighth" />
+  <Note position="space-1" noteValue="eighth" />
+  <Note position="line-1" noteValue="eighth" />
+</BeamContainer>
+```
+
+`BeamContainer` takes a `stem` (`"upStem" | "downStem"`, default `"upStem"`) and two or more `Note`/`NoteStack` children; it overrides each child's `stem` to `"noStem"` and injects a computed `stemEndValue`. Mixed 8th/16th groups share a primary beam, with 16th runs getting a secondary beam segment:
+
+```tsx
+<BeamContainer stem="upStem">
+  <Note pitch={{ step: "E", octave: 4 }} noteValue="eighth" dotted={1} />
+  <Note pitch={{ step: "F", octave: 4 }} noteValue="16th" />
+</BeamContainer>
+```
+
+`NoteStack` chords can appear inside a `BeamContainer` too — see [Beaming](#beaming) for how the anchor notehead is chosen.
+
+### Dotted notes and ties
+
+```tsx
+<Note position="line-4" noteValue="quarter" dotted={1} />
+
+<Note pitch={{ step: "G", octave: 5 }} noteValue="half" tie="start" />
+<Note pitch={{ step: "G", octave: 5 }} noteValue="half" tie="stop" />
+```
+
+`dotted?: 1` adds an augmentation dot (and 50% more flex-grow — see [Layout engine](#layout-engine)). `tie="start"` draws a curve from that note to the next note in the same measure; the receiving note should be marked `tie="stop"`. Direction defaults to opposite the stem, or `tieDirection="above" | "below"` to override — `Voice` sets this automatically so ties curve toward the voice's outer side.
+
+### Rests
+
+```tsx
+<Note rest noteValue="quarter" dotted={1} />
+```
+
+`rest: true` drops `pitch`, `stem`, `stemEndValue`, and `tie` from the prop type (`RestProps` in `types.ts`); `position` can still be set explicitly to move the rest off the default line.
+
+### Clefs, key signatures, time signatures, barlines
+
+All four are props on `Measure`, plus `startRepeat` for a left-side repeat barline:
+
+```tsx
+<Measure
+  clef="fClef"
+  fifths={-3}
+  time={{ beat: 4, beatType: 4 }}
+  startRepeat
+  barline="repeatEnd"
+>
+  {/* ... */}
+</Measure>
+```
+
+`barline` is a `BarlineType`: `"regular" | "double" | "final" | "repeatStart" | "repeatEnd"` (default `"regular"`), rendered at the measure's right edge. `startRepeat` renders a `repeatStart` barline at the left edge instead of taking a `BarlineType` value itself.
+
+### `Staff`: wrapping measures with a running clef
+
+```tsx
+<Staff>
+  <Measure clef="gClef" time={{ beat: 4, beatType: 4 }}>{/* ... */}</Measure>
+  <Measure>{/* clef inherited from the previous measure */}</Measure>
+</Staff>
+```
+
+`Staff` lays measures out as a wrapping flex row (`flex-wrap: wrap`); each `Measure` has a minimum width, so measures reflow onto new lines as the container narrows. `Staff` also tracks a running clef: a measure that doesn't declare its own `clef` inherits whatever clef was last declared, so pitch-based notes keep resolving correctly across the line.
+
+### `GrandStaff` / `GrandMeasure`: piano-style layout
+
+```tsx
+<GrandStaff>
+  <GrandMeasure
+    upper={
+      <Measure clef="gClef" time={{ beat: 4, beatType: 4 }}>
+        <Note pitch={{ step: "C", octave: 5 }} noteValue="eighth" />
+        {/* ... */}
+      </Measure>
+    }
+    lower={
+      <Measure clef="fClef" time={{ beat: 4, beatType: 4 }}>
+        <NoteStack
+          noteValue="half"
+          pitches={[
+            { pitch: { step: "C", octave: 3 } },
+            { pitch: { step: "G", octave: 3 } },
+          ]}
+        />
+      </Measure>
+    }
+  />
+</GrandStaff>
+```
+
+`GrandMeasure` takes `upper`/`lower` (each a `<Measure>` element), plus `barline` and `startRepeat` applied across both staves. `GrandStaff` draws the brace and tracks a running clef per staff, the same way `Staff` does for one. See [Grand staff](#grand-staff) for the layout and known limitations.
+
+### `Voice`: two voices per staff
+
+```tsx
+<Measure clef="gClef" time={{ beat: 4, beatType: 4 }}>
+  <Voice stem="upStem">
+    <Note pitch={{ step: "E", octave: 5 }} noteValue="quarter" />
+    <Note pitch={{ step: "F", octave: 5 }} noteValue="quarter" />
+  </Voice>
+  <Voice stem="downStem">
+    <Note pitch={{ step: "C", octave: 5 }} noteValue="quarter" />
+    <Note pitch={{ step: "B", octave: 4 }} noteValue="quarter" />
+  </Voice>
+</Measure>
+```
+
+`Voice` forces `stem` onto every child that doesn't set its own, defaults rests to `"space-4"` (up voice) or `"space-1"` (down voice) when the rest doesn't set an explicit `position`, and defaults `tieDirection` to the voice's outer side. Voices in the same measure — and, inside a grand measure, across both staves — lay their events out on a shared onset grid so simultaneous notes line up (see [Layout engine](#layout-engine)).
+
+## Sizing system
+
+All sizing is driven by two CSS custom properties declared in `src/global.css`:
+
+- **`--staff-space`** (default `8px`) — the distance from the center of one staff line to the center of the next. This is the master knob.
+- **`--staff-line-thickness`** (default `1px`) — staff lines, ledger lines, and barlines. Kept separate from `--staff-space` because hairlines shouldn't scale linearly at small sizes; bump it manually for very large staves.
+
+Override `--staff-space` on any container to scale all notation inside it as a unit (see the `staffSpace` control on the Demo stories).
+
+### Derivation
+
+- **Font size**: the Leland glyphs are sized by setting `font-size` on the `.leland` class. Font size is `4 * --staff-space` — at the default `8px` staff-space that's a `32px` font.
+- **Notehead height**: divide the font size by 8. At `32px` that's `4px` — a quarter-note notehead is 4px tall at the default size. Because pixel heights shouldn't be cut in half, this originally constrained supported sizes to font sizes that are multiples of 8 (notehead-height : font-size pairs `2:16`, `3:24`, `4:32`, `5:40`, `6:48`, …); the `--staff-space` system generalizes this but the same "keep it a whole/half pixel" logic still applies (see "Crisp sizes" below).
+- **Staff line spacing**: double the notehead size to get one full staff-space (`8px` at the default size). Split that between the line thickness (`--staff-line-thickness`, `1px`) and the gap between lines, so the gap is `staff-space - line-thickness` (`7px` by default). Each pitch-position step (line-to-space or space-to-line) is `staff-space / 2`.
+- **Glyph line box**: the Leland font's actual em-box is much taller than the nominal font size — `129px` tall at a `32px` font size, i.e. `16.125 * --staff-space`. This is used as vertical cushioning around the five staff lines.
+- **Staff margin**: the total height of the five staff lines is `4 * (staff-space - line-thickness) + 5 * line-thickness` (`33px` at the default size — four gaps plus five hairlines). Subtracting that from the `16.125 * staff-space` glyph line box and halving it gives the top/bottom margin around `.staff`: `(12.125 * staff-space - line-thickness) / 2` (`48px` at the default size).
+
+Sizes that keep these derived values on whole or half pixels (`--staff-space` of `6, 8, 10, 12, 16`, …) render crispest; other values still work but can blur on sub-pixel boundaries.
+
+The stem/beam SVGs use `viewBox="0 0 100 129"` with `preserveAspectRatio="none"`, so the `StemPositions`/`BeamPositions` tables in `helpers.ts` are resolution-independent viewBox coordinates (1 staff-space = 8 units) and never need to change with sizing — the SVG is stretched to the real rendered size. Stems use `vector-effect: non-scaling-stroke` with a CSS `stroke-width` of `0.15 * --staff-space`; without that, the non-uniform viewBox stretch would make stem thickness vary with measure width.
+
+The C-clef centering issue noted in earlier development has been resolved and verified against screenshots at multiple sizes — the clef's center notch sits on the middle line.
+
+## Layout engine
+
+Horizontal spacing is duration-proportional, not fixed-width: every note/rest gets `flexGrow` equal to its `noteValue`'s relative duration (`getNoteFlex` in `helpers.ts` — whole = 16, half = 8, quarter = 4, eighth = 2, 16th = 1), and a dot multiplies that by 1.5. Because every note has `flex-basis: 0`, horizontal position within a measure is exactly proportional to cumulative flex-grow — there's no absolute positioning or DOM measurement involved.
+
+### The onset grid
+
+`GrandMeasure` and `Voice` need something stronger than plain flex: notes on different staves (or in different voices) that sound at the same instant must land at the same x position even though the two lines of music may subdivide the beat differently. `layout.tsx` solves this with an onset grid:
+
+- Each event's duration converts to flex units (`getEventFlex`; a `BeamContainer`'s duration is the sum of its children's).
+- `getOnsetBoundaries` walks a measure's children and produces the cumulative onset (in flex units) at which each event starts — the boundaries array.
+- For a grand measure, `unionBoundaries` merges both staves' boundary arrays; for a measure with `Voice` layers, boundaries are the union of each voice's own boundaries.
+- `gridTemplateFromBoundaries` turns consecutive boundary deltas into CSS grid `fr` track sizes for a `display: grid` container.
+- `placeEventsOnGrid` wraps each event in a `.grid-event` `<div>` spanning the grid columns between its start and end onset. The wrapper itself is a flex row, so the event's own `flex-grow` fills it exactly as it would in an ungridded measure.
+
+This works because CSS grid `fr` columns are proportional exactly like `flex-grow` with `flex-basis: 0` — all the beam geometry (stem interpolation, secondary beam segments) keeps working unchanged inside a column span, since a beam group's internal notes are still flex-proportional within their grid cell. A beam group therefore lines up with the outer grid automatically without any special-casing.
+
+### Minimum note spacing
+
+Dense rhythms (a run of 16ths) could otherwise crush together at small sizes. `BeamContainer` reserves `min-width: calc(var(--staff-space) * 2.2 * <note count>)` on the whole group, so beam groups keep a minimum width as a unit — this preserves exact flex-proportional stem positions inside the group (since the group still flex-grows and lays its children out by ratio) rather than giving individual notes independent minimum widths, which would break the proportionality the beam-angle math depends on.
+
+## Beaming
+
+Textbook engraving rules this implementation targets:
+
+- When a note is in a space, the stem length is 3½ staff-spaces; on a line, it's shortened to 3¼ staff-spaces.
+- Beam angles usually cross no more than one staff line.
+- The outer notes of the group determine the beam direction and angle.
+- The beam is horizontal when the group begins and ends on the same note, when there's a repeated pattern of pitches, or when an inner note is closer to the beam than either outer note (concave groups are horizontal; convex groups are sloped).
+
+### Implemented algorithm
+
+`beamCreator.ts` decides the beam line; `BeamContainer` renders it and sets each stem:
+
+1. Look up each note's standard beam position (`BeamPositions`, a standard-length stem away from the notehead).
+2. The note closest to the beam is the anchor — its stem stays standard length; every other stem gets longer (never shorter).
+3. If that closest note is an inner note (a concave group), or the outer notes match, the beam is horizontal at the anchor.
+4. Otherwise the beam slopes from the anchor toward the other outer note, with the rise clamped to one staff-space (`MAX_BEAM_SLANT` in `beamCreator.ts`) since beams shouldn't cross more than one staff line. This clamp is what fixed an earlier "inner notes too short" problem, where steep intervals could drag the beam through the middle of the group.
+5. Inner stem heights are plain linear interpolation between the beam ends. Because every note is `flex-basis: 0`, horizontal positions are exactly proportional to flex-grow values, so the interpolation ratio is `prefixFlex / beamSpanFlex` — no trigonometry, no `ResizeObserver`, no measuring the DOM.
+6. Secondary (16th) beams sit a quarter staff-space toward the noteheads: runs of consecutive 16ths share one segment, and an isolated 16th gets a partial stub half a 16th wide, pointing back toward the previous note (or forward when it starts the group). Since stem x-positions are flex ratios, segment endpoints are too.
+7. Chords participate in beams: `BeamContainer` uses the chord's notehead nearest the beam as its effective position, and `NoteStack` runs its stem from the notehead farthest from the beam to the `stemEndValue` it receives from the beam container.
+
+**Not implemented yet**: the "repeated pattern of pitches goes horizontal" rule.
+
+While figuring out stem geometry, this trick handled the upward stem sitting off from the left edge of its container: positive margin on the left, negative margin on the right (now the `.stem-above` class in `Note.css`). Background reading kept from that phase of development:
 
 - [Make Awesome SVG Animations with CSS // 7 Useful Techniques](https://www.youtube.com/watch?v=UTHgr6NLeEw)
 - [SVG image without aspect ratio](https://stackoverflow.com/questions/50226255/scale-svg-image-without-aspect-ratio)
 
-### Beaming Rules
+## Grand staff
 
-- When notes are in a space, the stem length is 3 1/2 spaces
-- When notes are on a line, the stem is shortened to 3 1/4 spaces
-- Beam angles usually cross no more than one stave-line
-- The outer notes of the group determine the beam direction and angle.
-- The beam is horizontal when the group begins and ends with the same note, there is a repeated pattern of pitches, or an inner note is closer to the beam than either of the outer notes (important). Concave is horizontal, convex is sloped
+- The onset grid (see [Layout engine](#layout-engine)) is what lets two staves with independent rhythms align: `.grid-event` wrappers span their onset columns, and a beam group whose internal notes are flex-proportional lines up with the outer grid automatically.
+- The two staves overlap their Leland line boxes by 6 staff-spaces (each line box is `16.125 * staff-space` tall), which leaves a 6 staff-space gap between the bottom of the treble staff and the top of the bass staff. The system barline height and the brace height both derive from that same overlap.
+- **Known limitations**: the brace only renders on the first system — re-bracing wrapped rows needs real system layout, as does restating clefs per system. `repeatEnd` barlines render per staff (so the repeat dots sit on each staff individually); every other barline type spans both staves as one barline. A grand measure whose staves have mismatched total durations falls back to unaligned flow for the events past the mismatch (an event that doesn't land on a shared onset boundary just renders inline instead of being grid-placed).
 
-### Implemented Beaming Algorithm
+## Known limitations / rough edges
 
-`beamCreator.ts` decides the beam line; `BeamContainer` renders it and sets each stem:
+- **Accidental margins inside beams**: accidentals reserve horizontal space via a margin on the note's container. Inside a `BeamContainer`, that margin shifts the real stem position, but the beam's flex-ratio interpolation doesn't account for it, so a beamed note with an accidental can have its stem meet the beam slightly off. Rare in practice; the fix would be folding margins into the flex math.
+- **Spacing is legible, not engraving-grade**: `flex-grow` spacing is proportional to duration, which reads fine but isn't real engraving spacing (professional engraving uses a roughly logarithmic scale). Very tight 16th-note groups can nearly touch at default sizes.
+- **Voice collisions**: `Voice` doesn't do collision avoidance — unisons or seconds between two voices on the same staff will visually overlap.
+- See also the grand-staff-specific limitations above (brace/clef restatement on wrapped systems, per-staff repeat-end barlines, mismatched-duration fallback) and the "Still out" list under [Status](#status).
 
-- Look up each note's standard beam position (`BeamPositions`, a standard-length stem away from the notehead).
-- The note closest to the beam is the anchor — its stem stays standard length, every other stem gets longer (never shorter).
-- If that closest note is an inner note (concave group), or the outer notes match, the beam is horizontal at the anchor.
-- Otherwise the beam slopes from the anchor toward the other outer note, with the rise clamped to one staff-space (beams shouldn't cross more than one staff line). This is what fixed the "inner notes too short" problem — steep intervals no longer drag the beam through the group.
-- Inner stem heights are plain linear interpolation between the beam ends. Because every note is `flex-basis: 0`, horizontal positions are exactly proportional to flex-grow values, so the interpolation ratio is `prefixFlex / beamSpanFlex` — no trigonometry, no ResizeObserver, no measuring the DOM.
-- Secondary (16th) beams sit a quarter staff-space toward the noteheads: runs of consecutive 16ths share a segment, and an isolated 16th gets a partial stub half a 16th wide pointing back toward the previous note (or forward when it starts the group). Since stem x positions are flex ratios, segment endpoints are too.
-- Chords participate in beams: `BeamContainer` uses the chord's notehead nearest the beam as its effective position, and `NoteStack` runs its stem from the notehead farthest from the beam to the `stemEndValue` it receives.
+## Development
 
-Not implemented yet: the "repeated pattern of pitches goes horizontal" rule.
+Built with [Vite](https://vitejs.dev/), [Storybook](https://storybook.js.org/), and TypeScript.
 
-### Random Notes
+| Script | Purpose |
+| --- | --- |
+| `npm run dev` | Vite dev server |
+| `npm run build` | Type-check (`tsc`) then build with Vite |
+| `npm run lint` | ESLint |
+| `npm run storybook` | Storybook dev server on port 6006 |
+| `npm run build-storybook` | Static Storybook build |
 
-- Accidentals now reserve horizontal space (a margin on the note container). One caveat: inside a `BeamContainer`, that margin shifts the real stem position but the beam's flex-ratio interpolation doesn't know about it, so a beamed note with an accidental can have its stem meet the beam slightly off. Rare in practice; fix would be folding margins into the flex math.
-- flex-grow spacing is proportional to duration, which is legible but not engraving-grade spacing (real engraving uses a logarithmic-ish scale). Very tight 16th groups can nearly touch at default sizes.
+## Resources
 
-## Resources:
-
-- [video about musescore font](https://www.youtube.com/watch?v=XGo4PJd1lng)
+- [Video about the MuseScore font](https://www.youtube.com/watch?v=XGo4PJd1lng)
 - [Leland music fonts](https://github.com/MuseScoreFonts/Leland)
-- [standard music font layout](https://w3c.github.io/smufl/latest/index.html)
-- [musicXML wiki](https://www.w3.org/2021/06/musicxml40/)
+- [Standard Music Font Layout (SMuFL) spec](https://w3c.github.io/smufl/latest/index.html)
+- [MusicXML wiki](https://www.w3.org/2021/06/musicxml40/)
 - [Tool for viewing all font symbols](https://fontdrop.info/)
-- [May need this for font conversion](https://www.fontsquirrel.com/tools/webfont-generator)
-- [Subset web fonts](https://web.dev/learn/performance/optimize-web-fonts#:~:text=Note%3A%20The%20only%20time%20you,font%20formats%20other%20than%20WOFF2.)
+- [Font conversion tool](https://www.fontsquirrel.com/tools/webfont-generator)
+- [Subsetting web fonts](https://web.dev/learn/performance/optimize-web-fonts#:~:text=Note%3A%20The%20only%20time%20you,font%20formats%20other%20than%20WOFF2.)
 - [Deep Controls Addon docs](https://www.npmjs.com/package/storybook-addon-deep-controls)
-
-test 3
+- [Make Awesome SVG Animations with CSS // 7 Useful Techniques](https://www.youtube.com/watch?v=UTHgr6NLeEw)
+- [SVG image without aspect ratio](https://stackoverflow.com/questions/50226255/scale-svg-image-without-aspect-ratio)

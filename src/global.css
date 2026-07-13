@@ -10,8 +10,8 @@
   center of one staff line to the center of the next). Override it on any
   container to scale the notation inside as a unit.
 
-  Derivations (see README "Sizing"):
-  - font-size          = 4 * staff-space   (notehead height = 1 staff-space)
+  Derivations (see README "Sizing system"):
+  - font-size          = 4 * staff-space
   - position step      = staff-space / 2   (line-to-space distance)
   - glyph line box     = 16.125 * staff-space  (Leland's 129px at 32px font)
   - staff margin       = (12.125 * staff-space - line-thickness) / 2
