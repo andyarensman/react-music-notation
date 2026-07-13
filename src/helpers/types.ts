@@ -83,6 +83,7 @@ interface RestProps extends BaseNoteProps {
   tie?: never;
   tieDirection?: never;
   articulation?: never;
+  articulationPlacement?: never;
 }
 
 export interface Pitch {
@@ -105,8 +106,12 @@ export interface NoteValueProps extends BaseNoteProps {
   // Default: opposite the stem. Voices override this so ties curve toward
   // the voice's outer side (up voice above, down voice below).
   tieDirection?: "above" | "below";
-  // Rendered on the notehead side (opposite the stem)
+  // Rendered on the notehead side (opposite the stem); accents/marcato go
+  // outside the staff per engraving convention
   articulation?: ArticulationType;
+  // Forces the mark's side. Voices set this so articulation sits at the stem
+  // end (Gould's double-stemmed rule), never the notehead side.
+  articulationPlacement?: "above" | "below";
 }
 
 // One notehead within a NoteStack chord

@@ -1,5 +1,11 @@
 import { NoteGlyphs } from "./glyphs";
-import { ClefType, NoteProps, Pitch, PitchPosition } from "./types";
+import {
+  ArticulationType,
+  ClefType,
+  NoteProps,
+  Pitch,
+  PitchPosition,
+} from "./types";
 
 export const noteFlexValue: Record<NoteProps["noteValue"], number> = {
   whole: 16,
@@ -187,6 +193,60 @@ export const getChordStem = (
   const below = Math.max(...indices) - MIDDLE_LINE_INDEX;
   return below > above ? "upStem" : "downStem";
 };
+
+/*
+  Articulation placement, following Gould ("Behind Bars", pp. 115-121):
+  - staccato/tenuto marks are centred in a stave-space: a note in a space
+    takes the adjacent space, a note on a line takes the next clear space
+  - accents and wedges are usually best placed outside the stave
+  - at a stem end (double-stemmed writing, or a mark forced onto the stem
+    side), the mark goes in the first clear stave-space beyond the stem
+  Positions are pitch-position indices (pitchPositionOrder): even = line,
+  odd = space; the index may run past the table for ledger regions.
+*/
+const OUTSIDE_STAFF_FAMILIES: ArticulationType[] = [
+  "accent",
+  "accentStaccato",
+  "accentTenuto",
+  "staccatissimo",
+  "marcato",
+  "marcatoStaccato",
+];
+
+const FIRST_SPACE_BELOW_STAFF = 13; // space-below-1
+const FIRST_SPACE_ABOVE_STAFF = 3; // space-above-1
+
+export const getArticulationIndex = (options: {
+  articulation: ArticulationType;
+  noteIndex: number;
+  below: boolean;
+  // Set when the mark sits at the stem end: the tip's position index
+  stemTipIndex?: number;
+}): number => {
+  const { articulation, noteIndex, below, stemTipIndex } = options;
+  let target: number;
+  if (stemTipIndex !== undefined) {
+    // first clear stave-space beyond the stem
+    const step = stemTipIndex % 2 === 0 ? 1 : 2;
+    target = below ? stemTipIndex + step : stemTipIndex - step;
+  } else {
+    // next to the notehead: adjacent space (from a space) or next clear
+    // space (from a line)
+    const step = noteIndex % 2 === 0 ? 3 : 2;
+    target = below ? noteIndex + step : noteIndex - step;
+  }
+  if (OUTSIDE_STAFF_FAMILIES.includes(articulation)) {
+    target = below
+      ? Math.max(target, FIRST_SPACE_BELOW_STAFF)
+      : Math.min(target, FIRST_SPACE_ABOVE_STAFF);
+  }
+  return target;
+};
+
+// The strong accent goes above the stave regardless of stem direction
+export const articulationDefaultsAbove = (
+  articulation: ArticulationType
+): boolean => articulation === "marcato" || articulation === "marcatoStaccato";
 
 // How many beams/flags a note value carries
 export const getBeamCount = (noteValue: NoteProps["noteValue"]): number => {

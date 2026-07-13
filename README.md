@@ -48,8 +48,11 @@ The project is built in phases; each completed phase has a kitchen-sink story un
 - 32nd notes: note/rest/flag glyphs, triple beams, and mixed 8th/16th/32nd
   groups with per-level beam segments and partial stubs
 - Articulations (`articulation` on `Note`/`NoteStack`): staccato, tenuto,
-  accent, staccatissimo, marcato, and the combined forms — placed on the
-  notehead side opposite the stem using the SMuFL above/below glyph variants
+  accent, staccatissimo, marcato, and the combined forms — placed per Gould
+  ("Behind Bars", pp. 115-121, see `references/`): notehead side by default,
+  staccato/tenuto centred in the nearest clear stave-space, accents/wedges
+  outside the staff, marcato above regardless of stem direction, and inside
+  a `Voice` at the stem end (the double-stemmed rule)
 - Dynamics (`dynamic` on `Note`/`NoteStack`/rests): pp through ff, fp, sf,
   sfz, rf, rfz — rendered below the staff at the event's position, dropping
   lower when a below-side articulation needs the space
@@ -150,7 +153,14 @@ A `Note` can take `pitch={{ step, octave }}` instead of an explicit `position`. 
 />
 ```
 
-`articulation` (also on `NoteStack`) is an `ArticulationType` — `"accent" | "staccato" | "tenuto" | "staccatissimo" | "marcato"` plus the combined `"marcatoStaccato" | "accentStaccato" | "tenutoStaccato" | "accentTenuto"`. It renders on the notehead side (opposite the stem) using the SMuFL above/below glyph variants. `dynamic` is a `DynamicType` (`"pp"` … `"ff"`, `"fp"`, `"sf"`, `"sfz"`, `"rf"`, `"rfz"`) rendered below the staff at the event's position; rests can carry one too.
+`articulation` (also on `NoteStack`) is an `ArticulationType` — `"accent" | "staccato" | "tenuto" | "staccatissimo" | "marcato"` plus the combined `"marcatoStaccato" | "accentStaccato" | "tenutoStaccato" | "accentTenuto"`. Placement follows Gould ("Behind Bars", pp. 115-121; the PDFs in `references/` are the source of truth here):
+
+- Marks go on the notehead side (opposite the stem), using the SMuFL above/below glyph variants; stemless notes are treated as if stemmed.
+- Staccato and tenuto marks are centred in a stave-space — the adjacent space for a note in a space, the next *clear* space for a note on a line (`getArticulationIndex` in `helpers.ts`).
+- Accents and wedges clamp to outside the staff, where they're most conspicuous; marcato goes above the staff regardless of stem direction.
+- Inside a `Voice`, articulation moves to the stem end (never the notehead side, per the double-stemmed rule) — `Voice` injects `articulationPlacement`, which is also user-overridable.
+
+`dynamic` is a `DynamicType` (`"pp"` … `"ff"`, `"fp"`, `"sf"`, `"sfz"`, `"rf"`, `"rfz"`) rendered below the staff at the event's position (dropping lower when a below-side articulation needs the room); rests can carry one too.
 
 ### Rests
 

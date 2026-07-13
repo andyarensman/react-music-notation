@@ -10,7 +10,9 @@ import {
   noteGlyphs,
 } from "../helpers/glyphs";
 import {
+  articulationDefaultsAbove,
   assignAccidentalColumns,
+  getArticulationIndex,
   getChordStem,
   getLedgerLines,
   getNoteFlex,
@@ -34,6 +36,7 @@ export interface NoteStackProps {
   stem?: "upStem" | "downStem" | "noStem";
   stemEndValue?: number;
   articulation?: ArticulationType;
+  articulationPlacement?: "above" | "below";
   dynamic?: DynamicType;
 }
 
@@ -138,14 +141,32 @@ export const NoteStack = (props: NoteStackProps) => {
   // css top offset of the stem tip, in staff-spaces below the middle line
   const flagTop = stemLine ? (stemLine.y2 - MIDDLE_LINE_STEM_Y) / 8 : 0;
 
-  // Articulations sit on the free side (opposite the stem), just past the
-  // outer notehead there
-  const articulationBelow = walkUp;
+  // Articulations follow the same Gould rules as single notes: notehead
+  // side by default (relative to the outer notehead there), marcato above,
+  // explicit placement (a Voice's stem side) wins and moves past the stem
+  const articulationBelow = props.articulationPlacement
+    ? props.articulationPlacement === "below"
+    : props.articulation && articulationDefaultsAbove(props.articulation)
+      ? false
+      : walkUp;
   const articulationTarget = articulationBelow
     ? notes[notes.length - 1]
     : notes[0];
-  const articulationTopSpaces =
-    (articulationTarget.index - 8) * 0.5 + (articulationBelow ? 1.4 : -1.4);
+  const articulationAtStemEnd =
+    stemLine !== null && articulationBelow === !stemUp;
+  const articulationTopSpaces = props.articulation
+    ? (getArticulationIndex({
+        articulation: props.articulation,
+        noteIndex: articulationTarget.index,
+        below: articulationBelow,
+        stemTipIndex:
+          articulationAtStemEnd && stemLine
+            ? Math.round(stemLine.y2 / 4) - 8
+            : undefined,
+      }) -
+        8) *
+      0.5
+    : 0;
 
   return (
     <div

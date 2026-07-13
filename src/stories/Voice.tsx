@@ -21,6 +21,7 @@ interface StemmableProps {
   rest?: boolean;
   position?: string;
   tieDirection?: "above" | "below";
+  articulationPlacement?: "above" | "below";
 }
 
 const VoiceComponent = ({ stem, children }: VoiceProps) => {
@@ -38,6 +39,11 @@ const VoiceComponent = ({ stem, children }: VoiceProps) => {
     // opposite the stem
     if (child.props.tieDirection === undefined) {
       overrides.tieDirection = stem === "upStem" ? "above" : "below";
+    }
+    // ...and articulation goes at the stem end, never the notehead side
+    // (Gould's double-stemmed rule)
+    if (child.props.articulationPlacement === undefined) {
+      overrides.articulationPlacement = stem === "upStem" ? "above" : "below";
     }
     // Keep the voices' rests out of each other's way: up-voice rests sit
     // high, down-voice rests sit low, unless placed explicitly

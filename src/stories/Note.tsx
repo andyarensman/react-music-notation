@@ -9,6 +9,8 @@ import {
   noteGlyphs,
 } from "../helpers/glyphs";
 import {
+  articulationDefaultsAbove,
+  getArticulationIndex,
   getDefaultStem,
   getLedgerLines,
   getNoteFlex,
@@ -48,11 +50,43 @@ export const Note = (props: NoteProps) => {
   const tieTopSpaces =
     (positionIndex(position) - 4) * 0.5 + (tieAbove ? -1.85 : 0.6);
 
-  // Articulations sit on the notehead side, opposite the stem
+  /*
+    Articulations (Gould pp. 115-121): notehead side by default, marcato
+    above the staff regardless of stem, and an explicit placement (a Voice's
+    stem side) wins. When the mark lands on the stem side it moves past the
+    stem tip; otherwise it snaps to a clear stave-space next to the notehead.
+  */
   const articulation = !rest ? props.articulation : undefined;
-  const articulationBelow = effectiveStemUp;
-  const articulationTopSpaces =
-    (positionIndex(position) - 8) * 0.5 + (articulationBelow ? 1.4 : -1.4);
+  const articulationBelow = props.articulationPlacement
+    ? props.articulationPlacement === "below"
+    : articulation && articulationDefaultsAbove(articulation)
+      ? false
+      : effectiveStemUp;
+  const hasRealStem =
+    !rest &&
+    noteValue !== "whole" &&
+    (stem === "upStem" ||
+      stem === "downStem" ||
+      (stem === "noStem" && stemEndValue !== undefined));
+  const articulationAtStemEnd =
+    hasRealStem && articulationBelow === !effectiveStemUp;
+  let stemTipIndex: number | undefined;
+  if (articulationAtStemEnd) {
+    stemTipIndex =
+      stem === "noStem" && stemEndValue !== undefined
+        ? Math.round(stemEndValue / 4) - 8
+        : positionIndex(position) + (effectiveStemUp ? -7 : 7);
+  }
+  const articulationTopSpaces = articulation
+    ? (getArticulationIndex({
+        articulation,
+        noteIndex: positionIndex(position),
+        below: articulationBelow,
+        stemTipIndex,
+      }) -
+        8) *
+      0.5
+    : 0;
 
   // Reserve horizontal room for the accidental so it doesn't overlap the
   // previous note; double accidentals are wider

@@ -18,8 +18,16 @@ export const TwoVoices: Story = {
   render: () => (
     <Measure clef="gClef" time={{ beat: 4, beatType: 4 }}>
       <Voice stem="upStem">
-        <Note pitch={{ step: "E", octave: 5 }} noteValue="quarter" />
-        <Note pitch={{ step: "D", octave: 5 }} noteValue="quarter" />
+        <Note
+          pitch={{ step: "E", octave: 5 }}
+          noteValue="quarter"
+          articulation="staccato"
+        />
+        <Note
+          pitch={{ step: "D", octave: 5 }}
+          noteValue="quarter"
+          articulation="staccato"
+        />
         <BeamContainer>
           <Note pitch={{ step: "E", octave: 5 }} noteValue="eighth" />
           <Note pitch={{ step: "F", octave: 5 }} noteValue="eighth" />
@@ -28,8 +36,16 @@ export const TwoVoices: Story = {
         </BeamContainer>
       </Voice>
       <Voice stem="downStem">
-        <Note pitch={{ step: "C", octave: 5 }} noteValue="half" />
-        <Note pitch={{ step: "B", octave: 4 }} noteValue="half" />
+        <Note
+          pitch={{ step: "C", octave: 5 }}
+          noteValue="half"
+          articulation="accent"
+        />
+        <Note
+          pitch={{ step: "B", octave: 4 }}
+          noteValue="half"
+          articulation="accent"
+        />
       </Voice>
     </Measure>
   ),
