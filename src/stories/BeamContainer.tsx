@@ -155,7 +155,11 @@ export const BeamContainer = ({ stem, children }: BeamContainerProps) => {
 
   return (
     <div
-      style={{ flexGrow: totalFlexGrowth, display: "flex" }}
+      style={{
+        flexGrow: totalFlexGrowth,
+        display: "flex",
+        minWidth: `calc(var(--staff-space) * ${2.2 * beamedNotesArray.length})`,
+      }}
       className="beam-container"
     >
       {updatedBeamedNotesArray}

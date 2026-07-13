@@ -70,6 +70,9 @@ export const flagGlyphs: Record<
   },
 };
 
+// Spans a grand staff's two staves; scaled via font-size (see GrandStaff.css)
+export const braceGlyph = "";
+
 export const clefGlyphs = {
   gClef: "\uE050",
   fClef: "\uE062",

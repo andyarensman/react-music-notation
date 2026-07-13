@@ -33,3 +33,9 @@
 .notes-container {
   flex-grow: 1;
 }
+
+/* One event on the onset grid; the event inside flex-grows to fill it */
+.grid-event {
+  display: flex;
+  position: relative;
+}

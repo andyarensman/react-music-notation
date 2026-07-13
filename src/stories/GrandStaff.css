@@ -1,0 +1,45 @@
+.grand-staff-container {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.grand-measure {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-width: calc(var(--staff-space) * 31.25);
+}
+
+/* Pull the staves together: the two glyph line boxes would leave a 12
+   staff-space gap; overlapping by 6 leaves a 6 staff-space gap between the
+   bottom of the treble staff and the top of the bass staff */
+.grand-measure-lower {
+  margin-top: calc(var(--staff-space) * -6);
+}
+
+/* The system barline runs from the top staff's top line to the bottom
+   staff's bottom line: staff height (4ss + line) + line box (16.125ss)
+   - overlap (6ss) */
+.grand-measure > .barline {
+  height: calc(var(--staff-space) * 14.125 + var(--staff-line-thickness));
+}
+
+.grand-brace {
+  position: relative;
+  width: calc(var(--staff-space) * 2);
+  /* two glyph line boxes minus the overlap, same as a grand measure */
+  height: calc(var(--staff-space) * 26.25);
+}
+
+.grand-brace-glyph {
+  position: absolute;
+  left: 0;
+  /* baseline sits at the bottom staff's bottom line (6ss above the wrapper
+     bottom); the glyph is scaled to span both staves via font-size */
+  bottom: calc(var(--staff-space) * 6);
+  font-size: calc(var(--staff-space) * 14.125);
+  line-height: 0;
+}

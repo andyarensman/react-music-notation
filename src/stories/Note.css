@@ -2,6 +2,15 @@
   position: relative;
   /* flex-grow: 1; */
   flex-basis: 0;
+  /* keep dense rhythms from crushing together */
+  min-width: calc(var(--staff-space) * 2.2);
+}
+
+/* Inside a beam group widths must stay exactly flex-proportional or stems
+   drift off the beam, so the group reserves the minimum instead (inline
+   min-width on .beam-container, set per note count) */
+.beam-container > .note-container {
+  min-width: 0;
 }
 
 .note {

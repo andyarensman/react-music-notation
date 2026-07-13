@@ -57,7 +57,37 @@ Phase 2:
   secondary beam segment and lone 16ths get a partial stub (dotted-8th + 16th
   works)
 
-Still out: multi-voice (two voices on one staff), multi-staff systems, ties/slurs/tuplets, 32nd+ notes, articulations/dynamics (glyph tables exist in `glyphs.ts`), automatic beam grouping from the time signature, MusicXML/MIDI, playback, print layout, and npm packaging (no lib build/exports yet — deliberately deferred).
+Phase 3:
+
+- Grand staff (piano-style): `GrandStaff` + `GrandMeasure` stack a treble and
+  bass measure with a brace and barlines spanning both staves; grand measures
+  wrap together as a unit
+- Onset-grid alignment: each grand measure lays both staves on a shared CSS
+  grid whose columns are the union of both staves' note onsets, so notes that
+  sound together sit at the same x even when the hands have different rhythms
+  (see `layout.tsx`)
+- Minimum note spacing so dense rhythms can't crush together (beam groups
+  reserve their minimum as a unit to keep stem positions exactly
+  flex-proportional)
+
+Still out: multi-voice (two voices on one staff), cross-staff beaming, ties/slurs/tuplets, 32nd+ notes, articulations/dynamics (glyph tables exist in `glyphs.ts`), automatic beam grouping from the time signature, MusicXML/MIDI, playback, print layout, and npm packaging (no lib build/exports yet — deliberately deferred).
+
+### Grand staff notes
+
+- The onset grid works because CSS grid `fr` columns are proportional exactly
+  like `flex-grow` with `flex-basis: 0` — all the beam geometry keeps working
+  unchanged inside a column span. Events are wrapped in `.grid-event` items
+  spanning their onset columns; a beam group whose internal notes are
+  flex-proportional lines up with the outer grid automatically.
+- The two staves overlap their Leland line boxes by 6 staff-spaces, leaving a
+  6 staff-space gap between the staves. The system barline and the brace both
+  derive from that.
+- Known limitations: the brace only renders on the first system (re-bracing
+  wrapped rows needs real system layout, as does restating clefs per system);
+  `repeatEnd` barlines render per staff so the dots sit on each staff, other
+  barline types span both staves; a grand measure whose staves have
+  mismatched total durations falls back to unaligned flow for the events past
+  the mismatch.
 
 ## Sizing:
 
