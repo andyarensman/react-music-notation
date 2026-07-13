@@ -1,12 +1,12 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { GrandStaff } from "./GrandStaff";
-import { GrandMeasure } from "./GrandMeasure";
-import { Measure } from "./Measure";
-import { Note } from "./Note";
-import { Voice } from "./Voice";
-import { BeamContainer } from "./BeamContainer";
+import { GrandStaff } from "../components/GrandStaff";
+import { GrandMeasure } from "../components/GrandMeasure";
+import { Measure } from "../components/Measure";
+import { Note } from "../components/Note";
+import { Voice } from "../components/Voice";
+import { BeamContainer } from "../components/BeamContainer";
 
 /*
   Phase 4 demo: a four-part chorale (SATB) on the grand staff.

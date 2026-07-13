@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { NoteStack } from "./NoteStack";
-import { Measure } from "./Measure";
+import { NoteStack } from "../components/NoteStack";
+import { Measure } from "../components/Measure";
 import { TypeWithDeepControls } from "storybook-addon-deep-controls";
 
 const meta: Meta<typeof NoteStack> = {

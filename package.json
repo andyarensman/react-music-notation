@@ -1,17 +1,51 @@
 {
   "name": "react-music-notation",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "React components for rendering Western music notation with responsive CSS layout and the Leland SMuFL font",
+  "keywords": [
+    "react",
+    "music",
+    "notation",
+    "sheet-music",
+    "score",
+    "smufl",
+    "engraving"
+  ],
+  "author": "Andy Arensman",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andyarensman/react-music-notation.git"
+  },
+  "homepage": "https://github.com/andyarensman/react-music-notation#readme",
   "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./styles.css": "./dist/style.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "prepublishOnly": "npm run build"
   },
-  "dependencies": {
+  "peerDependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
@@ -34,9 +68,12 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
     "eslint-plugin-storybook": "^0.8.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "storybook": "^8.0.8",
     "storybook-addon-deep-controls": "^0.6.2",
     "typescript": "^5.2.2",
-    "vite": "^5.2.0"
+    "vite": "^5.2.0",
+    "vite-plugin-dts": "^5.0.3"
   }
 }

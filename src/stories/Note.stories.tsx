@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Note } from "./Note";
-import { Measure } from "./Measure";
+import { Note } from "../components/Note";
+import { Measure } from "../components/Measure";
 import { TypeWithDeepControls } from "storybook-addon-deep-controls";
 
 const meta: Meta<typeof Note> = {

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Clef } from "./Clef";
+import { Clef } from "../../components/MeasureMeta/Clef";
 
 const meta: Meta<typeof Clef> = {
   title: "Measure Meta/Clef",

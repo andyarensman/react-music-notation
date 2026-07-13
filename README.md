@@ -2,7 +2,7 @@
 
 React components for rendering Western music notation (sheet music) in the browser. A score is composed the way you'd compose any other UI — `<Staff><Measure><Note /></Measure></Staff>` — instead of being handed to a canvas or SVG engraving engine. Layout is built entirely from CSS flex and grid (not fixed engraving coordinates), so notation reflows and wraps like other web content, and the whole thing scales from a single `--staff-space` CSS custom property. Glyphs come from the [Leland](https://github.com/MuseScoreFonts/Leland) SMuFL music font. The data model (pitches as `{ step, octave }`, key signatures as `fifths`, time signatures as `beat`/`beatType`) is loosely inspired by MusicXML vocabulary, though this library only renders notation — it doesn't read or write MusicXML.
 
-The library is not yet packaged for npm (no build/exports configured). That's deliberate: the component API is still moving between phases, and Storybook is the intended way to explore it for now.
+The package is publish-ready (library build, bundled types, single stylesheet with the font inlined) but not yet on npm — see [Installing](#installing).
 
 ## Status
 
@@ -57,16 +57,50 @@ The project is built in phases; each completed phase has a kitchen-sink story un
   sfz, rf, rfz — rendered below the staff at the event's position, dropping
   lower when a below-side articulation needs the space
 
-**Still out**: cross-staff beaming, slurs, tuplets, cross-measure ties (a tie on a measure's last note stops at the barline; no incoming half-tie on the next system), ties on chord members, 64th+ notes, hairpin crescendo/decrescendo marks, automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), courtesy naturals on key changes, MusicXML/MIDI import or export, playback, print layout, and npm packaging (no lib build/exports yet — deliberately deferred).
+**Phase 7**
 
-## Getting started
+- npm packaging: components moved to `src/components/` with a public API in
+  `src/index.ts`; Vite library build producing ESM + CJS bundles, a full
+  `.d.ts` tree, and one `dist/style.css` with the Leland font inlined as a
+  data URI (no asset-path issues inside `node_modules`); MIT license with
+  the font's OFL notice; verified by installing the `npm pack` tarball into
+  a separate Vite app and rendering a grand-staff score
+- CI (typecheck + library build + Storybook build) and a Storybook →
+  GitHub Pages deploy workflow
+
+**Still out**: cross-staff beaming, slurs, tuplets, cross-measure ties (a tie on a measure's last note stops at the barline; no incoming half-tie on the next system), ties on chord members, 64th+ notes, hairpin crescendo/decrescendo marks, automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), courtesy naturals on key changes, MusicXML/MIDI import or export, playback, and print layout.
+
+## Installing
+
+The package is not published to npm yet; publishing is a deliberate manual step (`npm publish` from a logged-in account — `prepublishOnly` rebuilds `dist/` automatically). Once published:
+
+```
+npm install react-music-notation
+```
+
+```tsx
+import { Staff, Measure, Note } from "react-music-notation";
+import "react-music-notation/styles.css"; // staff styles + the Leland font
+
+const Melody = () => (
+  <Staff>
+    <Measure clef="gClef" time={{ beat: 4, beatType: 4 }}>
+      <Note pitch={{ step: "C", octave: 5 }} noteValue="quarter" />
+    </Measure>
+  </Staff>
+);
+```
+
+React 18 is a peer dependency. Until it's published, `npm pack` in this repo produces an installable tarball.
+
+## Getting started (development)
 
 ```
 npm install
 npm run storybook
 ```
 
-Storybook runs at `http://localhost:6006`. The phase kitchen-sink demos live under **Demo**; individual component stories (Note, NoteStack, Measure, Staff, GrandStaff, Voice, Barline, Clef, KeySignature, TimeSignature, StaffLines) are grouped by component name.
+Storybook runs at `http://localhost:6006`. The phase kitchen-sink demos live under **Demo**; individual component stories (Note, NoteStack, Measure, Staff, GrandStaff, Voice, Barline, Clef, KeySignature, TimeSignature, StaffLines) are grouped by component name. Components live in `src/components/`, their stories in `src/stories/`. Pushes to `main` deploy the Storybook to GitHub Pages (once Pages is enabled for the repo) and run CI.
 
 ## Usage
 

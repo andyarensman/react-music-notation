@@ -1,10 +1,10 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Staff } from "./Staff";
-import { Measure } from "./Measure";
-import { Note } from "./Note";
-import { BeamContainer } from "./BeamContainer";
+import { Staff } from "../components/Staff";
+import { Measure } from "../components/Measure";
+import { Note } from "../components/Note";
+import { BeamContainer } from "../components/BeamContainer";
 
 /*
   Kitchen-sink demo of the MVP feature set:

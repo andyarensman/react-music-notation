@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Voice } from "./Voice";
-import { Measure } from "./Measure";
-import { Note } from "./Note";
-import { BeamContainer } from "./BeamContainer";
+import { Voice } from "../components/Voice";
+import { Measure } from "../components/Measure";
+import { Note } from "../components/Note";
+import { BeamContainer } from "../components/BeamContainer";
 
 const meta: Meta<typeof Voice> = {
   component: Voice,

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { KeySignature } from "./KeySignature";
-import { Measure } from "../Measure";
+import { KeySignature } from "../../components/MeasureMeta/KeySignature";
+import { Measure } from "../../components/Measure";
 
 const meta: Meta<typeof KeySignature> = {
   title: "Measure Meta/Key Signature",

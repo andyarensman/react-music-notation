@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import type { TypeWithDeepControls } from "storybook-addon-deep-controls";
 
-import { Measure } from "./Measure";
-import { Note } from "./Note";
-import { BeamContainer } from "./BeamContainer";
+import { Measure } from "../components/Measure";
+import { Note } from "../components/Note";
+import { BeamContainer } from "../components/BeamContainer";
 
 const meta: Meta<typeof Measure> = {
   component: Measure,

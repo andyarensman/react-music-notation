@@ -1,11 +1,11 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Staff } from "./Staff";
-import { Measure } from "./Measure";
-import { Note } from "./Note";
-import { NoteStack } from "./NoteStack";
-import { BeamContainer } from "./BeamContainer";
+import { Staff } from "../components/Staff";
+import { Measure } from "../components/Measure";
+import { Note } from "../components/Note";
+import { NoteStack } from "../components/NoteStack";
+import { BeamContainer } from "../components/BeamContainer";
 
 /*
   Phase 2 demo:

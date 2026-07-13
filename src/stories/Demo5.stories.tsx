@@ -1,13 +1,13 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Staff } from "./Staff";
-import { Measure } from "./Measure";
-import { Note } from "./Note";
-import { NoteStack } from "./NoteStack";
-import { BeamContainer } from "./BeamContainer";
-import { GrandStaff } from "./GrandStaff";
-import { GrandMeasure } from "./GrandMeasure";
+import { Staff } from "../components/Staff";
+import { Measure } from "../components/Measure";
+import { Note } from "../components/Note";
+import { NoteStack } from "../components/NoteStack";
+import { BeamContainer } from "../components/BeamContainer";
+import { GrandStaff } from "../components/GrandStaff";
+import { GrandMeasure } from "../components/GrandMeasure";
 
 /*
   Phase 5 demo: real system layout.

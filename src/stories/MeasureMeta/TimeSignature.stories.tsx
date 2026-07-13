@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { TimeSignature } from "./TimeSignature";
+import { TimeSignature } from "../../components/MeasureMeta/TimeSignature";
 
 const meta: Meta<typeof TimeSignature> = {
   title: "Measure Meta/Time Signature",

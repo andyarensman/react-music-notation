@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Staff } from "./Staff";
-import { Measure } from "./Measure";
-import { Note } from "./Note";
+import { Staff } from "../components/Staff";
+import { Measure } from "../components/Measure";
+import { Note } from "../components/Note";
 
 const meta: Meta<typeof Staff> = {
   component: Staff,

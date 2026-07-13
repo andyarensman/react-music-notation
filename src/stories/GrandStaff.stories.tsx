@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { GrandStaff } from "./GrandStaff";
-import { GrandMeasure } from "./GrandMeasure";
-import { Measure } from "./Measure";
-import { Note } from "./Note";
-import { NoteStack } from "./NoteStack";
+import { GrandStaff } from "../components/GrandStaff";
+import { GrandMeasure } from "../components/GrandMeasure";
+import { Measure } from "../components/Measure";
+import { Note } from "../components/Note";
+import { NoteStack } from "../components/NoteStack";
 
 const meta: Meta<typeof GrandStaff> = {
   component: GrandStaff,

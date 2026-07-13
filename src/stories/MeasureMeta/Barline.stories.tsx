@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Barline } from "./Barline";
-import { Staff } from "../Staff";
-import { Measure } from "../Measure";
-import { Note } from "../Note";
+import { Barline } from "../../components/MeasureMeta/Barline";
+import { Staff } from "../../components/Staff";
+import { Measure } from "../../components/Measure";
+import { Note } from "../../components/Note";
 
 const meta: Meta<typeof Barline> = {
   title: "Measure Meta/Barline",
