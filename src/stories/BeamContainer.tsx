@@ -1,15 +1,12 @@
-import React, {
+import {
   Children,
   ReactElement,
   ReactNode,
   cloneElement,
   isValidElement,
-  useEffect,
-  useRef,
-  useState,
 } from "react";
 import { Note } from "./Note";
-import { noteFlexValue } from "../helpers/helpers";
+import { getNoteFlex } from "../helpers/helpers";
 import { NoteProps, NoteValueProps } from "../helpers/types";
 import "./Note.css";
 import { beamCreator } from "../helpers/beamCreator";
@@ -19,111 +16,47 @@ interface BeamContainerProps {
   stem: "upStem" | "downStem";
 }
 
-//! I don't fully understand what's happening here, need to review
 const isNoteElement = (child: ReactNode): child is ReactElement<NoteProps> => {
   return isValidElement(child) && child.props.noteValue !== undefined;
 };
 
+const BEAM_THICKNESS = 4; // half a staff-space, in viewBox units
+const SECOND_BEAM_GAP = 2; // quarter staff-space between beams
+
 export const BeamContainer = ({ stem, children }: BeamContainerProps) => {
-  const refContainer = useRef<HTMLDivElement>(null);
-  const [beamContainerWidth, setContainerBeamWidth] = useState<number>(0);
-  const [angleRadians, setAngleRadians] = useState<number>(0);
-
-  //Get the current container width
-  useEffect(() => {
-    const handleResize = (entries: ResizeObserverEntry[]) => {
-      if (entries[0].target === refContainer.current) {
-        setContainerBeamWidth(entries[0].contentRect.width);
-      }
-    };
-
-    const resizeObserver = new ResizeObserver(handleResize);
-
-    if (refContainer.current) {
-      resizeObserver.observe(refContainer.current);
-    }
-
-    return () => {
-      if (refContainer.current) {
-        resizeObserver.unobserve(refContainer.current);
-      }
-      resizeObserver.disconnect();
-    };
-  }, []);
-
-  // Handle the flexGrow
   const beamedNotesArray = Children.toArray(children).filter(
     isNoteElement
   ) as ReactElement<NoteValueProps>[];
+
+  if (beamedNotesArray.length < 2) {
+    return <>{children}</>;
+  }
+
   const totalFlexGrowth = beamedNotesArray.reduce(
-    (sum, child) => sum + noteFlexValue[child.props.noteValue],
+    (sum, child) => sum + getNoteFlex(child.props),
     0
   );
 
-  //handle width of Beam
-  const finalChildFlex =
-    noteFlexValue[
-      beamedNotesArray[beamedNotesArray.length - 1].props.noteValue
-    ];
-  const beamWidthPercentage =
-    ((totalFlexGrowth - finalChildFlex) / totalFlexGrowth) * 100;
+  // The beam spans from the first stem to the last stem, i.e. everything
+  // except the final note's width. Widths are proportional to flex-grow
+  // (flex-basis is 0), so all beam geometry can be derived from flex ratios
+  const finalChildFlex = getNoteFlex(
+    beamedNotesArray[beamedNotesArray.length - 1].props
+  );
+  const beamFlexSpan = totalFlexGrowth - finalChildFlex;
+  const beamWidthPercentage = (beamFlexSpan / totalFlexGrowth) * 100;
 
   //get the topLeft and topRight values for Beam
-  const beamValues = beamCreator(beamedNotesArray, stem);
+  const { topLeftY, topRightY } = beamCreator(beamedNotesArray, stem);
 
-  //beaming values
-  const beamThickness = 4;
-  const topLeftY = beamValues.topLeftY;
-  const topRightY = beamValues.topRightY;
-  const bottomLeftY = topLeftY + beamThickness;
-  const bottomRightY = topRightY + beamThickness;
-
-  const nextBeamOffset = stem === "upStem" ? 6 : -6; //beamThickness + beamThickness / 2
-
-  //set the Radians
-  useEffect(() => {
-    // const beamHeight = topLeftY - topRightY;
-    // const hypotenuse = Math.sqrt(
-    //   beamContainerWidth * beamContainerWidth + beamHeight * beamHeight
-    // );
-    // const newAngleRadians = Math.acos(beamContainerWidth / hypotenuse);
-    // setAngleRadians(newAngleRadians);
-    const beamHeight = topLeftY - topRightY;
-
-    const newAngleRadians = Math.abs(
-      Math.atan2(beamHeight, beamContainerWidth)
-    );
-
-    setAngleRadians(newAngleRadians);
-  }, [topLeftY, topRightY, beamContainerWidth]);
-
-  //assign stem values to each child. topLeftY is my base value
-
-  let widthCounter = 0;
-  let positiveBeamAngle = topRightY < topLeftY;
-  const beamFlexAmount =
-    totalFlexGrowth -
-    noteFlexValue[
-      beamedNotesArray[beamedNotesArray.length - 1].props.noteValue
-    ];
-
+  // Each stem ends on the beam line: interpolate between the beam ends by
+  // the note's horizontal position within the beam span
+  let flexCounter = 0;
   const updatedBeamedNotesArray = beamedNotesArray.map((noteElement, index) => {
-    //get the total distance from the left
-    const exactHeight = widthCounter * Math.tan(angleRadians);
-    const stemAdditionalValue = Math.round(exactHeight * 100) / 100;
-
-    let stemEndValue: number;
-    if (positiveBeamAngle) {
-      stemEndValue = topLeftY - stemAdditionalValue;
-    } else {
-      stemEndValue = topLeftY + stemAdditionalValue;
-    }
-
-    //increment width counter. percentage of beamContainerWidth. totalFlexGrowth
-    const currentNoteFlexValue = noteFlexValue[noteElement.props.noteValue];
-
-    const fraction = currentNoteFlexValue / beamFlexAmount;
-    widthCounter += beamContainerWidth * fraction;
+    const ratio = flexCounter / beamFlexSpan;
+    const stemEndValue =
+      Math.round((topLeftY + (topRightY - topLeftY) * ratio) * 100) / 100;
+    flexCounter += getNoteFlex(noteElement.props);
 
     return cloneElement(noteElement, {
       ...noteElement.props,
@@ -132,6 +65,22 @@ export const BeamContainer = ({ stem, children }: BeamContainerProps) => {
       stemEndValue: stemEndValue,
     });
   });
+
+  // Beam thickness extends from the stem tips toward the noteheads
+  const thickness = stem === "upStem" ? BEAM_THICKNESS : -BEAM_THICKNESS;
+  const beamPolygonPoints = (offset: number) =>
+    `0,${topLeftY + offset} 100,${topRightY + offset} 100,${
+      topRightY + offset + thickness
+    } 0,${topLeftY + offset + thickness}`;
+
+  // 16ths get a second beam, offset further toward the noteheads
+  const hasSecondBeam = beamedNotesArray.every(
+    (note) => note.props.noteValue === "16th"
+  );
+  const secondBeamOffset =
+    stem === "upStem"
+      ? BEAM_THICKNESS + SECOND_BEAM_GAP
+      : -(BEAM_THICKNESS + SECOND_BEAM_GAP);
 
   return (
     <div
@@ -142,23 +91,12 @@ export const BeamContainer = ({ stem, children }: BeamContainerProps) => {
       <div
         className={"beam-new " + (stem === "upStem" ? "beam-above" : "")}
         style={{ width: `${beamWidthPercentage}%` }}
-        ref={refContainer}
       >
         <svg viewBox="0 0 100 129" preserveAspectRatio="none" className="beam">
-          {stem === "upStem" ? (
-            <polygon
-              points={`0,${topLeftY} 100,${topRightY} 100,${bottomRightY} 0,${bottomLeftY}`}
-            />
-          ) : (
-            <polygon
-              points={`0,${topLeftY - 4} 100,${topRightY - 4} 100,${bottomRightY - 4} 0,${bottomLeftY - 4}`}
-            />
-          )}
+          <polygon points={beamPolygonPoints(0)} />
+          {hasSecondBeam && <polygon points={beamPolygonPoints(secondBeamOffset)} />}
         </svg>
       </div>
-      {/* <div style={{ position: "absolute" }}>
-        {angleRadians * (180 / Math.PI)}
-      </div> */}
     </div>
   );
 };

@@ -29,6 +29,19 @@ export default {
 - Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
 - Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
 
+## MVP Scope
+
+In scope (see the `Demo` stories in Storybook for all of it at once):
+
+- Single staff, single voice, one note per rhythmic slot
+- G, F, and C clefs; key signatures -7..7 placed per clef; numeric and common/cut time signatures
+- Note values whole through 16th, rests, dotted notes, accidentals
+- Ledger lines up to two above/below the staff
+- Beaming for uniform groups of 8ths or 16ths (explicit `BeamContainer` wrapping)
+- Sizing via `--staff-space` and responsive measure wrapping via flex
+
+Explicitly out for now: chords/multi-voice (`NoteStack` is an unfinished experiment), multi-staff systems, ties/slurs/tuplets, 32nd+ notes, articulations/dynamics (glyph tables exist in `glyphs.ts`), mixed-value beam groups, automatic beam grouping from the time signature, pitch-to-position derivation, MusicXML/MIDI, playback, print layout, and npm packaging (no lib build/exports yet — deliberately deferred).
+
 ## Sizing:
 
 To determine the position of note heads, you take the font size of the Leland font and divide it by 8. So we are currently using font size 32px, which equates to 4px being the height of the note heads.I don't think pixels should be cut in half, so right now the font size options are 2:16, 3:24, 4:32, 5:40, 6:48, etc. This means I will likely need to limit the user to these font ratios.
@@ -37,7 +50,18 @@ To determine the sizing of the staff lines, you need to first double the note he
 
 The height of the leland font is not 32px, it is much larger at 129px (for this font size). We will use that as cushioning so we need to take the total height of our staff lines, subtract it from 129, and divide it by 2 to get our top and bottom border. The total height of the staff lines is 33px, so that gives us 48px margins for `.staff`.
 
-Things are mostly looking good now except for the C Clef which seems to be slightly off center.
+### The --staff-space system
+
+All of the sizing above is now driven by two CSS custom properties declared in `src/global.css`:
+
+- `--staff-space` (default `8px`) — the distance from the center of one staff line to the center of the next. This is the master knob: font-size is `4 * staff-space`, each pitch-position step is `staff-space / 2`, the Leland line box is `16.125 * staff-space` (the 129px above), and the staff margin is `(12.125 * staff-space - line-thickness) / 2`.
+- `--staff-line-thickness` (default `1px`) — staff lines, ledger lines, and barlines. Kept separate because hairlines shouldn't scale linearly at small sizes; bump it manually for very large staves.
+
+Override `--staff-space` on any container to scale all notation inside it as a unit (see the Demo stories). Sizes that keep the derived values on whole/half pixels (6, 8, 10, 12, 16...) render crispest.
+
+The stem/beam SVGs use `viewBox="0 0 100 129"` with `preserveAspectRatio="none"`, so the `StemPositions`/`BeamPositions` tables in `helpers.ts` are resolution-independent viewBox coordinates (1 staff-space = 8 units) and never need to change with sizing. Stems use `vector-effect: non-scaling-stroke` with a CSS `stroke-width` of `0.15 * staff-space` — without that, the non-uniform viewBox stretch would make stem thickness vary with measure width.
+
+The C Clef centering issue mentioned previously appears resolved — verified against screenshots at multiple sizes; the center notch sits on the middle line.
 
 ## Beaming:
 
@@ -56,34 +80,23 @@ To account for the upward stem being off from from the left edge of the containe
 - The outer notes of the group determine the beam direction and angle.
 - The beam is horizontal when the group begins and ends with the same note, there is a repeated pattern of pitches, or an inner note is closer to the beam than either of the outer notes (important). Concave is horizontal, convex is sloped
 
-### Brainstorming Beaming Algorithm
+### Implemented Beaming Algorithm
 
-For upstems:
+`beamCreator.ts` decides the beam line; `BeamContainer` renders it and sets each stem:
 
-- Find the first in beam and add to array until the last beam (Children.toArray)
-- Find the position of the first and last notes (if more than two notes)
-- When stems are up, find the highest note in the beamed set (vice versa). This note has the shortest possible stem length
-- if the highest note is between the outer notes, straight beam
-- If there is an angle, find it by using the formula:
+- Look up each note's standard beam position (`BeamPositions`, a standard-length stem away from the notehead).
+- The note closest to the beam is the anchor — its stem stays standard length, every other stem gets longer (never shorter).
+- If that closest note is an inner note (concave group), or the outer notes match, the beam is horizontal at the anchor.
+- Otherwise the beam slopes from the anchor toward the other outer note, with the rise clamped to one staff-space (beams shouldn't cross more than one staff line). This is what fixed the "inner notes too short" problem — steep intervals no longer drag the beam through the group.
+- Inner stem heights are plain linear interpolation between the beam ends. Because every note is `flex-basis: 0`, horizontal positions are exactly proportional to flex-grow values, so the interpolation ratio is `prefixFlex / beamSpanFlex` — no trigonometry, no ResizeObserver, no measuring the DOM.
+- Uniform groups of 16ths get a second beam offset a quarter staff-space toward the noteheads.
 
-  ```js
-  \\ x is the base, and y is the height
-  const hypotenuse = Math.sqrt(x * x + y * y);
-  const angleRadians = Math.acos(x / hypotenuse);
-  ```
-
-- Next determine the height of each inner note's beam starting point by using the angle and distance:
-
-  ```js
-  const y = x * Math.tan(angleRadians);
-  ```
-
-- This y value will be added on to the normal height of the stem
+Not implemented yet: partial/fractional beams for mixed 8th+16th groups (they currently share a single beam), and the "repeated pattern of pitches goes horizontal" rule.
 
 ### Random Notes
 
-- The rules for beaming need to be adjusted more - inner notes can be too short still
-- width of the stem should probably be relative to the note head somehow
+- Accidentals don't reserve horizontal space, so an accidental directly after a very tight group (e.g. 16ths) can collide with the previous note. Collision-aware spacing is a post-MVP problem.
+- flex-grow spacing is proportional to duration, which is legible but not engraving-grade spacing (real engraving uses a logarithmic-ish scale).
 
 ## Resources:
 

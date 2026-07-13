@@ -1,56 +1,53 @@
 import { BeamPositions } from "./helpers";
 import { NoteElement } from "./types";
 
-function findExtremeAndCheckPositions(
-  arr: number[],
-  stemDirecton: "upStem" | "downStem"
-): { extremeValue: number; isBetween: boolean } {
-  const extremeValue =
-    stemDirecton === "upStem" ? Math.min(...arr) : Math.max(...arr);
+// One staff-space in svg viewBox units. Beam slants shouldn't cross more
+// than one staff line, so the rise is clamped to this.
+const MAX_BEAM_SLANT = 8;
 
-  const middleArray = arr.slice(1, -1);
-  const isBetween = middleArray.includes(extremeValue);
+const clampSlant = (value: number): number =>
+  Math.max(-MAX_BEAM_SLANT, Math.min(MAX_BEAM_SLANT, value));
 
-  return { extremeValue, isBetween };
-}
-
-// Returns topLeft and topRight values for the beam svg
+// Returns topLeftY and topRightY (the beam edge at the stem tips) for the
+// beam svg, in viewBox units.
 export function beamCreator(
   notesToBeamArray: NoteElement[], //!The NoteElement does not include rests - may change in future
-  stemDirecton: "upStem" | "downStem"
+  stemDirection: "upStem" | "downStem"
 ): { topLeftY: number; topRightY: number } {
-  // Find potential beam position of each note
+  // Standard beam position of each note (a standard-length stem away)
   const beamPositionsArray = notesToBeamArray.map(
-    (note) => BeamPositions[stemDirecton][note.props.position]
+    (note) => BeamPositions[stemDirection][note.props.position]
   );
 
-  //Find the positions of the first and last notes in beamed set
-  const firstNote = beamPositionsArray[0];
-  const lastNoteIndex = notesToBeamArray.length - 1;
-  const lastNote = beamPositionsArray[lastNoteIndex];
+  const firstBeam = beamPositionsArray[0];
+  const lastBeam = beamPositionsArray[beamPositionsArray.length - 1];
 
-  //if there's only two notes, return the beam
-  if (beamPositionsArray.length === 2) {
-    return { topLeftY: firstNote, topRightY: lastNote };
+  // The note closest to the beam sets the anchor: its stem stays standard
+  // length, every other stem gets longer
+  const extremeValue =
+    stemDirection === "upStem"
+      ? Math.min(...beamPositionsArray)
+      : Math.max(...beamPositionsArray);
+
+  // Horizontal beam when an inner note is closer to the beam than the outer
+  // notes (concave group), or when the outer notes match
+  const innerHasExtreme = beamPositionsArray
+    .slice(1, -1)
+    .includes(extremeValue);
+  if (innerHasExtreme || firstBeam === lastBeam) {
+    return { topLeftY: extremeValue, topRightY: extremeValue };
   }
 
-  //Find the note closest to the beam and if it appears between the outer notes
-  const extremeValueAndIsBetween = findExtremeAndCheckPositions(
-    beamPositionsArray,
-    stemDirecton
-  );
-
-  //Will the line be straight?
-  if (extremeValueAndIsBetween.isBetween) {
+  // Sloped beam: anchor at the outer note closest to the beam and clamp the
+  // slant so the far end never drifts more than one staff-space away
+  if (firstBeam === extremeValue) {
     return {
-      topLeftY: extremeValueAndIsBetween.extremeValue,
-      topRightY: extremeValueAndIsBetween.extremeValue,
+      topLeftY: firstBeam,
+      topRightY: firstBeam + clampSlant(lastBeam - firstBeam),
     };
   }
-
-  //the line is not straight and there are more than two notes
-  return { topLeftY: firstNote, topRightY: lastNote };
+  return {
+    topLeftY: lastBeam + clampSlant(firstBeam - lastBeam),
+    topRightY: lastBeam,
+  };
 }
-
-// returns values needed for any stem?
-const stemCreator = () => {};

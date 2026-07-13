@@ -5,7 +5,7 @@
 }
 
 .note {
-  position: absolute; /*! Need to figure out ledger lines */
+  position: absolute;
 }
 
 .beam-container {
@@ -14,85 +14,103 @@
 
 .beam,
 .stem {
-  height: 129px;
+  height: calc(var(--staff-space) * 16.125);
   width: 100%;
   display: flex;
+}
+
+/* The svg is stretched non-uniformly, so without non-scaling-stroke the stem
+   thickness would vary with the note's rendered width */
+.stem line {
+  stroke-width: calc(var(--staff-space) * 0.15);
 }
 
 .beam-new,
 .stem-container {
   position: absolute;
-  height: 129px;
+  top: 0;
+  left: 0;
+  height: calc(var(--staff-space) * 16.125);
   /* outline: 1px solid red; */
 }
 
+/* Up-stems attach to the right side of the notehead, so shift the stem/beam
+   svg over by one notehead width */
 .beam-above,
 .stem-above {
-  margin-right: -10px;
-  margin-left: 10px;
+  margin-right: calc(var(--staff-space) * -1.25);
+  margin-left: calc(var(--staff-space) * 1.25);
 }
 
 .sharp,
 .flat,
 .natural {
-  left: -10px;
+  left: calc(var(--staff-space) * -1.25);
 }
 
 .doubleSharp {
-  left: -12px;
+  left: calc(var(--staff-space) * -1.5);
 }
 
 .doubleFlat {
-  left: -13px;
+  left: calc(var(--staff-space) * -1.625);
 }
 
-.line-above-1 {
-  top: -24px;
+/* Ledger lines: short lines centered on the notehead, at the same vertical
+   rhythm as the staff lines. Top offsets start from the staff margin (see
+   StaffLines.css) and step by one staff-space per line. */
+.ledger-line {
+  position: absolute;
+  height: var(--staff-line-thickness);
+  background-color: black;
+  width: calc(var(--staff-space) * 2);
+  left: calc(var(--staff-space) * -0.4);
 }
 
-.space-above-1 {
-  top: -20px;
+.ledger-line.ledger-wide {
+  /* whole noteheads are wider */
+  width: calc(var(--staff-space) * 2.5);
 }
 
-.line-5 {
-  top: -16px;
+.ledger-above-1 {
+  top: calc(
+    (var(--staff-space) * 12.125 - var(--staff-line-thickness)) / 2 -
+      var(--staff-space)
+  );
 }
 
-.space-4 {
-  top: -12px;
+.ledger-above-2 {
+  top: calc(
+    (var(--staff-space) * 12.125 - var(--staff-line-thickness)) / 2 -
+      var(--staff-space) * 2
+  );
 }
 
-.line-4 {
-  top: -8px;
+.ledger-below-1 {
+  top: calc(
+    (var(--staff-space) * 12.125 - var(--staff-line-thickness)) / 2 +
+      var(--staff-space) * 5
+  );
 }
 
-.space-3 {
-  top: -4px;
+.ledger-below-2 {
+  top: calc(
+    (var(--staff-space) * 12.125 - var(--staff-line-thickness)) / 2 +
+      var(--staff-space) * 6
+  );
 }
 
-.line-3 {
-  top: 0px; /* Default middle */
+/* Augmentation dot: sits just right of the notehead. When the note is on a
+   line the dot moves up into the space above. */
+.aug-dot {
+  left: calc(var(--staff-space) * 1.6);
 }
 
-.space-2 {
-  top: 4px;
+.aug-dot.aug-dot-wide {
+  /* clears the wider whole notehead */
+  left: calc(var(--staff-space) * 2.1);
 }
 
-.line-2 {
-  top: 8px;
-}
-
-.space-1 {
-  top: 12px;
-}
-
-.line-1 {
-  top: 16px;
-}
-.space-below-1 {
-  top: 20px;
-}
-
-.line-below-1 {
-  top: 24px; /*! Need to figure out ledger lines */
+.aug-dot.aug-dot-on-line {
+  transform: translateY(calc(var(--staff-space) * -0.5));
 }

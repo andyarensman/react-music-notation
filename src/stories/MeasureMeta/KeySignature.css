@@ -1,73 +1,17 @@
 .key-signature-container {
   position: relative;
   display: flex;
-  margin-right: 15px;
+  margin-right: calc(var(--staff-space) * 1.875);
 }
 
 .accidental-container {
   position: relative;
   flex-grow: 1;
-  width: 8px;
+  width: calc(var(--staff-space) * 1);
 }
 
+/* Vertical placement comes from the shared pitch-position classes in
+   global.css, looked up per clef in helpers.ts */
 .accidental {
   position: absolute;
-}
-
-/* all for treble clef right now */
-
-.sharp-0 {
-  top: -16px;
-}
-
-.sharp-1 {
-  top: -4px;
-}
-
-.sharp-2 {
-  top: -20px;
-}
-
-.sharp-3 {
-  top: -8px;
-}
-
-.sharp-4 {
-  top: 4px;
-}
-
-.sharp-5 {
-  top: -12px;
-}
-
-.sharp-6 {
-  top: 0px;
-}
-
-.flat-0 {
-  top: 0px;
-}
-
-.flat-1 {
-  top: -12px;
-}
-
-.flat-2 {
-  top: 4px;
-}
-
-.flat-3 {
-  top: -8px;
-}
-
-.flat-4 {
-  top: 8px;
-}
-
-.flat-5 {
-  top: -4px;
-}
-
-.flat-6 {
-  top: 12px;
 }

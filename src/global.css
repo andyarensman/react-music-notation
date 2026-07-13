@@ -5,8 +5,97 @@
   font-style: normal;
 }
 
+/*
+  Sizing system: everything derives from --staff-space (the distance from the
+  center of one staff line to the center of the next). Override it on any
+  container to scale the notation inside as a unit.
+
+  Derivations (see README "Sizing"):
+  - font-size          = 4 * staff-space   (notehead height = 1 staff-space)
+  - position step      = staff-space / 2   (line-to-space distance)
+  - glyph line box     = 16.125 * staff-space  (Leland's 129px at 32px font)
+  - staff margin       = (12.125 * staff-space - line-thickness) / 2
+*/
+:root {
+  --staff-space: 8px;
+  --staff-line-thickness: 1px;
+}
+
 .leland {
   font-family: "lelandregular";
-  font-size: 32px;
+  font-size: calc(var(--staff-space) * 4);
   margin: 0px;
+}
+
+/*
+  Vertical pitch positions, shared by notes, rests, and key signature
+  accidentals. Each step is half a staff-space. line-3 (middle line) is the
+  reference at 0.
+*/
+.line-above-2 {
+  top: calc(var(--staff-space) * -4);
+}
+
+.space-above-2 {
+  top: calc(var(--staff-space) * -3.5);
+}
+
+.line-above-1 {
+  top: calc(var(--staff-space) * -3);
+}
+
+.space-above-1 {
+  top: calc(var(--staff-space) * -2.5);
+}
+
+.line-5 {
+  top: calc(var(--staff-space) * -2);
+}
+
+.space-4 {
+  top: calc(var(--staff-space) * -1.5);
+}
+
+.line-4 {
+  top: calc(var(--staff-space) * -1);
+}
+
+.space-3 {
+  top: calc(var(--staff-space) * -0.5);
+}
+
+.line-3 {
+  top: 0px; /* Default middle */
+}
+
+.space-2 {
+  top: calc(var(--staff-space) * 0.5);
+}
+
+.line-2 {
+  top: calc(var(--staff-space) * 1);
+}
+
+.space-1 {
+  top: calc(var(--staff-space) * 1.5);
+}
+
+.line-1 {
+  top: calc(var(--staff-space) * 2);
+}
+
+.space-below-1 {
+  top: calc(var(--staff-space) * 2.5);
+}
+
+.line-below-1 {
+  top: calc(var(--staff-space) * 3);
+}
+
+.space-below-2 {
+  top: calc(var(--staff-space) * 3.5);
+}
+
+.line-below-2 {
+  top: calc(var(--staff-space) * 4);
 }

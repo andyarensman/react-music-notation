@@ -1,4 +1,3 @@
-import React from "react";
 import "./TimeSignature.css";
 import "../../global.css";
 import {
@@ -29,11 +28,11 @@ export const TimeSignature = ({
   const beatTypeArray =
     beatType != null ? beatType.toString().split("").map(Number) : null;
 
-  let width = 12;
+  let widthMultiplier = 1.5;
 
   if (beatArray && beatTypeArray) {
     const maxLength = Math.max(beatArray.length, beatTypeArray.length);
-    if (maxLength > 0) width *= maxLength;
+    if (maxLength > 0) widthMultiplier *= maxLength;
   }
 
   return (
@@ -46,7 +45,7 @@ export const TimeSignature = ({
       {beatArray && beatTypeArray && (
         <div
           className="normal-time-signature-container leland"
-          style={{ width: `${width}px` }}
+          style={{ width: `calc(var(--staff-space) * ${widthMultiplier})` }}
         >
           <div className="number-container number-top">
             {beatArray.map((n) => timeSignatureNumberGlyphs[n])}

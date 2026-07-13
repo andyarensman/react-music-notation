@@ -1,4 +1,3 @@
-import React from "react";
 import "./Note.css";
 import "../global.css";
 import { NoteGlyphs, accidentalGlyphs, noteGlyphs } from "../helpers/glyphs";

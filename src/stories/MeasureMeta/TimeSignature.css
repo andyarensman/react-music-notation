@@ -1,15 +1,15 @@
 .time-signature-container {
   position: relative;
-  margin-right: 15px;
+  margin-right: calc(var(--staff-space) * 1.875);
 }
 
 .normal-time-signature-container {
   position: relative;
-  margin-right: 15px;
+  margin-right: calc(var(--staff-space) * 1.875);
 }
 
 .symbol-container {
-  width: 15px;
+  width: calc(var(--staff-space) * 1.875);
 }
 
 .number-container {
@@ -19,9 +19,9 @@
 }
 
 .number-top {
-  top: -8px;
+  top: calc(var(--staff-space) * -1);
 }
 
 .number-bottom {
-  top: 8px;
+  top: calc(var(--staff-space) * 1);
 }

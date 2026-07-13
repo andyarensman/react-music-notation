@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { KeySignature } from "./KeySignature";
+import { Measure } from "../Measure";
 
 const meta: Meta<typeof KeySignature> = {
   title: "Measure Meta/Key Signature",
@@ -11,5 +12,20 @@ export default meta;
 type Story = StoryObj<typeof KeySignature>;
 
 export const Primary: Story = {
-  render: () => <KeySignature />,
+  args: {
+    fifths: 3,
+    clef: "gClef",
+  },
+  argTypes: {
+    fifths: {
+      control: { type: "range", min: -7, max: 7, step: 1 },
+    },
+    clef: {
+      control: "select",
+      options: ["gClef", "fClef", "cClef"],
+    },
+  },
+  render: function Render({ fifths, clef }) {
+    return <Measure clef={clef} fifths={fifths} />;
+  },
 };

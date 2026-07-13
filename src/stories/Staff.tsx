@@ -1,5 +1,4 @@
-import React, { ReactNode } from "react";
-import { Measure } from "./Measure";
+import { ReactNode } from "react";
 import "./Staff.css";
 
 interface StaffProps {

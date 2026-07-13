@@ -24,6 +24,8 @@ export const Primary: TypeWithDeepControls<Story> = {
     position: {
       control: "select",
       options: [
+        "line-above-2",
+        "space-above-2",
         "line-above-1",
         "space-above-1",
         "line-5",
@@ -37,11 +39,17 @@ export const Primary: TypeWithDeepControls<Story> = {
         "line-1",
         "space-below-1",
         "line-below-1",
+        "space-below-2",
+        "line-below-2",
       ],
     },
     noteValue: {
       control: "select",
       options: ["whole", "half", "quarter", "eighth", "16th"],
+    },
+    dotted: {
+      control: "select",
+      options: [undefined, 1],
     },
     "pitch.alter": {
       control: "select",

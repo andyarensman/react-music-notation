@@ -1,10 +1,10 @@
-import React from "react";
 import "./Clef.css";
 import "../../global.css";
 import { clefGlyphs } from "../../helpers/glyphs";
+import { ClefType } from "../../helpers/types";
 
 interface ClefProps {
-  clef: "gClef" | "fClef" | "cClef";
+  clef: ClefType;
 }
 
 export const Clef = ({ clef }: ClefProps) => {

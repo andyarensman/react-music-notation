@@ -11,5 +11,5 @@ export default meta;
 type Story = StoryObj<typeof TimeSignature>;
 
 export const Primary: Story = {
-  render: () => <TimeSignature />,
+  render: () => <TimeSignature beat={4} beatType={4} />,
 };

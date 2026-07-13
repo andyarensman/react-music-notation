@@ -3,13 +3,13 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  min-width: 250px;
+  min-width: calc(var(--staff-space) * 31.25);
   flex-grow: 1;
 }
 
 /* Might remove this later*/
 .meta-container > :first-child {
-  margin-left: 10px;
+  margin-left: calc(var(--staff-space) * 1.25);
 }
 
 .data-container {
@@ -18,19 +18,16 @@
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
-  height: 129px;
-  gap: 15px;
+  height: calc(var(--staff-space) * 16.125);
+  gap: calc(var(--staff-space) * 1.875);
 }
 
 .meta-container,
 .notes-container {
   position: relative;
-  height: 129px;
+  height: calc(var(--staff-space) * 16.125);
   display: flex;
   flex-direction: row;
-}
-
-.meta-container {
 }
 
 .notes-container {

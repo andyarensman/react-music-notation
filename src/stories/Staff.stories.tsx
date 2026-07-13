@@ -12,7 +12,7 @@ export default meta;
 type Story = StoryObj<typeof Staff>;
 
 export const Primary: Story = {
-  render: (args) => (
+  render: () => (
     <Staff>
       <Measure clef="gClef" fifths={3} time={{ beat: 4, beatType: 4 }}>
         <Note position="line-2" noteValue="quarter" />

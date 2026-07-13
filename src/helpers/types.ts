@@ -17,7 +17,11 @@ export type KeyRange =
   | 6
   | 7;
 
+export type ClefType = "gClef" | "fClef" | "cClef";
+
 export type PitchPosition =
+  | "line-above-2"
+  | "space-above-2"
   | "line-above-1"
   | "space-above-1"
   | "line-5"
@@ -30,7 +34,9 @@ export type PitchPosition =
   | "space-1"
   | "line-1"
   | "space-below-1"
-  | "line-below-1";
+  | "line-below-1"
+  | "space-below-2"
+  | "line-below-2";
 
 interface BaseNoteProps {
   noteValue: "whole" | "half" | "quarter" | "eighth" | "16th";
