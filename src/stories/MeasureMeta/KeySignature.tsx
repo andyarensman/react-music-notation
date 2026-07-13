@@ -9,7 +9,6 @@ interface KeySignatureProps {
 }
 
 export const KeySignature = ({ fifths }: KeySignatureProps) => {
-  console.log(fifths);
   const SharpsOrFlats = fifths > 0 ? "sharp" : "flat";
   const absoluteKey = Math.abs(fifths);
 

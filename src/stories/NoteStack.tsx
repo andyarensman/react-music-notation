@@ -2,7 +2,7 @@ import React from "react";
 import "./Note.css";
 import "../global.css";
 import { NoteGlyphs, accidentalGlyphs, noteGlyphs } from "../helpers/glyphs";
-import { PitchPosition } from "./Note";
+import { PitchPosition } from "../helpers/types";
 
 interface Note {
   position: PitchPosition;
@@ -43,11 +43,12 @@ export const NoteStack = ({ pitches, noteValue }: NoteStackProps) => {
       className="note-container"
       style={{ flexGrow: noteFlexValue[noteValue] }}
     >
-      {pitches.map((pitch) => (
+      {pitches.map((pitch, index) => (
         <>
           {pitch.pitch && pitch.pitch.alter && (
             <div
               className={`leland note ${pitch.pitch.alter} ${pitch.position}`}
+              key={index}
             >
               {accidentalGlyphs[pitch.pitch.alter]}
             </div>

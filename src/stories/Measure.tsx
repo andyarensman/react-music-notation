@@ -1,9 +1,9 @@
 import React, { Children, ReactElement } from "react";
 import "./Measure.css";
 import { StaffLines } from "./StaffLines";
-import { Note, NoteProps } from "./Note";
+import { Note } from "./Note";
 import { Clef } from "./MeasureMeta/Clef";
-import { KeyRange } from "../helpers/types";
+import { KeyRange, NoteProps } from "../helpers/types";
 import { KeySignature } from "./MeasureMeta/KeySignature";
 import { TimeSignature, TimeSignatureProps } from "./MeasureMeta/TimeSignature";
 
