@@ -3,7 +3,9 @@ import "./Note.css";
 import "../global.css";
 import {
   accidentalGlyphs,
+  articulationGlyphs,
   dottedGlyph,
+  dynamicGlyphs,
   flagGlyphs,
   noteGlyphs,
 } from "../helpers/glyphs";
@@ -17,7 +19,12 @@ import {
   resolvePosition,
   StemPositions,
 } from "../helpers/helpers";
-import { NoteProps, StackedNote } from "../helpers/types";
+import {
+  ArticulationType,
+  DynamicType,
+  NoteProps,
+  StackedNote,
+} from "../helpers/types";
 import { ClefContext } from "./ClefContext";
 
 export interface NoteStackProps {
@@ -26,6 +33,8 @@ export interface NoteStackProps {
   dotted?: 1;
   stem?: "upStem" | "downStem" | "noStem";
   stemEndValue?: number;
+  articulation?: ArticulationType;
+  dynamic?: DynamicType;
 }
 
 const STEM_LENGTH = 28; // 3.5 staff-spaces in viewBox units
@@ -125,9 +134,18 @@ export const NoteStack = (props: NoteStackProps) => {
   const showFlag =
     stemLine !== null &&
     stemEndValue === undefined &&
-    (noteValue === "eighth" || noteValue === "16th");
+    (noteValue === "eighth" || noteValue === "16th" || noteValue === "32nd");
   // css top offset of the stem tip, in staff-spaces below the middle line
   const flagTop = stemLine ? (stemLine.y2 - MIDDLE_LINE_STEM_Y) / 8 : 0;
+
+  // Articulations sit on the free side (opposite the stem), just past the
+  // outer notehead there
+  const articulationBelow = walkUp;
+  const articulationTarget = articulationBelow
+    ? notes[notes.length - 1]
+    : notes[0];
+  const articulationTopSpaces =
+    (articulationTarget.index - 8) * 0.5 + (articulationBelow ? 1.4 : -1.4);
 
   return (
     <div
@@ -193,9 +211,32 @@ export const NoteStack = (props: NoteStackProps) => {
             left: stemUp ? "calc(var(--staff-space) * 1.25)" : undefined,
           }}
         >
-          {flagGlyphs[noteValue as "eighth" | "16th"][
+          {flagGlyphs[noteValue as "eighth" | "16th" | "32nd"][
             stemUp ? "upStem" : "downStem"
           ]}
+        </div>
+      )}
+      {props.articulation && (
+        <div
+          className="leland note articulation"
+          style={{
+            top: `calc(var(--staff-space) * ${articulationTopSpaces})`,
+          }}
+        >
+          {articulationGlyphs[props.articulation][
+            articulationBelow ? "below" : "above"
+          ]}
+        </div>
+      )}
+      {props.dynamic && (
+        <div
+          className={`leland note dynamic-marking${
+            props.articulation && articulationBelow
+              ? " dynamic-marking-low"
+              : ""
+          }`}
+        >
+          {dynamicGlyphs[props.dynamic]}
         </div>
       )}
       {stemLine && (

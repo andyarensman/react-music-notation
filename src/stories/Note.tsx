@@ -1,7 +1,13 @@
 import { useContext } from "react";
 import "./Note.css";
 import "../global.css";
-import { accidentalGlyphs, dottedGlyph, noteGlyphs } from "../helpers/glyphs";
+import {
+  accidentalGlyphs,
+  articulationGlyphs,
+  dottedGlyph,
+  dynamicGlyphs,
+  noteGlyphs,
+} from "../helpers/glyphs";
 import {
   getDefaultStem,
   getLedgerLines,
@@ -42,6 +48,12 @@ export const Note = (props: NoteProps) => {
   const tieTopSpaces =
     (positionIndex(position) - 4) * 0.5 + (tieAbove ? -1.85 : 0.6);
 
+  // Articulations sit on the notehead side, opposite the stem
+  const articulation = !rest ? props.articulation : undefined;
+  const articulationBelow = effectiveStemUp;
+  const articulationTopSpaces =
+    (positionIndex(position) - 8) * 0.5 + (articulationBelow ? 1.4 : -1.4);
+
   // Reserve horizontal room for the accidental so it doesn't overlap the
   // previous note; double accidentals are wider
   const accidentalMargin = pitch?.alter
@@ -81,6 +93,27 @@ export const Note = (props: NoteProps) => {
           className={`leland note aug-dot ${position}${dotOnLine ? " aug-dot-on-line" : ""}${isWide ? " aug-dot-wide" : ""}`}
         >
           {dottedGlyph.dotted}
+        </div>
+      )}
+      {articulation && (
+        <div
+          className="leland note articulation"
+          style={{
+            top: `calc(var(--staff-space) * ${articulationTopSpaces})`,
+          }}
+        >
+          {articulationGlyphs[articulation][
+            articulationBelow ? "below" : "above"
+          ]}
+        </div>
+      )}
+      {props.dynamic && (
+        <div
+          className={`leland note dynamic-marking${
+            articulation && articulationBelow ? " dynamic-marking-low" : ""
+          }`}
+        >
+          {dynamicGlyphs[props.dynamic]}
         </div>
       )}
       {tie === "start" && (

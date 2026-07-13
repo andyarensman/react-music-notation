@@ -43,7 +43,18 @@ The project is built in phases; each completed phase has a kitchen-sink story un
 - Every grand system gets its own brace
 - A mostly-empty final system keeps its natural width instead of justifying (`LOOSE_SYSTEM_THRESHOLD`)
 
-**Still out**: cross-staff beaming, slurs, tuplets, cross-measure ties (a tie on a measure's last note stops at the barline; no incoming half-tie on the next system), ties on chord members, 32nd+ notes, articulations/dynamics (glyph tables already exist in `glyphs.ts`), automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), courtesy naturals on key changes, MusicXML/MIDI import or export, playback, print layout, and npm packaging (no lib build/exports yet — deliberately deferred).
+**Phase 6**
+
+- 32nd notes: note/rest/flag glyphs, triple beams, and mixed 8th/16th/32nd
+  groups with per-level beam segments and partial stubs
+- Articulations (`articulation` on `Note`/`NoteStack`): staccato, tenuto,
+  accent, staccatissimo, marcato, and the combined forms — placed on the
+  notehead side opposite the stem using the SMuFL above/below glyph variants
+- Dynamics (`dynamic` on `Note`/`NoteStack`/rests): pp through ff, fp, sf,
+  sfz, rf, rfz — rendered below the staff at the event's position, dropping
+  lower when a below-side articulation needs the space
+
+**Still out**: cross-staff beaming, slurs, tuplets, cross-measure ties (a tie on a measure's last note stops at the barline; no incoming half-tie on the next system), ties on chord members, 64th+ notes, hairpin crescendo/decrescendo marks, automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), courtesy naturals on key changes, MusicXML/MIDI import or export, playback, print layout, and npm packaging (no lib build/exports yet — deliberately deferred).
 
 ## Getting started
 
@@ -127,6 +138,19 @@ A `Note` can take `pitch={{ step, octave }}` instead of an explicit `position`. 
 ```
 
 `dotted?: 1` adds an augmentation dot (and 50% more flex-grow — see [Layout engine](#layout-engine)). `tie="start"` draws a curve from that note to the next note in the same measure; the receiving note should be marked `tie="stop"`. Direction defaults to opposite the stem, or `tieDirection="above" | "below"` to override — `Voice` sets this automatically so ties curve toward the voice's outer side.
+
+### Articulations and dynamics
+
+```tsx
+<Note
+  pitch={{ step: "E", octave: 5 }}
+  noteValue="quarter"
+  articulation="accent"
+  dynamic="f"
+/>
+```
+
+`articulation` (also on `NoteStack`) is an `ArticulationType` — `"accent" | "staccato" | "tenuto" | "staccatissimo" | "marcato"` plus the combined `"marcatoStaccato" | "accentStaccato" | "tenutoStaccato" | "accentTenuto"`. It renders on the notehead side (opposite the stem) using the SMuFL above/below glyph variants. `dynamic` is a `DynamicType` (`"pp"` … `"ff"`, `"fp"`, `"sf"`, `"sfz"`, `"rf"`, `"rfz"`) rendered below the staff at the event's position; rests can carry one too.
 
 ### Rests
 
@@ -271,7 +295,7 @@ Textbook engraving rules this implementation targets:
 3. If that closest note is an inner note (a concave group), or the outer notes match, the beam is horizontal at the anchor.
 4. Otherwise the beam slopes from the anchor toward the other outer note, with the rise clamped to one staff-space (`MAX_BEAM_SLANT` in `beamCreator.ts`) since beams shouldn't cross more than one staff line. This clamp is what fixed an earlier "inner notes too short" problem, where steep intervals could drag the beam through the middle of the group.
 5. Inner stem heights are plain linear interpolation between the beam ends. Because every note is `flex-basis: 0`, horizontal positions are exactly proportional to flex-grow values, so the interpolation ratio is `prefixFlex / beamSpanFlex` — no trigonometry, no `ResizeObserver`, no measuring the DOM.
-6. Secondary (16th) beams sit a quarter staff-space toward the noteheads: runs of consecutive 16ths share one segment, and an isolated 16th gets a partial stub half a 16th wide, pointing back toward the previous note (or forward when it starts the group). Since stem x-positions are flex ratios, segment endpoints are too.
+6. Secondary beams (16ths get a second, 32nds a third) each sit a further three-quarters of a staff-space toward the noteheads: for each beam level, runs of consecutive notes carrying that level share one segment, and an isolated note gets a partial stub half its own width, pointing back toward the previous note (or forward when it starts the group). Since stem x-positions are flex ratios, segment endpoints are too.
 7. Chords participate in beams: `BeamContainer` uses the chord's notehead nearest the beam as its effective position, and `NoteStack` runs its stem from the notehead farthest from the beam to the `stemEndValue` it receives from the beam container.
 
 **Not implemented yet**: the "repeated pattern of pitches goes horizontal" rule.

@@ -7,6 +7,7 @@ export const noteFlexValue: Record<NoteProps["noteValue"], number> = {
   quarter: 4,
   eighth: 2,
   "16th": 1,
+  "32nd": 0.5,
 };
 
 // Horizontal space a note takes up, as a flex-grow value. A dot adds half
@@ -98,6 +99,7 @@ export const noteTranslations: Record<
   quarter: "quarterNote",
   eighth: "eighthNote",
   "16th": "sixteenthNote",
+  "32nd": "thirtySecondNote",
 };
 
 // Every renderable position, top of the range to bottom. line-3 (the middle
@@ -188,6 +190,7 @@ export const getChordStem = (
 
 // How many beams/flags a note value carries
 export const getBeamCount = (noteValue: NoteProps["noteValue"]): number => {
+  if (noteValue === "32nd") return 3;
   if (noteValue === "16th") return 2;
   if (noteValue === "eighth") return 1;
   return 0;

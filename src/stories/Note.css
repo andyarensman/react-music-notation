@@ -138,6 +138,23 @@
   left: calc(var(--staff-space) * -1.15);
 }
 
+/* Articulations center on the notehead; vertical placement is inline,
+   computed from the note's position and stem side */
+.articulation {
+  left: calc(var(--staff-space) * 0.1);
+}
+
+/* Dynamics sit below the staff at the event's position */
+.dynamic-marking {
+  top: calc(var(--staff-space) * 4.5);
+  left: calc(var(--staff-space) * -0.2);
+}
+
+/* ...and drop lower when a below-side articulation needs the space */
+.dynamic-marking.dynamic-marking-low {
+  top: calc(var(--staff-space) * 5.75);
+}
+
 /* Tie: a filled lens curve from just right of the notehead to the next
    note's left edge (the note container's right edge). Vertical placement is
    inline, computed from the note's position. */

@@ -38,15 +38,40 @@ export type PitchPosition =
   | "space-below-2"
   | "line-below-2";
 
+export type ArticulationType =
+  | "accent"
+  | "staccato"
+  | "tenuto"
+  | "staccatissimo"
+  | "marcato"
+  | "marcatoStaccato"
+  | "accentStaccato"
+  | "tenutoStaccato"
+  | "accentTenuto";
+
+export type DynamicType =
+  | "p"
+  | "pp"
+  | "mp"
+  | "mf"
+  | "f"
+  | "ff"
+  | "fp"
+  | "sf"
+  | "sfz"
+  | "rf"
+  | "rfz";
+
 interface BaseNoteProps {
-  noteValue: "whole" | "half" | "quarter" | "eighth" | "16th";
-  // | "32nd"
+  noteValue: "whole" | "half" | "quarter" | "eighth" | "16th" | "32nd";
   // | "64th"
   // | "128th"
   // | "256th"
   // | "512th"
   // | "1024th";
   dotted?: 1;
+  // Rendered below the staff at this event's position
+  dynamic?: DynamicType;
 }
 
 interface RestProps extends BaseNoteProps {
@@ -57,6 +82,7 @@ interface RestProps extends BaseNoteProps {
   stemEndValue?: never;
   tie?: never;
   tieDirection?: never;
+  articulation?: never;
 }
 
 export interface Pitch {
@@ -79,6 +105,8 @@ export interface NoteValueProps extends BaseNoteProps {
   // Default: opposite the stem. Voices override this so ties curve toward
   // the voice's outer side (up voice above, down voice below).
   tieDirection?: "above" | "below";
+  // Rendered on the notehead side (opposite the stem)
+  articulation?: ArticulationType;
 }
 
 // One notehead within a NoteStack chord

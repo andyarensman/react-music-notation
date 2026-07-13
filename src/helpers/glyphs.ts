@@ -13,6 +13,7 @@ export interface NoteGlyphs {
   quarterNote: NoteDetails;
   eighthNote: NoteDetails;
   sixteenthNote: NoteDetails;
+  thirtySecondNote: NoteDetails;
 }
 
 export const noteGlyphs: NoteGlyphs = {
@@ -50,6 +51,14 @@ export const noteGlyphs: NoteGlyphs = {
     NoFlagDownStem: "\uE1D6",
     rest: "\uE4E7",
   },
+  thirtySecondNote: {
+    upStem: "\uE1DB",
+    downStem: "\uE1DC",
+    noStem: "\uE0A4",
+    NoFlagUpStem: "\uE1D5",
+    NoFlagDownStem: "\uE1D6",
+    rest: "\uE4E8",
+  },
 };
 export const dottedGlyph = {
   dotted: "\uE1E7",
@@ -57,7 +66,7 @@ export const dottedGlyph = {
 
 // Standalone flags for chord stems (single-note glyphs have flags built in)
 export const flagGlyphs: Record<
-  "eighth" | "16th",
+  "eighth" | "16th" | "32nd",
   { upStem: string; downStem: string }
 > = {
   eighth: {
@@ -67,6 +76,10 @@ export const flagGlyphs: Record<
   "16th": {
     upStem: "\uE242",
     downStem: "\uE243",
+  },
+  "32nd": {
+    upStem: "\uE244",
+    downStem: "\uE245",
   },
 };
 
