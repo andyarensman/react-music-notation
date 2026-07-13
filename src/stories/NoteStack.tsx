@@ -10,7 +10,9 @@ import {
   noteGlyphs,
 } from "../helpers/glyphs";
 import {
+  articulationCentersOnStem,
   articulationDefaultsAbove,
+  articulationLeftSs,
   assignAccidentalColumns,
   getArticulationIndex,
   getChordStem,
@@ -167,6 +169,11 @@ export const NoteStack = (props: NoteStackProps) => {
         8) *
       0.5
     : 0;
+  const articulationLeftSpaces = props.articulation
+    ? articulationAtStemEnd && articulationCentersOnStem(props.articulation)
+      ? (stemUp ? 1.25 : 0) - 0.16
+      : articulationLeftSs[props.articulation]
+    : 0;
 
   return (
     <div
@@ -242,6 +249,7 @@ export const NoteStack = (props: NoteStackProps) => {
           className="leland note articulation"
           style={{
             top: `calc(var(--staff-space) * ${articulationTopSpaces})`,
+            left: `calc(var(--staff-space) * ${articulationLeftSpaces})`,
           }}
         >
           {articulationGlyphs[props.articulation][

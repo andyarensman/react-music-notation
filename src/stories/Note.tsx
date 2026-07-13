@@ -9,7 +9,9 @@ import {
   noteGlyphs,
 } from "../helpers/glyphs";
 import {
+  articulationCentersOnStem,
   articulationDefaultsAbove,
+  articulationLeftSs,
   getArticulationIndex,
   getDefaultStem,
   getLedgerLines,
@@ -87,6 +89,13 @@ export const Note = (props: NoteProps) => {
         8) *
       0.5
     : 0;
+  // Centred on the notehead, except staccato dots at a stem end, which
+  // center on the stem itself
+  const articulationLeftSpaces = articulation
+    ? articulationAtStemEnd && articulationCentersOnStem(articulation)
+      ? (effectiveStemUp ? 1.25 : 0) - 0.16
+      : articulationLeftSs[articulation]
+    : 0;
 
   // Reserve horizontal room for the accidental so it doesn't overlap the
   // previous note; double accidentals are wider
@@ -134,6 +143,7 @@ export const Note = (props: NoteProps) => {
           className="leland note articulation"
           style={{
             top: `calc(var(--staff-space) * ${articulationTopSpaces})`,
+            left: `calc(var(--staff-space) * ${articulationLeftSpaces})`,
           }}
         >
           {articulationGlyphs[articulation][

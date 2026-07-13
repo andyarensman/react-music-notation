@@ -248,6 +248,31 @@ export const articulationDefaultsAbove = (
   articulation: ArticulationType
 ): boolean => articulation === "marcato" || articulation === "marcatoStaccato";
 
+/*
+  Horizontal centering: articulation is centred in line with the notehead
+  (Gould p. 118), but the glyphs vary in width — a staccato dot is a third
+  of a notehead, a tenuto is exactly a notehead — so each mark needs its own
+  left offset (in staff-spaces from the notehead's left edge) to center on
+  the ~1.18 staff-space notehead.
+*/
+export const articulationLeftSs: Record<ArticulationType, number> = {
+  staccato: 0.43,
+  staccatissimo: 0.37,
+  tenuto: 0,
+  accent: -0.05,
+  marcato: 0.12,
+  marcatoStaccato: 0.12,
+  accentStaccato: -0.05,
+  tenutoStaccato: 0,
+  accentTenuto: -0.05,
+};
+
+// Staccato dots at a stem end look best centred on the stem (Gould p. 118);
+// the stem sits at the notehead's right edge (up) or left edge (down)
+export const articulationCentersOnStem = (
+  articulation: ArticulationType
+): boolean => articulation === "staccato" || articulation === "staccatissimo";
+
 // How many beams/flags a note value carries
 export const getBeamCount = (noteValue: NoteProps["noteValue"]): number => {
   if (noteValue === "32nd") return 3;

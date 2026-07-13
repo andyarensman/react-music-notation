@@ -138,11 +138,9 @@
   left: calc(var(--staff-space) * -1.15);
 }
 
-/* Articulations center on the notehead; vertical placement is inline,
-   computed from the note's position and stem side */
-.articulation {
-  left: calc(var(--staff-space) * 0.1);
-}
+/* Articulation placement (top and left) is fully inline: vertical from the
+   note's position and stem side, horizontal per mark width (see
+   articulationLeftSs in helpers.ts) */
 
 /* Dynamics sit below the staff at the event's position */
 .dynamic-marking {
