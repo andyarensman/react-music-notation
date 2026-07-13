@@ -137,3 +137,24 @@
 .notehead-flip-left {
   left: calc(var(--staff-space) * -1.15);
 }
+
+/* Tie: a filled lens curve from just right of the notehead to the next
+   note's left edge (the note container's right edge). Vertical placement is
+   inline, computed from the note's position. */
+.tie-container {
+  position: absolute;
+  left: calc(var(--staff-space) * 1.4);
+  right: calc(var(--staff-space) * -0.3);
+  height: calc(var(--staff-space) * 1.25);
+  pointer-events: none;
+}
+
+.tie-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.tie-svg path {
+  fill: black;
+}

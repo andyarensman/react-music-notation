@@ -1,4 +1,4 @@
-import { Children, ReactNode, isValidElement } from "react";
+import { Children, ReactElement, ReactNode, isValidElement } from "react";
 import { getNoteFlex } from "../helpers/helpers";
 import { NoteProps } from "../helpers/types";
 import { BeamContainer } from "./BeamContainer";
@@ -14,6 +14,15 @@ import { BeamContainer } from "./BeamContainer";
 */
 
 const round3 = (value: number) => Math.round(value * 1000) / 1000;
+
+// Voice can't be imported here (it imports this module), so voices are
+// recognized by the musicRole marker on the component
+export const isVoiceElement = (node: ReactNode): boolean =>
+  isValidElement(node) &&
+  (node.type as { musicRole?: string }).musicRole === "voice";
+
+export const hasVoices = (children: ReactNode): boolean =>
+  Children.toArray(children).some(isVoiceElement);
 
 // Duration of one measure event in flex units. Beam groups span the sum of
 // their notes.
@@ -37,11 +46,24 @@ export const getEventFlex = (node: ReactNode): number => {
 };
 
 // Cumulative onsets of a measure's events, starting at 0 and ending at the
-// measure's total duration
+// measure's total duration. Voices run in parallel, so a measure containing
+// Voice layers gets the union of each voice's boundaries.
 export const getOnsetBoundaries = (children: ReactNode): number[] => {
+  const childArray = Children.toArray(children);
+  const voices = childArray.filter(isVoiceElement);
+  if (voices.length > 0) {
+    return voices
+      .map((voice) =>
+        getOnsetBoundaries(
+          (voice as ReactElement<{ children?: ReactNode }>).props.children
+        )
+      )
+      .reduce(unionBoundaries);
+  }
+
   const boundaries = [0];
   let onset = 0;
-  Children.toArray(children).forEach((child) => {
+  childArray.forEach((child) => {
     const flex = getEventFlex(child);
     if (flex > 0) {
       onset += flex;

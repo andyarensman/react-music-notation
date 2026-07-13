@@ -7,6 +7,7 @@ import {
   getLedgerLines,
   getNoteFlex,
   noteTranslations,
+  positionIndex,
   resolvePosition,
   StemPositions,
 } from "../helpers/helpers";
@@ -24,6 +25,22 @@ export const Note = (props: NoteProps) => {
   const ledgerLines = rest ? [] : getLedgerLines(position);
   const isWide = noteValue === "whole";
   const dotOnLine = position.startsWith("line");
+
+  // Ties curve on the side opposite the stem (real or implied) unless a
+  // Voice dictates the side
+  const tie = !rest ? props.tie : undefined;
+  const effectiveStemUp =
+    stem === "upStem" ||
+    (stem === "noStem" &&
+      (stemEndValue !== undefined
+        ? stemEndValue < stemStart
+        : getDefaultStem(position) === "upStem"));
+  const tieAbove = props.tieDirection
+    ? props.tieDirection === "above"
+    : !effectiveStemUp;
+  // notehead center sits (index - 4) half-spaces below the top staff line
+  const tieTopSpaces =
+    (positionIndex(position) - 4) * 0.5 + (tieAbove ? -1.85 : 0.6);
 
   // Reserve horizontal room for the accidental so it doesn't overlap the
   // previous note; double accidentals are wider
@@ -64,6 +81,26 @@ export const Note = (props: NoteProps) => {
           className={`leland note aug-dot ${position}${dotOnLine ? " aug-dot-on-line" : ""}${isWide ? " aug-dot-wide" : ""}`}
         >
           {dottedGlyph.dotted}
+        </div>
+      )}
+      {tie === "start" && (
+        <div
+          className="tie-container"
+          style={{
+            top: `calc((var(--staff-space) * 12.125 - var(--staff-line-thickness)) / 2 + var(--staff-space) * ${tieTopSpaces})`,
+          }}
+        >
+          <svg
+            viewBox="0 0 100 10"
+            preserveAspectRatio="none"
+            className="tie-svg"
+          >
+            {tieAbove ? (
+              <path d="M2,8 Q50,-2 98,8 Q50,4 2,8" />
+            ) : (
+              <path d="M2,2 Q50,12 98,2 Q50,6 2,2" />
+            )}
+          </svg>
         </div>
       )}
       {stem === "noStem" && stemEndValue && (

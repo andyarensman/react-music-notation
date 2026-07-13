@@ -70,7 +70,18 @@ Phase 3:
   reserve their minimum as a unit to keep stem positions exactly
   flex-proportional)
 
-Still out: multi-voice (two voices on one staff), cross-staff beaming, ties/slurs/tuplets, 32nd+ notes, articulations/dynamics (glyph tables exist in `glyphs.ts`), automatic beam grouping from the time signature, MusicXML/MIDI, playback, print layout, and npm packaging (no lib build/exports yet — deliberately deferred).
+Phase 4:
+
+- Two voices per staff via `Voice`: stems forced per voice (up/down), events
+  laid on the measure's shared onset grid so voices align with each other and
+  (in a grand measure) with the other staff; beams inherit the voice's stem
+  direction; rests default high in the up voice and low in the down voice
+- Ties: `tie="start"/"stop"` on Note draws a filled lens curve to the next
+  note. Direction is opposite the stem for single-voice music; inside a Voice
+  the tie curves toward the voice's outer side (standard multi-voice rule);
+  `tieDirection` overrides either
+
+Still out: cross-staff beaming, slurs, tuplets, cross-measure ties, ties on chord members, 32nd+ notes, articulations/dynamics (glyph tables exist in `glyphs.ts`), automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), MusicXML/MIDI, playback, print layout, and npm packaging (no lib build/exports yet — deliberately deferred).
 
 ### Grand staff notes
 

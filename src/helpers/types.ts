@@ -55,6 +55,8 @@ interface RestProps extends BaseNoteProps {
   position?: PitchPosition;
   stem?: never;
   stemEndValue?: never;
+  tie?: never;
+  tieDirection?: never;
 }
 
 export interface Pitch {
@@ -71,6 +73,12 @@ export interface NoteValueProps extends BaseNoteProps {
   stem?: "upStem" | "downStem" | "noStem";
   rest?: false;
   stemEndValue?: number;
+  // "start" draws a tie curve to the next note (same measure); "stop" marks
+  // the receiving note
+  tie?: "start" | "stop";
+  // Default: opposite the stem. Voices override this so ties curve toward
+  // the voice's outer side (up voice above, down voice below).
+  tieDirection?: "above" | "below";
 }
 
 // One notehead within a NoteStack chord

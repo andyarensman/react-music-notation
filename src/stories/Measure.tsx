@@ -7,7 +7,13 @@ import { KeySignature } from "./MeasureMeta/KeySignature";
 import { TimeSignature, TimeSignatureProps } from "./MeasureMeta/TimeSignature";
 import { Barline, BarlineType } from "./MeasureMeta/Barline";
 import { ClefContext } from "./ClefContext";
-import { gridTemplateFromBoundaries, placeEventsOnGrid } from "./layout";
+import { GridContext } from "./GridContext";
+import {
+  getOnsetBoundaries,
+  gridTemplateFromBoundaries,
+  hasVoices,
+  placeEventsOnGrid,
+} from "./layout";
 
 export interface MeasureProps {
   measureNumber?: number;
@@ -37,7 +43,13 @@ export const Measure = ({
   children,
 }: MeasureProps) => {
   const activeClef = clef ?? inheritedClef ?? "gClef";
-  const gridMode = grid !== undefined && grid.length > 1;
+  // Voice layers always lay out on an onset grid (their own union if the
+  // measure isn't part of a grand staff) so the voices align with each other
+  const voiceMode = hasVoices(children);
+  const voiceBoundaries = voiceMode
+    ? grid ?? getOnsetBoundaries(children)
+    : null;
+  const gridMode = !voiceMode && grid !== undefined && grid.length > 1;
 
   return (
     <ClefContext.Provider value={activeClef}>
@@ -64,7 +76,15 @@ export const Measure = ({
                 : undefined
             }
           >
-            {gridMode ? placeEventsOnGrid(children, grid) : children}
+            {voiceMode ? (
+              <GridContext.Provider value={voiceBoundaries}>
+                {children}
+              </GridContext.Provider>
+            ) : gridMode ? (
+              placeEventsOnGrid(children, grid)
+            ) : (
+              children
+            )}
           </div>
         </div>
       </div>

@@ -24,7 +24,8 @@ import { ClefContext } from "./ClefContext";
 
 interface BeamContainerProps {
   children?: ReactNode;
-  stem: "upStem" | "downStem";
+  // Optional so a surrounding Voice can inject its direction
+  stem?: "upStem" | "downStem";
 }
 
 // The prop surface shared by Note and NoteStack that beaming relies on
@@ -48,7 +49,7 @@ const isBeamable = (child: ReactNode): child is ReactElement<BeamableProps> => {
 const BEAM_THICKNESS = 4; // half a staff-space, in viewBox units
 const SECOND_BEAM_GAP = 2; // quarter staff-space between beams
 
-export const BeamContainer = ({ stem, children }: BeamContainerProps) => {
+export const BeamContainer = ({ stem = "upStem", children }: BeamContainerProps) => {
   const clef = useContext(ClefContext);
   const beamedNotesArray = Children.toArray(children).filter(isBeamable);
 

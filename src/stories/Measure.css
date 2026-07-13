@@ -39,3 +39,16 @@
   display: flex;
   position: relative;
 }
+
+/* Voice layers stack on top of each other inside the notes container */
+.voice-layer {
+  flex-grow: 1;
+}
+
+.notes-container > .voice-layer:not(:first-child) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
