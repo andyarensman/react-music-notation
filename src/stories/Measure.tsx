@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { CSSProperties, ReactNode } from "react";
 import "./Measure.css";
 import { StaffLines } from "./StaffLines";
 import { Clef } from "./MeasureMeta/Clef";
@@ -21,6 +21,13 @@ export interface MeasureProps {
   // Set by Staff/GrandStaff when an earlier measure's clef is still in effect
   inheritedClef?: ClefType;
   fifths?: KeyRange;
+  // Set by Staff/GrandStaff: the key still in effect from earlier measures
+  inheritedFifths?: KeyRange;
+  // Set by Staff/GrandStaff on the first measure of each system: restate
+  // the running clef and key signature
+  systemStart?: boolean;
+  // Set by Staff/GrandStaff for non-justified (loose) final systems
+  style?: CSSProperties;
   time?: TimeSignatureProps;
   // "none" is used by GrandMeasure, which draws one barline across both staves
   barline?: BarlineType | "none";
@@ -36,6 +43,9 @@ export const Measure = ({
   clef,
   inheritedClef,
   fifths,
+  inheritedFifths,
+  systemStart,
+  style,
   time,
   barline,
   startRepeat,
@@ -43,6 +53,8 @@ export const Measure = ({
   children,
 }: MeasureProps) => {
   const activeClef = clef ?? inheritedClef ?? "gClef";
+  const displayClef = clef ?? (systemStart ? activeClef : undefined);
+  const displayFifths = fifths ?? (systemStart ? inheritedFifths : undefined);
   // Voice layers always lay out on an onset grid (their own union if the
   // measure isn't part of a grand staff) so the voices align with each other
   const voiceMode = hasVoices(children);
@@ -53,15 +65,17 @@ export const Measure = ({
 
   return (
     <ClefContext.Provider value={activeClef}>
-      <div className="measure-container">
+      <div className="measure-container" style={style}>
         <StaffLines />
         {barline !== "none" && (
           <Barline type={barline ?? "regular"} placement="end" />
         )}
         <div className="data-container">
           <div className="meta-container">
-            {clef && <Clef clef={clef} />}
-            {fifths && <KeySignature fifths={fifths} clef={activeClef} />}
+            {displayClef && <Clef clef={displayClef} />}
+            {displayFifths && (
+              <KeySignature fifths={displayFifths} clef={activeClef} />
+            )}
             {time && <TimeSignature {...time} />}
           </div>
           {startRepeat && <Barline type="repeatStart" placement="start" />}

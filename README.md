@@ -36,7 +36,14 @@ The project is built in phases; each completed phase has a kitchen-sink story un
 - Two voices per staff via `Voice`: stems forced per voice (up/down), events laid on the measure's shared onset grid so voices align with each other and (in a grand measure) with the other staff; beams inherit the voice's stem direction; rests default high in the up voice and low in the down voice
 - Ties: `tie="start"`/`"stop"` on `Note` draws a filled lens curve to the next note. Direction is opposite the stem for single-voice music; inside a `Voice` the tie curves toward the voice's outer side (standard multi-voice rule); `tieDirection` overrides either
 
-**Still out**: cross-staff beaming, slurs, tuplets, cross-measure ties, ties on chord members, 32nd+ notes, articulations/dynamics (glyph tables already exist in `glyphs.ts`), automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), MusicXML/MIDI import or export, playback, print layout, and npm packaging (no lib build/exports yet — deliberately deferred).
+**Phase 5**
+
+- Real system layout: `Staff` and `GrandStaff` break measures into systems (lines) from the measured container width (`ResizeObserver` + estimated measure widths in `systemLayout.tsx`) instead of blind `flex-wrap`
+- Every system restates the running clef and key signature (time signatures are correctly not restated); the running clef/key track mid-piece changes
+- Every grand system gets its own brace
+- A mostly-empty final system keeps its natural width instead of justifying (`LOOSE_SYSTEM_THRESHOLD`)
+
+**Still out**: cross-staff beaming, slurs, tuplets, cross-measure ties (a tie on a measure's last note stops at the barline; no incoming half-tie on the next system), ties on chord members, 32nd+ notes, articulations/dynamics (glyph tables already exist in `glyphs.ts`), automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), courtesy naturals on key changes, MusicXML/MIDI import or export, playback, print layout, and npm packaging (no lib build/exports yet — deliberately deferred).
 
 ## Getting started
 
@@ -156,7 +163,7 @@ All four are props on `Measure`, plus `startRepeat` for a left-side repeat barli
 </Staff>
 ```
 
-`Staff` lays measures out as a wrapping flex row (`flex-wrap: wrap`); each `Measure` has a minimum width, so measures reflow onto new lines as the container narrows. `Staff` also tracks a running clef: a measure that doesn't declare its own `clef` inherits whatever clef was last declared, so pitch-based notes keep resolving correctly across the line.
+`Staff` breaks its measures into systems (lines) from the measured container width: each system is a justified flex row, and the first measure of every system after the first restates the running clef and key signature (time signatures are not restated, per convention). The running clef/key also drive pitch derivation, so a measure that doesn't declare its own `clef` inherits whatever was last declared — including across a mid-piece clef change. A mostly-empty final system keeps its natural width instead of stretching its measures. Line breaking uses estimated measure widths (`systemLayout.tsx`), not DOM measurement of the notes, so a very dense measure can occasionally overflow its estimate.
 
 ### `GrandStaff` / `GrandMeasure`: piano-style layout
 
@@ -278,7 +285,8 @@ While figuring out stem geometry, this trick handled the upward stem sitting off
 
 - The onset grid (see [Layout engine](#layout-engine)) is what lets two staves with independent rhythms align: `.grid-event` wrappers span their onset columns, and a beam group whose internal notes are flex-proportional lines up with the outer grid automatically.
 - The two staves overlap their Leland line boxes by 6 staff-spaces (each line box is `16.125 * staff-space` tall), which leaves a 6 staff-space gap between the bottom of the treble staff and the top of the bass staff. The system barline height and the brace height both derive from that same overlap.
-- **Known limitations**: the brace only renders on the first system — re-bracing wrapped rows needs real system layout, as does restating clefs per system. `repeatEnd` barlines render per staff (so the repeat dots sit on each staff individually); every other barline type spans both staves as one barline. A grand measure whose staves have mismatched total durations falls back to unaligned flow for the events past the mismatch (an event that doesn't land on a shared onset boundary just renders inline instead of being grid-placed).
+- Systems: `GrandStaff` breaks grand measures into systems the same way `Staff` does; every system gets its own brace and restates the running clef and key on both staves.
+- **Known limitations**: `repeatEnd` barlines render per staff (so the repeat dots sit on each staff individually); every other barline type spans both staves as one barline. A grand measure whose staves have mismatched total durations falls back to unaligned flow for the events past the mismatch (an event that doesn't land on a shared onset boundary just renders inline instead of being grid-placed).
 
 ## Known limitations / rough edges
 

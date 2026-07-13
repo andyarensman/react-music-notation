@@ -1,31 +1,136 @@
-import { Children, ReactNode, cloneElement, isValidElement } from "react";
-import { ClefType } from "../helpers/types";
+import {
+  Children,
+  ReactElement,
+  ReactNode,
+  cloneElement,
+  isValidElement,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { ClefType, KeyRange } from "../helpers/types";
+import { MeasureProps } from "./Measure";
+import {
+  LOOSE_SYSTEM_THRESHOLD,
+  breakIntoSystems,
+  estimateMeasureWidthSs,
+  systemFillRatio,
+} from "./systemLayout";
 import "./Staff.css";
 
 interface StaffProps {
   children?: ReactNode;
 }
 
-interface ClefAwareProps {
-  clef?: ClefType;
-  inheritedClef?: ClefType;
+interface AnnotatedMeasure {
+  element: ReactElement<MeasureProps>;
+  inheritedClef: ClefType;
+  inheritedFifths: KeyRange | undefined;
+  baseWidthSs: number;
+  startWidthSs: number;
 }
 
+/*
+  Staff breaks its measures into systems (lines) itself, using estimated
+  measure widths against the observed container width, so each system's
+  first measure can restate the running clef and key signature. Intermediate
+  systems justify to full width; a mostly-empty final system stays at
+  natural width instead of stretching its measures.
+*/
 export const Staff = ({ children }: StaffProps) => {
-  // A clef stays in effect until a later measure changes it, so measures
-  // that don't restate the clef still derive pitch positions correctly
-  let runningClef: ClefType = "gClef";
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [widthSs, setWidthSs] = useState(0);
+  const [staffSpacePx, setStaffSpacePx] = useState(8);
 
-  const measures = Children.map(children, (child) => {
-    if (!isValidElement<ClefAwareProps>(child)) {
-      return child;
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+    const measure = () => {
+      const spacePx =
+        parseFloat(
+          getComputedStyle(element).getPropertyValue("--staff-space")
+        ) || 8;
+      setStaffSpacePx(spacePx);
+      setWidthSs(element.clientWidth / spacePx);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  // Track the running clef and key while annotating each measure
+  let runningClef: ClefType = "gClef";
+  let runningFifths: KeyRange | undefined;
+  const annotated: AnnotatedMeasure[] = [];
+  const passthrough: ReactNode[] = [];
+
+  Children.forEach(children, (child) => {
+    if (!isValidElement<MeasureProps>(child)) {
+      passthrough.push(child);
+      return;
     }
-    if (child.props.clef) {
-      runningClef = child.props.clef;
-      return child;
-    }
-    return cloneElement(child, { inheritedClef: runningClef });
+    const inheritedClef = runningClef;
+    const inheritedFifths = runningFifths;
+    if (child.props.clef) runningClef = child.props.clef;
+    if (child.props.fifths !== undefined) runningFifths = child.props.fifths;
+
+    const activeFifths = child.props.fifths ?? inheritedFifths;
+    annotated.push({
+      element: child,
+      inheritedClef,
+      inheritedFifths,
+      baseWidthSs: estimateMeasureWidthSs(child.props.children, {
+        showsClef: child.props.clef !== undefined,
+        fifthsCount: Math.abs(child.props.fifths ?? 0),
+        hasTime: child.props.time !== undefined,
+        hasStartRepeat: child.props.startRepeat === true,
+      }),
+      startWidthSs: estimateMeasureWidthSs(child.props.children, {
+        showsClef: true,
+        fifthsCount: Math.abs(activeFifths ?? 0),
+        hasTime: child.props.time !== undefined,
+        hasStartRepeat: child.props.startRepeat === true,
+      }),
+    });
   });
 
-  return <div className="staff-container">{measures}</div>;
+  // Before the first width measurement, render everything as one system
+  const systems =
+    widthSs > 0 ? breakIntoSystems(annotated, widthSs) : [annotated];
+
+  return (
+    <div className="staff-container" ref={containerRef}>
+      {systems.map((system, systemIndex) => {
+        const loose =
+          systemIndex === systems.length - 1 &&
+          systems.length > 1 &&
+          widthSs > 0 &&
+          systemFillRatio(system, widthSs) < LOOSE_SYSTEM_THRESHOLD;
+        return (
+          <div key={systemIndex} className="staff-system">
+            {system.map((measure, measureIndex) => {
+              const isSystemStart = measureIndex === 0;
+              const widthSsForMeasure = isSystemStart
+                ? measure.startWidthSs
+                : measure.baseWidthSs;
+              return cloneElement(measure.element, {
+                key: measureIndex,
+                inheritedClef: measure.inheritedClef,
+                inheritedFifths: measure.inheritedFifths,
+                systemStart: isSystemStart && systemIndex > 0,
+                style: loose
+                  ? {
+                      flexGrow: 0,
+                      flexBasis: `${widthSsForMeasure * staffSpacePx}px`,
+                    }
+                  : undefined,
+              });
+            })}
+          </div>
+        );
+      })}
+      {passthrough}
+    </div>
+  );
 };

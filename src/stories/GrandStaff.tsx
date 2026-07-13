@@ -1,44 +1,194 @@
-import { Children, ReactNode, cloneElement, isValidElement } from "react";
+import {
+  Children,
+  ReactElement,
+  ReactNode,
+  cloneElement,
+  isValidElement,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import "./GrandStaff.css";
 import "../global.css";
 import { braceGlyph } from "../helpers/glyphs";
-import { ClefType } from "../helpers/types";
+import { ClefType, KeyRange } from "../helpers/types";
 import { GrandMeasureProps } from "./GrandMeasure";
+import {
+  LOOSE_SYSTEM_THRESHOLD,
+  breakIntoSystems,
+  estimateMeasureWidthSs,
+  systemFillRatio,
+} from "./systemLayout";
 
 interface GrandStaffProps {
   children?: ReactNode;
 }
 
+interface AnnotatedGrandMeasure {
+  element: ReactElement<GrandMeasureProps>;
+  inheritedUpperClef: ClefType;
+  inheritedLowerClef: ClefType;
+  inheritedUpperFifths: KeyRange | undefined;
+  inheritedLowerFifths: KeyRange | undefined;
+  baseWidthSs: number;
+  startWidthSs: number;
+}
+
+const BRACE_WIDTH_SS = 2;
+
 /*
-  A piano-style pair of staves. Tracks a running clef per staff (like Staff
-  does for one) and draws the brace. Known limitation: when measures wrap,
-  only the first system gets the brace — re-bracing each wrapped row needs
-  real system layout.
+  A piano-style pair of staves. Like Staff, GrandStaff breaks its measures
+  into systems itself: every system gets a brace and restates the running
+  clef and key signature on both staves.
 */
 export const GrandStaff = ({ children }: GrandStaffProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [widthSs, setWidthSs] = useState(0);
+  const [staffSpacePx, setStaffSpacePx] = useState(8);
+
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+    const measure = () => {
+      const spacePx =
+        parseFloat(
+          getComputedStyle(element).getPropertyValue("--staff-space")
+        ) || 8;
+      setStaffSpacePx(spacePx);
+      setWidthSs(element.clientWidth / spacePx);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
   let upperClef: ClefType = "gClef";
   let lowerClef: ClefType = "fClef";
+  let upperFifths: KeyRange | undefined;
+  let lowerFifths: KeyRange | undefined;
+  const annotated: AnnotatedGrandMeasure[] = [];
+  const passthrough: ReactNode[] = [];
 
-  const measures = Children.map(children, (child) => {
+  Children.forEach(children, (child) => {
     if (!isValidElement<GrandMeasureProps>(child)) {
-      return child;
+      passthrough.push(child);
+      return;
     }
-    const declaredUpper = child.props.upper?.props.clef;
-    const declaredLower = child.props.lower?.props.clef;
-    if (declaredUpper) upperClef = declaredUpper;
-    if (declaredLower) lowerClef = declaredLower;
-    return cloneElement(child, {
+    const { upper, lower } = child.props;
+    const inherited = {
       inheritedUpperClef: upperClef,
       inheritedLowerClef: lowerClef,
+      inheritedUpperFifths: upperFifths,
+      inheritedLowerFifths: lowerFifths,
+    };
+    if (upper?.props.clef) upperClef = upper.props.clef;
+    if (lower?.props.clef) lowerClef = lower.props.clef;
+    if (upper?.props.fifths !== undefined) upperFifths = upper.props.fifths;
+    if (lower?.props.fifths !== undefined) lowerFifths = lower.props.fifths;
+
+    const staffWidth = (
+      measureElement: ReactElement<{ children?: ReactNode }> | undefined,
+      declaredClef: boolean,
+      fifthsCount: number,
+      hasTime: boolean,
+      restate: boolean
+    ) =>
+      measureElement
+        ? estimateMeasureWidthSs(measureElement.props.children, {
+            showsClef: declaredClef || restate,
+            fifthsCount,
+            hasTime,
+            hasStartRepeat: child.props.startRepeat === true,
+          })
+        : 0;
+
+    const base = Math.max(
+      staffWidth(
+        upper,
+        upper?.props.clef !== undefined,
+        Math.abs(upper?.props.fifths ?? 0),
+        upper?.props.time !== undefined,
+        false
+      ),
+      staffWidth(
+        lower,
+        lower?.props.clef !== undefined,
+        Math.abs(lower?.props.fifths ?? 0),
+        lower?.props.time !== undefined,
+        false
+      )
+    );
+    const start = Math.max(
+      staffWidth(
+        upper,
+        true,
+        Math.abs(
+          upper?.props.fifths ?? inherited.inheritedUpperFifths ?? 0
+        ),
+        upper?.props.time !== undefined,
+        true
+      ),
+      staffWidth(
+        lower,
+        true,
+        Math.abs(
+          lower?.props.fifths ?? inherited.inheritedLowerFifths ?? 0
+        ),
+        lower?.props.time !== undefined,
+        true
+      )
+    );
+
+    annotated.push({
+      element: child,
+      ...inherited,
+      baseWidthSs: base,
+      startWidthSs: start,
     });
   });
 
+  const availableSs = widthSs > 0 ? widthSs - BRACE_WIDTH_SS : 0;
+  const systems =
+    availableSs > 0 ? breakIntoSystems(annotated, availableSs) : [annotated];
+
   return (
-    <div className="grand-staff-container">
-      <div className="grand-brace">
-        <span className="leland grand-brace-glyph">{braceGlyph}</span>
-      </div>
-      {measures}
+    <div className="grand-staff-container" ref={containerRef}>
+      {systems.map((system, systemIndex) => {
+        const loose =
+          systemIndex === systems.length - 1 &&
+          systems.length > 1 &&
+          availableSs > 0 &&
+          systemFillRatio(system, availableSs) < LOOSE_SYSTEM_THRESHOLD;
+        return (
+          <div key={systemIndex} className="grand-system">
+            <div className="grand-brace">
+              <span className="leland grand-brace-glyph">{braceGlyph}</span>
+            </div>
+            {system.map((measure, measureIndex) => {
+              const isSystemStart = measureIndex === 0;
+              const widthSsForMeasure = isSystemStart
+                ? measure.startWidthSs
+                : measure.baseWidthSs;
+              return cloneElement(measure.element, {
+                key: measureIndex,
+                inheritedUpperClef: measure.inheritedUpperClef,
+                inheritedLowerClef: measure.inheritedLowerClef,
+                inheritedUpperFifths: measure.inheritedUpperFifths,
+                inheritedLowerFifths: measure.inheritedLowerFifths,
+                systemStart: isSystemStart && systemIndex > 0,
+                style: loose
+                  ? {
+                      flexGrow: 0,
+                      flexBasis: `${widthSsForMeasure * staffSpacePx}px`,
+                    }
+                  : undefined,
+              });
+            })}
+          </div>
+        );
+      })}
+      {passthrough}
     </div>
   );
 };

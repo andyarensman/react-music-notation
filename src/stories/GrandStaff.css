@@ -1,8 +1,12 @@
 .grand-staff-container {
   position: relative;
   display: flex;
+  flex-direction: column;
+}
+
+.grand-system {
+  display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
 }
 
 .grand-measure {

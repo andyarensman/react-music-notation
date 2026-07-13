@@ -1,8 +1,8 @@
-import { ReactElement, cloneElement } from "react";
+import { CSSProperties, ReactElement, cloneElement } from "react";
 import "./GrandStaff.css";
 import { MeasureProps } from "./Measure";
 import { Barline, BarlineType } from "./MeasureMeta/Barline";
-import { ClefType } from "../helpers/types";
+import { ClefType, KeyRange } from "../helpers/types";
 import { getOnsetBoundaries, unionBoundaries } from "./layout";
 
 export interface GrandMeasureProps {
@@ -10,9 +10,14 @@ export interface GrandMeasureProps {
   lower: ReactElement<MeasureProps>;
   barline?: BarlineType;
   startRepeat?: boolean;
-  // Set by GrandStaff, one running clef per staff
+  // Set by GrandStaff: running clef/key per staff, system-start restating,
+  // and loose-system sizing
   inheritedUpperClef?: ClefType;
   inheritedLowerClef?: ClefType;
+  inheritedUpperFifths?: KeyRange;
+  inheritedLowerFifths?: KeyRange;
+  systemStart?: boolean;
+  style?: CSSProperties;
 }
 
 /*
@@ -27,6 +32,10 @@ export const GrandMeasure = ({
   startRepeat,
   inheritedUpperClef,
   inheritedLowerClef,
+  inheritedUpperFifths,
+  inheritedLowerFifths,
+  systemStart,
+  style,
 }: GrandMeasureProps) => {
   const boundaries = unionBoundaries(
     getOnsetBoundaries(upper.props.children),
@@ -38,12 +47,14 @@ export const GrandMeasure = ({
   const perStaffBarline = barline === "repeatEnd";
 
   return (
-    <div className="grand-measure">
+    <div className="grand-measure" style={style}>
       {cloneElement(upper, {
         grid: boundaries,
         barline: perStaffBarline ? "repeatEnd" : "none",
         startRepeat,
         inheritedClef: inheritedUpperClef,
+        inheritedFifths: inheritedUpperFifths,
+        systemStart,
       })}
       <div className="grand-measure-lower">
         {cloneElement(lower, {
@@ -51,6 +62,8 @@ export const GrandMeasure = ({
           barline: perStaffBarline ? "repeatEnd" : "none",
           startRepeat,
           inheritedClef: inheritedLowerClef,
+          inheritedFifths: inheritedLowerFifths,
+          systemStart,
         })}
       </div>
       {!perStaffBarline && (

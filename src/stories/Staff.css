@@ -1,6 +1,10 @@
 .staff-container {
   position: relative;
   display: flex;
+  flex-direction: column;
+}
+
+.staff-system {
+  display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
 }
