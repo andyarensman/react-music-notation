@@ -10,6 +10,7 @@ import {
   noteGlyphs,
 } from "../helpers/glyphs";
 import {
+  MIDDLE_LINE_INDEX,
   articulationCentersOnStem,
   articulationDefaultsAbove,
   articulationLeftSs,
@@ -165,10 +166,10 @@ export const NoteStack = (props: NoteStackProps) => {
         below: articulationBelow,
         stemTipIndex:
           articulationAtStemEnd && stemLine
-            ? Math.round(stemLine.y2 / 4) - 8
+            ? Math.round((stemLine.y2 - 64) / 4) + MIDDLE_LINE_INDEX
             : undefined,
       }) -
-        8) *
+        MIDDLE_LINE_INDEX) *
       0.5
     : 0;
   const articulationLeftSpaces = props.articulation

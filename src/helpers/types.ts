@@ -20,6 +20,10 @@ export type KeyRange =
 export type ClefType = "gClef" | "fClef" | "cClef";
 
 export type PitchPosition =
+  | "line-above-4"
+  | "space-above-4"
+  | "line-above-3"
+  | "space-above-3"
   | "line-above-2"
   | "space-above-2"
   | "line-above-1"
@@ -36,7 +40,11 @@ export type PitchPosition =
   | "space-below-1"
   | "line-below-1"
   | "space-below-2"
-  | "line-below-2";
+  | "line-below-2"
+  | "space-below-3"
+  | "line-below-3"
+  | "space-below-4"
+  | "line-below-4";
 
 export type ArticulationType =
   | "accent"

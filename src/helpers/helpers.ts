@@ -23,94 +23,14 @@ export const getNoteFlex = (props: {
   dotted?: 1;
 }): number => noteFlexValue[props.noteValue] * (props.dotted ? 1.5 : 1);
 
-/*
-  The tables below are y-coordinates inside the stem/beam svg viewBox
-  ("0 0 100 129"), where 129 units span the full Leland line box. One
-  staff-space is 8 units, so each position step is 4. They are resolution
-  independent: the svg is stretched to the real rendered size.
-*/
-
-type BeamPositionsType = Record<
-  "upStem" | "downStem",
-  Record<PitchPosition, number>
->;
-
-export const BeamPositions: BeamPositionsType = {
-  upStem: {
-    "line-above-2": 4,
-    "space-above-2": 8,
-    "line-above-1": 12,
-    "space-above-1": 16,
-    "line-5": 20,
-    "space-4": 24,
-    "line-4": 28,
-    "space-3": 32,
-    "line-3": 36,
-    "space-2": 40,
-    "line-2": 44,
-    "space-1": 48,
-    "line-1": 52,
-    "space-below-1": 56,
-    "line-below-1": 60,
-    "space-below-2": 64,
-    "line-below-2": 68,
-  },
-  downStem: {
-    "line-above-2": 56,
-    "space-above-2": 60,
-    "line-above-1": 64,
-    "space-above-1": 68,
-    "line-5": 72,
-    "space-4": 76,
-    "line-4": 80,
-    "space-3": 84,
-    "line-3": 88,
-    "space-2": 92,
-    "line-2": 96,
-    "space-1": 100,
-    "line-1": 104,
-    "space-below-1": 108,
-    "line-below-1": 112,
-    "space-below-2": 116,
-    "line-below-2": 120,
-  },
-};
-
-export const StemPositions: Record<PitchPosition, number> = {
-  "line-above-2": 32,
-  "space-above-2": 36,
-  "line-above-1": 40,
-  "space-above-1": 44,
-  "line-5": 48,
-  "space-4": 52,
-  "line-4": 56,
-  "space-3": 60,
-  "line-3": 64,
-  "space-2": 68,
-  "line-2": 72,
-  "space-1": 76,
-  "line-1": 80,
-  "space-below-1": 84,
-  "line-below-1": 88,
-  "space-below-2": 92,
-  "line-below-2": 96,
-};
-
-export const noteTranslations: Record<
-  NoteProps["noteValue"],
-  keyof NoteGlyphs
-> = {
-  whole: "wholeNote",
-  half: "halfNote",
-  quarter: "quarterNote",
-  eighth: "eighthNote",
-  "16th": "sixteenthNote",
-  "32nd": "thirtySecondNote",
-};
-
-// Every renderable position, top of the range to bottom. line-3 (the middle
-// line) sits at index 8; each index step is half a staff-space.
+// Every renderable position, top of the range (four ledger lines above the
+// staff) to the bottom (four below). Each index step is half a staff-space;
+// even indices are lines, odd are spaces.
 export const pitchPositionOrder: PitchPosition[] = [
+  "line-above-4",
+  "space-above-4",
+  "line-above-3",
+  "space-above-3",
   "line-above-2",
   "space-above-2",
   "line-above-1",
@@ -128,12 +48,65 @@ export const pitchPositionOrder: PitchPosition[] = [
   "line-below-1",
   "space-below-2",
   "line-below-2",
+  "space-below-3",
+  "line-below-3",
+  "space-below-4",
+  "line-below-4",
 ];
 
-const MIDDLE_LINE_INDEX = 8;
+export const TOP_LINE_INDEX = pitchPositionOrder.indexOf("line-5");
+export const MIDDLE_LINE_INDEX = pitchPositionOrder.indexOf("line-3");
+export const BOTTOM_LINE_INDEX = pitchPositionOrder.indexOf("line-1");
 
 export const positionIndex = (position: PitchPosition): number =>
   pitchPositionOrder.indexOf(position);
+
+/*
+  The tables below are y-coordinates inside the stem/beam svg viewBox
+  ("0 0 100 129"), where 129 units span the full Leland line box. One
+  staff-space is 8 units, so each position step is 4, with the middle line
+  at 64. They are resolution independent: the svg is stretched to the real
+  rendered size. Positions far outside the staff can produce values outside
+  0..129; those clip if a stem/beam is actually drawn there, but the default
+  stem directions keep extreme notes' stems pointing into the staff.
+*/
+const stemPositionAt = (index: number): number =>
+  64 + (index - MIDDLE_LINE_INDEX) * 4;
+
+export const StemPositions = Object.fromEntries(
+  pitchPositionOrder.map((position, index) => [position, stemPositionAt(index)])
+) as Record<PitchPosition, number>;
+
+export const BeamPositions: Record<
+  "upStem" | "downStem",
+  Record<PitchPosition, number>
+> = {
+  // a standard-length stem (3.5 staff-spaces = 28 units) away from the head
+  upStem: Object.fromEntries(
+    pitchPositionOrder.map((position, index) => [
+      position,
+      stemPositionAt(index) - 28,
+    ])
+  ) as Record<PitchPosition, number>,
+  downStem: Object.fromEntries(
+    pitchPositionOrder.map((position, index) => [
+      position,
+      stemPositionAt(index) + 24,
+    ])
+  ) as Record<PitchPosition, number>,
+};
+
+export const noteTranslations: Record<
+  NoteProps["noteValue"],
+  keyof NoteGlyphs
+> = {
+  whole: "wholeNote",
+  half: "halfNote",
+  quarter: "quarterNote",
+  eighth: "eighthNote",
+  "16th": "sixteenthNote",
+  "32nd": "thirtySecondNote",
+};
 
 const stepIndex: Record<NonNullable<Pitch["step"]>, number> = {
   C: 0,
@@ -194,6 +167,37 @@ export const getChordStem = (
   return below > above ? "upStem" : "downStem";
 };
 
+// How many beams/flags a note value carries
+export const getBeamCount = (noteValue: NoteProps["noteValue"]): number => {
+  if (noteValue === "32nd") return 3;
+  if (noteValue === "16th") return 2;
+  if (noteValue === "eighth") return 1;
+  return 0;
+};
+
+/*
+  Assign accidentals to horizontal columns so they don't overlap vertically.
+  Input is the position indices of the accidental-bearing notes, top first;
+  output is a column per note (0 = closest to the chord). Accidentals within
+  6 half-steps (~ a sharp's height) of one in a column move a column left.
+*/
+export const assignAccidentalColumns = (indices: number[]): number[] => {
+  const columns: number[][] = [];
+  return indices.map((index) => {
+    for (let column = 0; column < columns.length; column++) {
+      const clashes = columns[column].some(
+        (other) => Math.abs(other - index) < 6
+      );
+      if (!clashes) {
+        columns[column].push(index);
+        return column;
+      }
+    }
+    columns.push([index]);
+    return columns.length - 1;
+  });
+};
+
 /*
   Articulation placement, following Gould ("Behind Bars", pp. 115-121):
   - staccato/tenuto marks are centred in a stave-space: a note in a space
@@ -213,8 +217,8 @@ const OUTSIDE_STAFF_FAMILIES: ArticulationType[] = [
   "marcatoStaccato",
 ];
 
-const FIRST_SPACE_BELOW_STAFF = 13; // space-below-1
-const FIRST_SPACE_ABOVE_STAFF = 3; // space-above-1
+const FIRST_SPACE_BELOW_STAFF = BOTTOM_LINE_INDEX + 1;
+const FIRST_SPACE_ABOVE_STAFF = TOP_LINE_INDEX - 1;
 
 export const getArticulationIndex = (options: {
   articulation: ArticulationType;
@@ -273,73 +277,31 @@ export const articulationCentersOnStem = (
   articulation: ArticulationType
 ): boolean => articulation === "staccato" || articulation === "staccatissimo";
 
-// How many beams/flags a note value carries
-export const getBeamCount = (noteValue: NoteProps["noteValue"]): number => {
-  if (noteValue === "32nd") return 3;
-  if (noteValue === "16th") return 2;
-  if (noteValue === "eighth") return 1;
-  return 0;
-};
-
-/*
-  Assign accidentals to horizontal columns so they don't overlap vertically.
-  Input is the position indices of the accidental-bearing notes, top first;
-  output is a column per note (0 = closest to the chord). Accidentals within
-  6 half-steps (~ a sharp's height) of one in a column move a column left.
-*/
-export const assignAccidentalColumns = (indices: number[]): number[] => {
-  const columns: number[][] = [];
-  return indices.map((index) => {
-    for (let column = 0; column < columns.length; column++) {
-      const clashes = columns[column].some(
-        (other) => Math.abs(other - index) < 6
-      );
-      if (!clashes) {
-        columns[column].push(index);
-        return column;
-      }
-    }
-    columns.push([index]);
-    return columns.length - 1;
-  });
-};
-
+// Notes on or above the middle line take down-stems by default
 export const getDefaultStem = (
   position: PitchPosition
-): "upStem" | "downStem" => {
-  const downStemPositions: PitchPosition[] = [
-    "line-above-2",
-    "space-above-2",
-    "line-above-1",
-    "space-above-1",
-    "line-5",
-    "space-4",
-    "line-4",
-    "space-3",
-    "line-3",
-  ];
+): "upStem" | "downStem" =>
+  positionIndex(position) <= MIDDLE_LINE_INDEX ? "downStem" : "upStem";
 
-  return downStemPositions.includes(position) ? "downStem" : "upStem";
-};
+export type LedgerLine = `above-${1 | 2 | 3 | 4}` | `below-${1 | 2 | 3 | 4}`;
 
-export type LedgerLine = "above-1" | "above-2" | "below-1" | "below-2";
-
-// Which ledger lines a notehead at this position needs drawn behind it
+// Which ledger lines a notehead at this position needs drawn behind it:
+// one per full staff-space beyond the outer staff line
 export const getLedgerLines = (position: PitchPosition): LedgerLine[] => {
-  switch (position) {
-    case "line-above-2":
-      return ["above-1", "above-2"];
-    case "space-above-2":
-    case "line-above-1":
-      return ["above-1"];
-    case "line-below-1":
-    case "space-below-2":
-      return ["below-1"];
-    case "line-below-2":
-      return ["below-1", "below-2"];
-    default:
-      return [];
+  const index = positionIndex(position);
+  const ledgers: LedgerLine[] = [];
+  if (index < TOP_LINE_INDEX) {
+    const count = Math.floor((TOP_LINE_INDEX - index) / 2);
+    for (let n = 1; n <= count; n++) {
+      ledgers.push(`above-${n}` as LedgerLine);
+    }
+  } else if (index > BOTTOM_LINE_INDEX) {
+    const count = Math.floor((index - BOTTOM_LINE_INDEX) / 2);
+    for (let n = 1; n <= count; n++) {
+      ledgers.push(`below-${n}` as LedgerLine);
+    }
   }
+  return ledgers;
 };
 
 /*

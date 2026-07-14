@@ -32,6 +32,22 @@
   accidentals. Each step is half a staff-space. line-3 (middle line) is the
   reference at 0.
 */
+.line-above-4 {
+  top: calc(var(--staff-space) * -6);
+}
+
+.space-above-4 {
+  top: calc(var(--staff-space) * -5.5);
+}
+
+.line-above-3 {
+  top: calc(var(--staff-space) * -5);
+}
+
+.space-above-3 {
+  top: calc(var(--staff-space) * -4.5);
+}
+
 .line-above-2 {
   top: calc(var(--staff-space) * -4);
 }
@@ -98,4 +114,20 @@
 
 .line-below-2 {
   top: calc(var(--staff-space) * 4);
+}
+
+.space-below-3 {
+  top: calc(var(--staff-space) * 4.5);
+}
+
+.line-below-3 {
+  top: calc(var(--staff-space) * 5);
+}
+
+.space-below-4 {
+  top: calc(var(--staff-space) * 5.5);
+}
+
+.line-below-4 {
+  top: calc(var(--staff-space) * 6);
 }

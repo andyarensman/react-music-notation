@@ -9,6 +9,8 @@ import {
   noteGlyphs,
 } from "../helpers/glyphs";
 import {
+  MIDDLE_LINE_INDEX,
+  TOP_LINE_INDEX,
   articulationCentersOnStem,
   articulationDefaultsAbove,
   articulationLeftSs,
@@ -48,9 +50,10 @@ export const Note = (props: NoteProps) => {
   const tieAbove = props.tieDirection
     ? props.tieDirection === "above"
     : !effectiveStemUp;
-  // notehead center sits (index - 4) half-spaces below the top staff line
+  // notehead center sits (index - top line) half-spaces below the top line
   const tieTopSpaces =
-    (positionIndex(position) - 4) * 0.5 + (tieAbove ? -1.85 : 0.6);
+    (positionIndex(position) - TOP_LINE_INDEX) * 0.5 +
+    (tieAbove ? -1.85 : 0.6);
 
   /*
     Articulations (Gould pp. 115-121): notehead side by default, marcato
@@ -76,7 +79,7 @@ export const Note = (props: NoteProps) => {
   if (articulationAtStemEnd) {
     stemTipIndex =
       stem === "noStem" && stemEndValue !== undefined
-        ? Math.round(stemEndValue / 4) - 8
+        ? Math.round((stemEndValue - 64) / 4) + MIDDLE_LINE_INDEX
         : positionIndex(position) + (effectiveStemUp ? -7 : 7);
   }
   const articulationTopSpaces = articulation
@@ -86,7 +89,7 @@ export const Note = (props: NoteProps) => {
         below: articulationBelow,
         stemTipIndex,
       }) -
-        8) *
+        MIDDLE_LINE_INDEX) *
       0.5
     : 0;
   // Centred on the notehead, except staccato dots at a stem end, which

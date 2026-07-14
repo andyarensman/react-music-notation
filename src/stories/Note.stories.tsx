@@ -24,6 +24,10 @@ export const Primary: TypeWithDeepControls<Story> = {
     position: {
       control: "select",
       options: [
+        "line-above-4",
+        "space-above-4",
+        "line-above-3",
+        "space-above-3",
         "line-above-2",
         "space-above-2",
         "line-above-1",
@@ -41,6 +45,10 @@ export const Primary: TypeWithDeepControls<Story> = {
         "line-below-1",
         "space-below-2",
         "line-below-2",
+        "space-below-3",
+        "line-below-3",
+        "space-below-4",
+        "line-below-4",
       ],
     },
     noteValue: {
@@ -95,4 +103,21 @@ export const Primary: TypeWithDeepControls<Story> = {
       </Measure>
     );
   },
+};
+
+// The full renderable range: four ledger lines above and below the staff
+export const LedgerRange: Story = {
+  render: () => (
+    <Measure clef="gClef">
+      <Note position="line-above-4" noteValue="quarter" />
+      <Note position="line-above-3" noteValue="quarter" />
+      <Note position="line-above-2" noteValue="quarter" />
+      <Note position="line-above-1" noteValue="quarter" />
+      <Note position="line-3" noteValue="quarter" />
+      <Note position="line-below-1" noteValue="quarter" />
+      <Note position="line-below-2" noteValue="quarter" />
+      <Note position="line-below-3" noteValue="quarter" />
+      <Note position="line-below-4" noteValue="whole" />
+    </Measure>
+  ),
 };

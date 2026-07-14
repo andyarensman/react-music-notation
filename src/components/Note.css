@@ -95,6 +95,20 @@
   );
 }
 
+.ledger-above-3 {
+  top: calc(
+    (var(--staff-space) * 12.125 - var(--staff-line-thickness)) / 2 -
+      var(--staff-space) * 3
+  );
+}
+
+.ledger-above-4 {
+  top: calc(
+    (var(--staff-space) * 12.125 - var(--staff-line-thickness)) / 2 -
+      var(--staff-space) * 4
+  );
+}
+
 .ledger-below-1 {
   top: calc(
     (var(--staff-space) * 12.125 - var(--staff-line-thickness)) / 2 +
@@ -106,6 +120,20 @@
   top: calc(
     (var(--staff-space) * 12.125 - var(--staff-line-thickness)) / 2 +
       var(--staff-space) * 6
+  );
+}
+
+.ledger-below-3 {
+  top: calc(
+    (var(--staff-space) * 12.125 - var(--staff-line-thickness)) / 2 +
+      var(--staff-space) * 7
+  );
+}
+
+.ledger-below-4 {
+  top: calc(
+    (var(--staff-space) * 12.125 - var(--staff-line-thickness)) / 2 +
+      var(--staff-space) * 8
   );
 }
 
