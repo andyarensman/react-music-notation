@@ -15,25 +15,45 @@ import { BeamContainer } from "./BeamContainer";
 
 const round3 = (value: number) => Math.round(value * 1000) / 1000;
 
-// Voice can't be imported here (it imports this module), so voices are
-// recognized by the musicRole marker on the component
+/*
+  Voice/Slur/Tuplet/Hairpin can't be imported here (they import this module),
+  so they're recognized by the musicRole marker each component carries.
+*/
+export const getMusicRole = (node: ReactNode): string | undefined =>
+  isValidElement(node)
+    ? (node.type as { musicRole?: string }).musicRole
+    : undefined;
+
 export const isVoiceElement = (node: ReactNode): boolean =>
-  isValidElement(node) &&
-  (node.type as { musicRole?: string }).musicRole === "voice";
+  getMusicRole(node) === "voice";
 
 export const hasVoices = (children: ReactNode): boolean =>
   Children.toArray(children).some(isVoiceElement);
 
-// Duration of one measure event in flex units. Beam groups span the sum of
-// their notes.
+// Duration of one measure event in flex units. Beam groups and slur/hairpin
+// wrappers span the sum of their notes; tuplets scale the sum by their
+// ratio (three-in-the-time-of-two = 2/3 of the natural duration).
 export const getEventFlex = (node: ReactNode): number => {
   if (!isValidElement(node)) {
     return 0;
   }
-  if (node.type === BeamContainer) {
+  const role = getMusicRole(node);
+  if (node.type === BeamContainer || role === "slur" || role === "hairpin") {
     return Children.toArray(
       (node.props as { children?: ReactNode }).children
     ).reduce((sum: number, child) => sum + getEventFlex(child), 0);
+  }
+  if (role === "tuplet") {
+    const props = node.props as {
+      ratio: [number, number];
+      children?: ReactNode;
+    };
+    const [actual, normal] = props.ratio;
+    const inner = Children.toArray(props.children).reduce(
+      (sum: number, child) => sum + getEventFlex(child),
+      0
+    );
+    return round3((inner * normal) / actual);
   }
   const props = node.props as {
     noteValue?: NoteProps["noteValue"];
@@ -61,15 +81,27 @@ export const getOnsetBoundaries = (children: ReactNode): number[] => {
       .reduce(unionBoundaries);
   }
 
+  // Slur/hairpin wrappers are transparent for timing: their internal notes
+  // contribute onsets so the other staff of a grand measure still aligns.
+  // Tuplets stay opaque (their fractional internals shouldn't create shared
+  // columns).
   const boundaries = [0];
   let onset = 0;
-  childArray.forEach((child) => {
-    const flex = getEventFlex(child);
-    if (flex > 0) {
-      onset += flex;
-      boundaries.push(round3(onset));
-    }
-  });
+  const addEvents = (nodes: ReactNode) => {
+    Children.toArray(nodes).forEach((child) => {
+      const role = getMusicRole(child);
+      if (role === "slur" || role === "hairpin") {
+        addEvents((child as ReactElement<{ children?: ReactNode }>).props.children);
+        return;
+      }
+      const flex = getEventFlex(child);
+      if (flex > 0) {
+        onset = round3(onset + flex);
+        boundaries.push(onset);
+      }
+    });
+  };
+  addEvents(childArray);
   return boundaries;
 };
 
@@ -81,6 +113,26 @@ export const gridTemplateFromBoundaries = (boundaries: number[]): string =>
     .slice(1)
     .map((boundary, index) => `${round3(boundary - boundaries[index])}fr`)
     .join(" ");
+
+// Flex of the last leaf note inside a group (slurs/hairpins end their spans
+// at the final notehead, not the group's right edge)
+export const getLastLeafFlex = (nodes: ReactNode): number => {
+  const childArray = Children.toArray(nodes);
+  for (let index = childArray.length - 1; index >= 0; index--) {
+    const child = childArray[index];
+    if (!isValidElement<{ noteValue?: unknown; children?: ReactNode }>(child)) {
+      continue;
+    }
+    if (child.props.noteValue !== undefined) {
+      return getEventFlex(child);
+    }
+    if (child.props.children) {
+      const inner = getLastLeafFlex(child.props.children);
+      if (inner > 0) return inner;
+    }
+  }
+  return 0;
+};
 
 // Wrap each event in a grid item spanning its onset columns. The wrapper is
 // a flex row, so the event's own flex-grow just fills it.

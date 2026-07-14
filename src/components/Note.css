@@ -109,6 +109,18 @@
   );
 }
 
+/* Expression text ("dolce") in italics on the dynamics line */
+.note-text {
+  position: absolute;
+  top: calc(var(--staff-space) * 11.7);
+  left: calc(var(--staff-space) * 0.15);
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-size: calc(var(--staff-space) * 1.6);
+  line-height: 1;
+  white-space: nowrap;
+}
+
 /* Augmentation dot: sits just right of the notehead. When the note is on a
    line the dot moves up into the space above. */
 .aug-dot {

@@ -86,6 +86,31 @@ export const flagGlyphs: Record<
 // Spans a grand staff's two staves; scaled via font-size (see GrandStaff.css)
 export const braceGlyph = "";
 
+// Tuplet number digits (SMuFL tuplet0-tuplet9)
+export const tupletGlyphs: Record<number, string> = {
+  0: "\uE880",
+  1: "\uE881",
+  2: "\uE882",
+  3: "\uE883",
+  4: "\uE884",
+  5: "\uE885",
+  6: "\uE886",
+  7: "\uE887",
+  8: "\uE888",
+  9: "\uE889",
+};
+
+// Text-sized note glyphs for metronome marks (SMuFL metNote* range)
+export const metronomeGlyphs = {
+  whole: "\uECA2",
+  half: "\uECA3",
+  quarter: "\uECA5",
+  eighth: "\uECA7",
+  "16th": "\uECA9",
+  "32nd": "\uECAB",
+  dot: "\uECB7",
+};
+
 export const clefGlyphs = {
   gClef: "\uE050",
   fClef: "\uE062",

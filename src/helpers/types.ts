@@ -72,6 +72,8 @@ interface BaseNoteProps {
   dotted?: 1;
   // Rendered below the staff at this event's position
   dynamic?: DynamicType;
+  // Expression text ("dolce", "cresc.") in italics below the staff
+  text?: string;
 }
 
 interface RestProps extends BaseNoteProps {

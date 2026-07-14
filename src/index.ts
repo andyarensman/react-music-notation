@@ -8,6 +8,9 @@ export { NoteStack } from "./components/NoteStack";
 export type { NoteStackProps } from "./components/NoteStack";
 export { BeamContainer } from "./components/BeamContainer";
 export { Voice } from "./components/Voice";
+export { Tuplet } from "./components/Tuplet";
+export { Slur } from "./components/Slur";
+export { Hairpin } from "./components/Hairpin";
 export { GrandStaff } from "./components/GrandStaff";
 export { GrandMeasure } from "./components/GrandMeasure";
 export type { GrandMeasureProps } from "./components/GrandMeasure";
@@ -17,6 +20,8 @@ export { Clef } from "./components/MeasureMeta/Clef";
 export { KeySignature } from "./components/MeasureMeta/KeySignature";
 export { TimeSignature } from "./components/MeasureMeta/TimeSignature";
 export type { TimeSignatureProps } from "./components/MeasureMeta/TimeSignature";
+export { Tempo } from "./components/MeasureMeta/Tempo";
+export type { TempoProps } from "./components/MeasureMeta/Tempo";
 export { StaffLines } from "./components/StaffLines";
 
 export type {

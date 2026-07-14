@@ -160,6 +160,7 @@ export const Note = (props: NoteProps) => {
           {dynamicGlyphs[props.dynamic]}
         </div>
       )}
+      {props.text && <div className="note-text">{props.text}</div>}
       {tie === "start" && (
         <div
           className="tie-container"

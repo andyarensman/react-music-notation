@@ -5,6 +5,7 @@ import { Clef } from "./MeasureMeta/Clef";
 import { ClefType, KeyRange } from "../helpers/types";
 import { KeySignature } from "./MeasureMeta/KeySignature";
 import { TimeSignature, TimeSignatureProps } from "./MeasureMeta/TimeSignature";
+import { Tempo, TempoProps } from "./MeasureMeta/Tempo";
 import { Barline, BarlineType } from "./MeasureMeta/Barline";
 import { ClefContext } from "./ClefContext";
 import { GridContext } from "./GridContext";
@@ -23,6 +24,8 @@ export interface MeasureProps {
   fifths?: KeyRange;
   // Set by Staff/GrandStaff: the key still in effect from earlier measures
   inheritedFifths?: KeyRange;
+  // Tempo indication rendered above the staff at the measure's start
+  tempo?: TempoProps;
   // Set by Staff/GrandStaff on the first measure of each system: restate
   // the running clef and key signature
   systemStart?: boolean;
@@ -44,6 +47,7 @@ export const Measure = ({
   inheritedClef,
   fifths,
   inheritedFifths,
+  tempo,
   systemStart,
   style,
   time,
@@ -67,6 +71,7 @@ export const Measure = ({
     <ClefContext.Provider value={activeClef}>
       <div className="measure-container" style={style}>
         <StaffLines />
+        {tempo && <Tempo {...tempo} />}
         {barline !== "none" && (
           <Barline type={barline ?? "regular"} placement="end" />
         )}

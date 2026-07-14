@@ -40,6 +40,8 @@ export interface NoteStackProps {
   articulation?: ArticulationType;
   articulationPlacement?: "above" | "below";
   dynamic?: DynamicType;
+  // Expression text ("dolce", "cresc.") in italics below the staff
+  text?: string;
 }
 
 const STEM_LENGTH = 28; // 3.5 staff-spaces in viewBox units
@@ -268,6 +270,7 @@ export const NoteStack = (props: NoteStackProps) => {
           {dynamicGlyphs[props.dynamic]}
         </div>
       )}
+      {props.text && <div className="note-text">{props.text}</div>}
       {stemLine && (
         <div className={"stem-container " + (stemUp ? "stem-above" : "")}>
           <svg

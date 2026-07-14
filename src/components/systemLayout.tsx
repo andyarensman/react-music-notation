@@ -1,6 +1,6 @@
 import { Children, ReactElement, ReactNode, isValidElement } from "react";
 import { BeamContainer } from "./BeamContainer";
-import { isVoiceElement } from "./layout";
+import { getMusicRole, isVoiceElement } from "./layout";
 import { Pitch, StackedNote } from "../helpers/types";
 
 /*
@@ -39,7 +39,13 @@ export const estimateNotesWidthSs = (children: ReactNode): number => {
     if (!isValidElement<CountableProps>(child)) {
       return;
     }
-    if (child.type === BeamContainer) {
+    const role = getMusicRole(child);
+    if (
+      child.type === BeamContainer ||
+      role === "slur" ||
+      role === "hairpin" ||
+      role === "tuplet"
+    ) {
       width += estimateNotesWidthSs(child.props.children);
       return;
     }

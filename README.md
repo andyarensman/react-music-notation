@@ -68,7 +68,24 @@ The project is built in phases; each completed phase has a kitchen-sink story un
 - CI (typecheck + library build + Storybook build) and a Storybook →
   GitHub Pages deploy workflow
 
-**Still out**: cross-staff beaming, slurs, tuplets, cross-measure ties (a tie on a measure's last note stops at the barline; no incoming half-tie on the next system), ties on chord members, 64th+ notes, hairpin crescendo/decrescendo marks, automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), courtesy naturals on key changes, MusicXML/MIDI import or export, playback, and print layout.
+**Phase 8 (the "real music" pack)**
+
+- Tuplets: `<Tuplet ratio={[3, 2]}>` scales its children's durations and
+  draws the bracket-and-number (above by default, below via `position` or a
+  down-voice); beamed and bracketed forms both work
+- Slurs: `<Slur>` wraps a contiguous run of events and draws the curve from
+  the first to the last notehead — below when every stem points up, above
+  otherwise (including over up-stemmed beam groups, where it clears the stem
+  tips); `direction` overrides, and voices push slurs to their outer side
+- Hairpins: `<Hairpin type="crescendo" | "diminuendo">` draws the wedge at
+  dynamics height under the wrapped events
+- Tempo marks (`tempo` on `Measure`): text and/or a metronome equation
+  (♩ = 120, SMuFL metronome glyphs) above the staff; expression text
+  (`text` on `Note`/`NoteStack`) in italics on the dynamics line
+- Slur/hairpin wrappers are transparent to the onset grid (their inner notes
+  still align across staves); tuplets stay opaque
+
+**Still out**: cross-staff beaming, cross-measure slurs and ties (both stop at the barline; no incoming half-curve on the next system), ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), courtesy naturals on key changes, MusicXML/MIDI import or export, playback, and print layout.
 
 ## Installing
 
@@ -195,6 +212,31 @@ A `Note` can take `pitch={{ step, octave }}` instead of an explicit `position`. 
 - Inside a `Voice`, articulation moves to the stem end (never the notehead side, per the double-stemmed rule) — `Voice` injects `articulationPlacement`, which is also user-overridable.
 
 `dynamic` is a `DynamicType` (`"pp"` … `"ff"`, `"fp"`, `"sf"`, `"sfz"`, `"rf"`, `"rfz"`) rendered below the staff at the event's position (dropping lower when a below-side articulation needs the room); rests can carry one too.
+
+### Tuplets, slurs, hairpins, tempo
+
+```tsx
+<Measure
+  clef="gClef"
+  time={{ beat: 4, beatType: 4 }}
+  tempo={{ text: "Allegro", beatUnit: "quarter", bpm: 120 }}
+>
+  <Slur>
+    <BeamContainer>
+      <Note pitch={{ step: "C", octave: 5 }} noteValue="eighth" />
+      <Note pitch={{ step: "D", octave: 5 }} noteValue="eighth" />
+    </BeamContainer>
+    <Note pitch={{ step: "E", octave: 5 }} noteValue="quarter" />
+  </Slur>
+  <Tuplet ratio={[3, 2]}>
+    <Note pitch={{ step: "F", octave: 5 }} noteValue="quarter" />
+    <Note pitch={{ step: "E", octave: 5 }} noteValue="quarter" />
+    <Note pitch={{ step: "D", octave: 5 }} noteValue="quarter" />
+  </Tuplet>
+</Measure>
+```
+
+`Tuplet`, `Slur`, and `Hairpin` all wrap a contiguous run of events and can nest beam groups. A tuplet's `ratio={[actual, normal]}` scales its children's durations (three-in-the-time-of-two = each note at ⅔ width), so the measure's flex math and the onset grid keep working. Inside a `Voice`, all three inherit the voice's stem direction and outer side.
 
 ### Rests
 
