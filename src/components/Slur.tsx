@@ -132,7 +132,31 @@ const SlurComponent = ({ direction, stem, children }: SlurProps) => {
   };
   const y1 = anchorY(first);
   const y2 = anchorY(last);
-  const bulge = above ? Math.min(y1, y2) - 12 : Math.max(y1, y2) + 12;
+  /*
+    The curve must stay outside every stem and beam it spans (Gould: a slur
+    "should always remain outside a beam"), so the bulge clears the most
+    extreme stem-tip line of ALL covered notes, not just the endpoints. For
+    beamed notes the beam sits at (or below) the standard tip, so standard
+    tips are a safe bound.
+  */
+  const obstacle = above
+    ? Math.min(
+        ...notes.map((note) =>
+          note.stemUp
+            ? StemPositions[note.topPosition] - 28
+            : StemPositions[note.topPosition] - 8
+        )
+      )
+    : Math.max(
+        ...notes.map((note) =>
+          note.stemUp
+            ? StemPositions[note.bottomPosition] + 8
+            : StemPositions[note.bottomPosition] + 28
+        )
+      );
+  const bulge = above
+    ? Math.min(y1, y2, obstacle) - 14
+    : Math.max(y1, y2, obstacle) + 14;
   const innerBulge = bulge + (above ? 4 : -4);
 
   const spanPercentage =
@@ -146,8 +170,11 @@ const SlurComponent = ({ direction, stem, children }: SlurProps) => {
       {children}
       <div className="slur-overlay" style={{ width: `${spanPercentage}%` }}>
         <svg viewBox="0 0 100 129" preserveAspectRatio="none" className="slur-svg">
+          {/* cubic so the curve holds its height across the group and only
+              rises/falls near the endpoints — keeps it clear of beams that
+              end mid-span */}
           <path
-            d={`M2,${y1} Q50,${bulge} 98,${y2} Q50,${innerBulge} 2,${y1} Z`}
+            d={`M2,${y1} C25,${bulge} 85,${bulge} 98,${y2} C85,${innerBulge} 25,${innerBulge} 2,${y1} Z`}
           />
         </svg>
       </div>

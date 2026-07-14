@@ -4,10 +4,10 @@
 
 /* Bracket with a gap for the number; hooks on the outer ends point toward
    the staff */
+/* Width is set inline: it ends at the final notehead's right edge */
 .tuplet-bracket {
   position: absolute;
   left: calc(var(--staff-space) * 0.25);
-  right: calc(var(--staff-space) * 0.75);
   height: calc(var(--staff-space) * 0.75);
   display: flex;
   flex-direction: row;
