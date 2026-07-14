@@ -1,0 +1,57 @@
+.score-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.score-system {
+  display: flex;
+  flex-direction: row;
+}
+
+.score-measure {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-width: calc(var(--staff-space) * 31.25);
+}
+
+.score-part {
+  position: relative;
+}
+
+/* Pull the parts' line boxes together for an 8 staff-space gap between
+   staves (looser than a grand staff's 6) */
+.score-part-following {
+  margin-top: calc(var(--staff-space) * -4);
+}
+
+/* The measure barline and the system-start barline both span from the top
+   staff's top line to the bottom staff's bottom line */
+.score-measure > .barline {
+  height: var(--score-barline-height);
+}
+
+.score-system-barline {
+  flex-shrink: 0;
+  width: var(--staff-line-thickness);
+  background-color: black;
+  margin-top: calc(
+    (var(--staff-space) * 12.125 - var(--staff-line-thickness)) / 2
+  );
+}
+
+.score-name-gutter {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.score-part-name {
+  position: absolute;
+  right: calc(var(--staff-space) * 1.25);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: calc(var(--staff-space) * 1.7);
+  line-height: 1;
+  white-space: nowrap;
+}

@@ -85,7 +85,20 @@ The project is built in phases; each completed phase has a kitchen-sink story un
 - Slur/hairpin wrappers are transparent to the onset grid (their inner notes
   still align across staves); tuplets stay opaque
 
-**Still out**: cross-staff beaming, cross-measure slurs and ties (both stop at the barline; no incoming half-curve on the next system), ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), courtesy naturals on key changes, MusicXML/MIDI import or export, playback, and print layout.
+**Phase 9**
+
+- Multi-instrument scores: `Score` + `ScoreMeasure` stack any number of
+  parts per measure — all parts share the union onset grid so different
+  rhythms align vertically across every staff, one barline spans from the
+  top staff to the bottom, each system starts with a systemic barline, and
+  each part's running clef/key restates per system
+- Part names (`partNames` on `Score`) in a left gutter on the first system
+- Slur/beam clearance and tuplet bracket extents fixed against Gould
+  (pp. 195, "Length of brackets"; slurs remain outside beams)
+
+**Still out**: cross-staff beaming, cross-measure slurs and ties (both stop at the barline; no incoming half-curve on the next system), ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), courtesy naturals on key changes, bracketed instrument-family groups in scores, a grand-staff part inside a `Score`, MusicXML/MIDI import or export, playback, and print layout.
+
+**MusicXML coverage roadmap** — auditing the [MusicXML 4.0 element reference](https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/) against what renders today, the notable visual-notation elements still missing are: ornaments (`trill-mark`, `turn`/`inverted-turn`, `mordent`/`inverted-mordent`, `wavy-line`), `grace` notes and `cue` notes, `fermata`, `breath-mark`/`caesura`, `tremolo`, `arpeggiate`, `glissando`/`slide`, `octave-shift` (8va), `pedal`, `lyric`, `ending` (volta brackets), `segno`/`coda`, `rehearsal` marks, `multiple-rest` (multi-measure rests), harmony/chord symbols, tablature, and percussion notation. These are the candidate pool for future phases.
 
 ## Installing
 
@@ -302,6 +315,21 @@ All four are props on `Measure`, plus `startRepeat` for a left-side repeat barli
 ```
 
 `GrandMeasure` takes `upper`/`lower` (each a `<Measure>` element), plus `barline` and `startRepeat` applied across both staves. `GrandStaff` draws the brace and tracks a running clef per staff, the same way `Staff` does for one. See [Grand staff](#grand-staff) for the layout and known limitations.
+
+### `Score` / `ScoreMeasure`: multi-instrument systems
+
+```tsx
+<Score partNames={["Violin", "Cello"]}>
+  <ScoreMeasure
+    parts={[
+      <Measure clef="gClef" time={{ beat: 4, beatType: 4 }}>{/* ... */}</Measure>,
+      <Measure clef="fClef" time={{ beat: 4, beatType: 4 }}>{/* ... */}</Measure>,
+    ]}
+  />
+</Score>
+```
+
+`ScoreMeasure` takes one `Measure` per part (top staff first) plus `barline`/`startRepeat` applied across all staves. `Score` breaks measures into systems like `Staff`/`GrandStaff` do, draws a systemic barline at each system's start, tracks running clef/key per part, and renders `partNames` in a left gutter on the first system. All parts of a measure share the union onset grid, so simultaneous notes align across every staff.
 
 ### `Voice`: two voices per staff
 
