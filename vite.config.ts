@@ -8,16 +8,25 @@ export default defineConfig({
   plugins: [
     react(),
     dts({
-      include: ["src/index.ts", "src/components", "src/helpers"],
+      include: [
+        "src/index.ts",
+        "src/components",
+        "src/helpers",
+        "src/musicxml",
+      ],
     }),
   ],
   build: {
     copyPublicDir: false,
     lib: {
-      entry: resolve(__dirname, "src/index.ts"),
+      entry: {
+        index: resolve(__dirname, "src/index.ts"),
+        musicxml: resolve(__dirname, "src/musicxml/index.ts"),
+      },
       name: "ReactMusicNotation",
       formats: ["es", "cjs"],
-      fileName: (format) => `index.${format === "es" ? "js" : "cjs"}`,
+      fileName: (format, entryName) =>
+        `${entryName}.${format === "es" ? "js" : "cjs"}`,
     },
     // one dist/style.css for consumers to import; the Leland woff2 inlines
     // into it as a data uri so there are no asset-path issues in node_modules

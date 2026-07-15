@@ -96,7 +96,19 @@ The project is built in phases; each completed phase has a kitchen-sink story un
 - Slur/beam clearance and tuplet bracket extents fixed against Gould
   (pp. 195, "Length of brackets"; slurs remain outside beams)
 
-**Still out**: cross-staff beaming, cross-measure slurs and ties (both stop at the barline; no incoming half-curve on the next system), ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), courtesy naturals on key changes, bracketed instrument-family groups in scores, a grand-staff part inside a `Score`, MusicXML/MIDI import or export, playback, and print layout.
+**Phase 10**
+
+- MusicXML import as a subpath export (`react-music-notation/musicxml`,
+  zero extra cost to consumers who don't use it): `parseMusicXML(xml)` and a
+  `<MusicXMLScore xml={...}/>` component map score-partwise documents onto
+  the component tree — keys/times/clefs, notes/rests/chords, voices, beams,
+  tuplets (time-modification), slurs, ties, articulations, dynamics, wedges,
+  tempo/words, barlines/repeats; one part → `Staff`, a two-staff part →
+  `GrandStaff`, multiple parts → `Score` with part names
+- Graceful degradation: unsupported elements (ornaments, grace notes,
+  lyrics, fermata, ...) are skipped and reported through `onWarnings`
+
+**Still out**: cross-staff beaming, cross-measure slurs and ties (both stop at the barline; no incoming half-curve on the next system), ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), courtesy naturals on key changes, bracketed instrument-family groups in scores, a grand-staff part inside a `Score`, `.mxl` unzipping (pass the contained XML string yourself), MusicXML export, MIDI, playback, and print layout.
 
 **MusicXML coverage roadmap** — auditing the [MusicXML 4.0 element reference](https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/) against what renders today, the notable visual-notation elements still missing are: ornaments (`trill-mark`, `turn`/`inverted-turn`, `mordent`/`inverted-mordent`, `wavy-line`), `grace` notes and `cue` notes, `fermata`, `breath-mark`/`caesura`, `tremolo`, `arpeggiate`, `glissando`/`slide`, `octave-shift` (8va), `pedal`, `lyric`, `ending` (volta brackets), `segno`/`coda`, `rehearsal` marks, `multiple-rest` (multi-measure rests), harmony/chord symbols, tablature, and percussion notation. These are the candidate pool for future phases.
 
@@ -330,6 +342,19 @@ All four are props on `Measure`, plus `startRepeat` for a left-side repeat barli
 ```
 
 `ScoreMeasure` takes one `Measure` per part (top staff first) plus `barline`/`startRepeat` applied across all staves. `Score` breaks measures into systems like `Staff`/`GrandStaff` do, draws a systemic barline at each system's start, tracks running clef/key per part, and renders `partNames` in a left gutter on the first system. All parts of a measure share the union onset grid, so simultaneous notes align across every staff.
+
+### MusicXML import
+
+```tsx
+import { MusicXMLScore, parseMusicXML } from "react-music-notation/musicxml";
+
+<MusicXMLScore xml={xmlString} onWarnings={(w) => console.log(w)} />;
+
+// or, for the element + warnings directly:
+const { element, warnings } = parseMusicXML(xmlString);
+```
+
+The importer accepts score-partwise MusicXML as a string (unzip `.mxl` files yourself and pass the contained document) and renders the subset this library supports, skipping the rest with a warnings report. Durations come from each note's `<type>`/`<dot>`/`<time-modification>`; `<backup>`/`<forward>` cursors are not needed because voices are reconstructed from `<voice>` numbers.
 
 ### `Voice`: two voices per staff
 

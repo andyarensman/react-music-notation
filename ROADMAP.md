@@ -9,10 +9,11 @@ afternoon) can handle. Grounded against the
 
 ## Heavy lifts (architecture-shaping)
 
-- **MusicXML import** — parse `.musicxml`/`.mxl` into the component tree.
-  The biggest adoption lever; touches every feature and forces API
-  completeness. Needs tuplet/slur/tie coverage (done) plus grace notes and
-  voltas to represent real files faithfully.
+- ~~**MusicXML import**~~ — shipped as `react-music-notation/musicxml`
+  (score-partwise → components with a warnings report). Importer coverage
+  now grows with the notation roadmap: grace notes, lyrics, voltas, 8va,
+  and ornaments below all have MusicXML elements waiting on renderer
+  support.
 - **Lyrics** (`<lyric>`) — verse text under notes interacts with the
   spacing engine (syllable widths can exceed note widths) and with
   multi-verse alignment.

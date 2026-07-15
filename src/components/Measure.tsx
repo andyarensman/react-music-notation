@@ -135,7 +135,9 @@ export const Measure = ({
         <div className="data-container">
           <div className="meta-container">
             {displayClef && <Clef clef={displayClef} />}
-            {displayFifths && (
+            {/* !! guard: fifths={0} (C major) draws nothing and must not
+                render a literal React "0" */}
+            {!!displayFifths && (
               <KeySignature fifths={displayFifths} clef={activeClef} />
             )}
             {time && <TimeSignature {...time} />}

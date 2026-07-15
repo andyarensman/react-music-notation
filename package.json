@@ -28,6 +28,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./musicxml": {
+      "types": "./dist/musicxml/index.d.ts",
+      "import": "./dist/musicxml.js",
+      "require": "./dist/musicxml.cjs"
+    },
     "./styles.css": "./dist/style.css"
   },
   "files": [
