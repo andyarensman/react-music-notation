@@ -42,7 +42,12 @@ export const getEventFlex = (node: ReactNode): number => {
     return 0;
   }
   const role = getMusicRole(node);
-  if (node.type === BeamContainer || role === "slur" || role === "hairpin") {
+  if (
+    node.type === BeamContainer ||
+    role === "slur" ||
+    role === "hairpin" ||
+    role === "ottava"
+  ) {
     return Children.toArray(
       (node.props as { children?: ReactNode }).children
     ).reduce((sum: number, child) => sum + getEventFlex(child), 0);
@@ -94,7 +99,7 @@ export const getOnsetBoundaries = (children: ReactNode): number[] => {
   const addEvents = (nodes: ReactNode) => {
     Children.toArray(nodes).forEach((child) => {
       const role = getMusicRole(child);
-      if (role === "slur" || role === "hairpin") {
+      if (role === "slur" || role === "hairpin" || role === "ottava") {
         addEvents((child as ReactElement<{ children?: ReactNode }>).props.children);
         return;
       }
@@ -220,6 +225,7 @@ const collectTimedNotes = (children: ReactNode, clef: ClefType): TimedNote[] => 
       if (
         role === "slur" ||
         role === "hairpin" ||
+        role === "ottava" ||
         child.type === BeamContainer
       ) {
         walk(props.children);

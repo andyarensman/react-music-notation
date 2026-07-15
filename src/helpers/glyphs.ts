@@ -99,6 +99,17 @@ export const graceNoteGlyphs = {
   appoggiaturaDown: "\ue563",
 };
 
+// Octave-shift labels. NOTE: Leland/SMuFL keep the explicit vb/mb
+// ligatures at E51C/E51D (ottavaBassaVb, quindicesimaBassaMb) - the
+// plain bassa codepoints E512/E513/E516 draw "8va"/"8ba"/"15ma" instead
+// (verified by rendering; see the add-glyphs skill).
+export const ottavaGlyphs = {
+  "8va": "\ue511",
+  "8vb": "\ue51c",
+  "15ma": "\ue515",
+  "15mb": "\ue51d",
+};
+
 // Tuplet number digits (SMuFL tuplet0-tuplet9)
 export const tupletGlyphs: Record<number, string> = {
   0: "\uE880",

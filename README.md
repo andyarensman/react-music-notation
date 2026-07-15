@@ -160,9 +160,24 @@ The project is built in phases; each completed phase has a kitchen-sink story un
   and chords separate; dotted up-voice notes widen the shift to clear
   the dot. Applies automatically to two-voice MusicXML imports.
 
-**Still out**: grace-note accidentals and beamed/slurred grace-note runs, D.S./D.C./segno/coda navigation marks, cross-staff beaming, collisions inside beamed groups between voices, ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, courtesy naturals on key changes, bracketed instrument-family groups in scores, a grand-staff part inside a `Score`, melisma extender lines and elisions, verse numbers, 3+ lyric verses (they overflow toward the next system), `.mxl` unzipping (pass the contained XML string yourself), MusicXML export, MIDI, playback, and print layout. See `ROADMAP.md` for the full coverage audit against Behind Bars and the MusicXML element reference.
+**Phase 15**
 
-**MusicXML coverage roadmap** — auditing the [MusicXML 4.0 element reference](https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/) against what renders today, the notable visual-notation elements still missing are: ornaments (`trill-mark`, `turn`/`inverted-turn`, `mordent`/`inverted-mordent`, `wavy-line`), `cue` notes, `fermata`, `breath-mark`/`caesura`, `tremolo`, `arpeggiate`, `glissando`/`slide`, `octave-shift` (8va), `pedal`, `segno`/`coda`, `rehearsal` marks, `multiple-rest` (multi-measure rests), harmony/chord symbols, tablature, and percussion notation. These are the candidate pool for future phases.
+- Octave lines (`Ottava` wrapper): 8va/8vb/15ma/15mb with the SMuFL label
+  ligature, dashed line, and closing hook toward the staff. Notes keep
+  their sounding pitch — the wrapper re-octaves the staff positions
+  beneath it through a context, so chords, grace notes, and anything else
+  that resolves a pitch follows automatically (explicit `position` props
+  are untouched). Timing-transparent to the onset grid, like
+  `Slur`/`Hairpin`. Leland quirk: the plain SMuFL bassa codepoints draw
+  "8va"/"15ma"; the explicit "8vb"/"15mb" ligatures live at E51C/E51D
+- MusicXML: `<octave-shift>` directions map within a measure (the stop is
+  exclusive, per the spec's placement before the first loco note); spans
+  crossing a barline are skipped with a warning — pitches then render
+  loco, which is still pitch-accurate
+
+**Still out**: grace-note accidentals and beamed/slurred grace-note runs, D.S./D.C./segno/coda navigation marks, cross-staff beaming, collisions inside beamed groups between voices, octave lines crossing barlines, ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, courtesy naturals on key changes, bracketed instrument-family groups in scores, a grand-staff part inside a `Score`, melisma extender lines and elisions, verse numbers, 3+ lyric verses (they overflow toward the next system), `.mxl` unzipping (pass the contained XML string yourself), MusicXML export, MIDI, playback, and print layout. See `ROADMAP.md` for the full coverage audit against Behind Bars and the MusicXML element reference.
+
+**MusicXML coverage roadmap** — auditing the [MusicXML 4.0 element reference](https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/) against what renders today, the notable visual-notation elements still missing are: ornaments (`trill-mark`, `turn`/`inverted-turn`, `mordent`/`inverted-mordent`, `wavy-line`), `cue` notes, `fermata`, `breath-mark`/`caesura`, `tremolo`, `arpeggiate`, `glissando`/`slide`, `pedal`, `segno`/`coda`, `rehearsal` marks, `multiple-rest` (multi-measure rests), harmony/chord symbols, tablature, and percussion notation. These are the candidate pool for future phases.
 
 ## Installing
 
@@ -343,6 +358,17 @@ The `Slur` wrapper can't cross a barline (its children live in one measure), so 
 ```
 
 `lyrics` (also on `NoteStack`) takes one entry per verse: a plain string for a whole word, or `{ text, syllabic }` where `syllabic: "begin" | "middle"` draws a hyphen toward the next syllable. Syllables center under the notehead; a long syllable raises its note's minimum slot width so neighboring verses never collide (the same estimate feeds system breaking). Two verses fit comfortably; more will crowd the next system.
+
+### Octave lines (`Ottava`)
+
+```tsx
+<Ottava type="8va">
+  <Note pitch={{ step: "C", octave: 6 }} noteValue="quarter" />
+  <Note pitch={{ step: "E", octave: 6 }} noteValue="quarter" />
+</Ottava>
+```
+
+`Ottava` wraps a run of events in an octave line: the label ligature (8va, 8vb, 15ma, or 15mb via `type`), a dashed line across the passage, and a closing hook toward the staff. Notes keep their **sounding** pitch — the wrapper re-octaves the staff positions beneath it (an 8va passage draws its pitches an octave lower), including chord tones and grace notes; explicit `position` props are never shifted. 8va/15ma sit above the staff, 8vb/15mb below. The wrapper is timing-transparent to the onset grid and cannot cross a barline.
 
 ### Grace notes
 

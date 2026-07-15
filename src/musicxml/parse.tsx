@@ -15,6 +15,7 @@ import { ScoreMeasure } from "../components/ScoreMeasure";
 import { BarlineType } from "../components/MeasureMeta/Barline";
 import { TempoProps } from "../components/MeasureMeta/Tempo";
 import { EndingProps } from "../components/MeasureMeta/Volta";
+import { Ottava, OttavaType } from "../components/Ottava";
 import {
   ArticulationType,
   ClefType,
@@ -127,6 +128,10 @@ interface ParsedNote {
   text?: string;
   wedgeStart?: "crescendo" | "diminuendo";
   wedgeStop: boolean;
+  // an <octave-shift> starts before this note / stops before this note
+  // (the stop is exclusive: the marked note itself is back at pitch)
+  ottavaStart?: OttavaType;
+  ottavaStop?: boolean;
 }
 
 interface MeasureAttributes {
@@ -252,6 +257,8 @@ function parseMeasure(
       text?: string;
       wedgeStart?: "crescendo" | "diminuendo";
       wedgeStop?: boolean;
+      ottavaStart?: OttavaType;
+      ottavaStop?: boolean;
     }
   >();
   const pendingFor = (staff: number) => {
@@ -295,6 +302,8 @@ function parseMeasure(
         note.text = claim.text;
         note.wedgeStart = claim.wedgeStart;
         note.wedgeStop = claim.wedgeStop ?? false;
+        note.ottavaStart = claim.ottavaStart;
+        note.ottavaStop = claim.ottavaStop ?? false;
         pending.set(note.staff, {});
 
         if (!measure.staves.has(note.staff)) {
@@ -407,6 +416,8 @@ function parseDirection(
     text?: string;
     wedgeStart?: "crescendo" | "diminuendo";
     wedgeStop?: boolean;
+    ottavaStart?: OttavaType;
+    ottavaStop?: boolean;
   },
   sawNote: boolean,
   warn: (message: string) => void
@@ -430,6 +441,22 @@ function parseDirection(
           if (type === "crescendo") pending.wedgeStart = "crescendo";
           else if (type === "diminuendo") pending.wedgeStart = "diminuendo";
           else if (type === "stop") pending.wedgeStop = true;
+          break;
+        }
+        case "octave-shift": {
+          // MusicXML: type="down" notates pitches an octave below sounding
+          // (the 8va line above the staff); type="up" is the 8vb line
+          const type = item.getAttribute("type");
+          const size = item.getAttribute("size") ?? "8";
+          if (type === "down") {
+            pending.ottavaStart = size === "15" ? "15ma" : "8va";
+          } else if (type === "up") {
+            pending.ottavaStart = size === "15" ? "15mb" : "8vb";
+          } else if (type === "stop") {
+            pending.ottavaStop = true;
+          } else if (type === "continue") {
+            warn('Skipped <octave-shift type="continue">');
+          }
           break;
         }
         case "metronome": {
@@ -634,6 +661,8 @@ interface EventDesc {
   slurStop: boolean;
   wedgeStart?: "crescendo" | "diminuendo";
   wedgeStop: boolean;
+  ottavaStart?: OttavaType;
+  ottavaStop: boolean;
 }
 
 function buildVoiceEvents(
@@ -700,6 +729,8 @@ function buildVoiceEvents(
       slurStop: stopMatched[index],
       wedgeStart: first.wedgeStart,
       wedgeStop: group.some((n) => n.wedgeStop),
+      ottavaStart: first.ottavaStart,
+      ottavaStop: group.some((n) => n.ottavaStop),
     };
     if (group.length > 1) {
       const pitches: StackedNote[] = group.map((n) => ({ pitch: n.pitch }));
@@ -801,7 +832,52 @@ function buildVoiceEvents(
     "wedge"
   );
 
-  // 5) slurs (outermost)
+  // 5) octave-shift lines. Unlike the other spans, the stop marker is
+  // EXCLUSIVE: MusicXML places <octave-shift type="stop"/> before the
+  // first note back at pitch, so the marked note stays outside the
+  // wrapper (re-octaving it would change its staff position). Spans
+  // crossing the barline are skipped: rendering the pitches loco is
+  // pitch-accurate, just without the line.
+  {
+    const wrapped: EventDesc[] = [];
+    let open: EventDesc[] | null = null;
+    let openKey = 0;
+    const closeOpen = () => {
+      if (!open) return;
+      wrapped.push({
+        node: (
+          <Ottava key={`ottava-${openKey}`} type={open[0].ottavaStart}>
+            {open.map((member) => member.node)}
+          </Ottava>
+        ),
+        tupletStart: false,
+        tupletStop: false,
+        // the outer slur pass still needs boundaries carried by members
+        slurStart: open.some((member) => member.slurStart),
+        slurStop: open.some((member) => member.slurStop),
+        wedgeStop: false,
+        ottavaStart: undefined,
+        ottavaStop: false,
+      });
+      open = null;
+    };
+    events.forEach((event, index) => {
+      if (open && event.ottavaStop) closeOpen();
+      if (!open && event.ottavaStart !== undefined) {
+        open = [];
+        openKey = index;
+      }
+      if (open) open.push(event);
+      else wrapped.push(event);
+    });
+    if (open !== null) {
+      warn("Skipped an octave-shift crossing the barline");
+      wrapped.push(...(open as EventDesc[]));
+    }
+    events = wrapped;
+  }
+
+  // 6) slurs (outermost)
   events = wrapRange(
     events,
     (event) => event.slurStart,
@@ -864,6 +940,12 @@ function wrapRange(
           )?.wedgeStart,
           wedgeStop: members.some(
             (member) => member.wedgeStop && !isStop(member)
+          ),
+          ottavaStart: members.find(
+            (member) => member.ottavaStart && !isStart(member)
+          )?.ottavaStart,
+          ottavaStop: members.some(
+            (member) => member.ottavaStop && !isStop(member)
           ),
         });
         open = null;

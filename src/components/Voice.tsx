@@ -15,7 +15,7 @@ import {
 
 // Wrappers the voice's defaults recurse into, so notes inside a slurred or
 // tupleted passage still get the voice's stems/rests/ties/articulation sides
-const TRANSPARENT_GROUPS = new Set(["slur", "tuplet", "hairpin"]);
+const TRANSPARENT_GROUPS = new Set(["slur", "tuplet", "hairpin", "ottava"]);
 
 interface VoiceProps {
   /**

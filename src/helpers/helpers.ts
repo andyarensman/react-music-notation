@@ -308,6 +308,35 @@ export const getDefaultStem = (
 ): "upStem" | "downStem" =>
   positionIndex(position) <= MIDDLE_LINE_INDEX ? "downStem" : "upStem";
 
+/*
+  Octave-line support: shift a pitch-bearing entry's written octave before
+  resolving its staff position (an 8va passage renders sounding pitches an
+  octave lower). Explicit `position` props always win over pitch and are
+  never shifted; entries without an octave pass through untouched.
+*/
+export const applyOttavaShift = <
+  T extends { pitch?: Pitch; position?: PitchPosition },
+>(
+  entry: T,
+  octaves: number
+): T => {
+  if (
+    !octaves ||
+    entry.position !== undefined ||
+    !entry.pitch ||
+    entry.pitch.octave === undefined
+  ) {
+    return entry;
+  }
+  return {
+    ...entry,
+    pitch: {
+      ...entry.pitch,
+      octave: (entry.pitch.octave + octaves) as Pitch["octave"],
+    },
+  };
+};
+
 // y of the staff top line inside the 129-unit stem/beam viewBox
 // (middle line is 64; the top line sits two staff-spaces = 16 units above)
 const VIEWBOX_STAFF_TOP = 48;

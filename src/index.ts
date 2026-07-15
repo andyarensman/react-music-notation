@@ -11,6 +11,8 @@ export { Voice } from "./components/Voice";
 export { Tuplet } from "./components/Tuplet";
 export { Slur } from "./components/Slur";
 export { Hairpin } from "./components/Hairpin";
+export { Ottava } from "./components/Ottava";
+export type { OttavaType } from "./components/Ottava";
 export { GrandStaff } from "./components/GrandStaff";
 export { GrandMeasure } from "./components/GrandMeasure";
 export type { GrandMeasureProps } from "./components/GrandMeasure";

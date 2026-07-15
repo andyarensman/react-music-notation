@@ -1,0 +1,54 @@
+.ottava-group {
+  position: relative;
+  display: flex;
+  flex-grow: 1;
+}
+
+.ottava-line {
+  position: absolute;
+  left: 0;
+  right: calc(var(--staff-space) * 0.4);
+  height: calc(var(--staff-space) * 1.6);
+  pointer-events: none;
+}
+
+/* above the staff (8va/15ma); the hook drops toward the staff */
+.ottava-above {
+  top: calc(var(--staff-space) * 1.3);
+}
+
+/* below the staff (8vb/15mb); the hook rises toward the staff */
+.ottava-below {
+  top: calc(var(--staff-space) * 12.6);
+}
+
+.ottava-glyph {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: calc(var(--staff-space) * 4);
+  line-height: calc(var(--staff-space) * 1.6);
+}
+
+.ottava-dashes {
+  position: absolute;
+  right: 0;
+  top: calc(var(--staff-space) * 0.15);
+  border-top: var(--staff-line-thickness) dashed black;
+}
+
+.ottava-hook {
+  position: absolute;
+  right: 0;
+  width: 0;
+  border-right: var(--staff-line-thickness) solid black;
+  height: calc(var(--staff-space) * 0.75);
+}
+
+.ottava-above .ottava-hook {
+  top: calc(var(--staff-space) * 0.15);
+}
+
+.ottava-below .ottava-hook {
+  top: calc(var(--staff-space) * -0.6);
+}

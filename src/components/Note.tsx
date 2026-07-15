@@ -12,6 +12,7 @@ import {
 import {
   MIDDLE_LINE_INDEX,
   TOP_LINE_INDEX,
+  applyOttavaShift,
   articulationCentersOnStem,
   articulationDefaultsAbove,
   articulationLeftSs,
@@ -29,6 +30,7 @@ import {
 } from "../helpers/helpers";
 import { NoteProps } from "../helpers/types";
 import { ClefContext } from "./ClefContext";
+import { OttavaContext } from "./OttavaContext";
 
 /**
  * Renders a single note or rest: notehead/rest glyph, optional accidental,
@@ -44,8 +46,9 @@ import { ClefContext } from "./ClefContext";
  */
 export const Note = (props: NoteProps) => {
   const clef = useContext(ClefContext);
+  const ottava = useContext(OttavaContext);
   const { noteValue, rest, dotted, stemEndValue } = props;
-  const position = resolvePosition(props, clef);
+  const position = resolvePosition(applyOttavaShift(props, ottava), clef);
   const stem = !rest ? props.stem || getDefaultStem(position) : undefined;
   const pitch = !rest ? props.pitch : null;
 
@@ -195,7 +198,10 @@ export const Note = (props: NoteProps) => {
         ></div>
       ))}
       {graces?.map((graceNote, index) => {
-        const gracePosition = resolvePosition(graceNote, clef);
+        const gracePosition = resolvePosition(
+          applyOttavaShift(graceNote, ottava),
+          clef
+        );
         const left = -(accidentalMargin + 0.5 + (graces.length - index) * 1.7);
         return (
           <div

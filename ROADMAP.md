@@ -111,8 +111,11 @@ afternoon) can handle. Grounded against the
   collisions inside beamed groups, cross-voice accidental collisions,
   and the more general collision-aware horizontal spacing (accidentals
   inside beams shift stems slightly off the beam math).
-- **Octave shift / 8va** (`<octave-shift>`) — dashed bracket + changing the
-  pitch-to-position mapping under it.
+- ~~**Octave shift / 8va**~~ — shipped: the `Ottava` wrapper (8va/8vb/
+  15ma/15mb) draws the dashed line + label and re-octaves the staff
+  positions beneath it via context; MusicXML `<octave-shift>` maps
+  within measures. Still open: octave lines crossing barlines/system
+  breaks (would ride the CurveOverlay mechanism).
 - **Interactivity + accessibility pack** — onNoteClick/hover/selection
   passthrough, ARIA labels per note/measure, keyboard focus. The
   differentiator versus canvas engraving engines.

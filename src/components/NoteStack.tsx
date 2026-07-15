@@ -12,6 +12,7 @@ import {
 } from "../helpers/glyphs";
 import {
   MIDDLE_LINE_INDEX,
+  applyOttavaShift,
   articulationCentersOnStem,
   articulationDefaultsAbove,
   articulationLeftSs,
@@ -38,6 +39,7 @@ import {
   StackedNote,
 } from "../helpers/types";
 import { ClefContext } from "./ClefContext";
+import { OttavaContext } from "./OttavaContext";
 
 export interface NoteStackProps {
   /**
@@ -115,12 +117,16 @@ const MIDDLE_LINE_STEM_Y = 64; // StemPositions["line-3"], the viewBox origin fo
  */
 export const NoteStack = (props: NoteStackProps) => {
   const clef = useContext(ClefContext);
+  const ottava = useContext(OttavaContext);
   const { pitches, noteValue, dotted, stemEndValue } = props;
 
   // Resolve every notehead's position and sort top-of-staff first
   const notes = pitches
     .map((stackedNote) => {
-      const position = resolvePosition(stackedNote, clef);
+      const position = resolvePosition(
+        applyOttavaShift(stackedNote, ottava),
+        clef
+      );
       return { ...stackedNote, position, index: positionIndex(position) };
     })
     .sort((a, b) => a.index - b.index);
@@ -301,7 +307,10 @@ export const NoteStack = (props: NoteStackProps) => {
         ></div>
       ))}
       {props.grace?.map((graceNote, index) => {
-        const gracePosition = resolvePosition(graceNote, clef);
+        const gracePosition = resolvePosition(
+          applyOttavaShift(graceNote, ottava),
+          clef
+        );
         const left = -(
           accidentalMargin +
           0.5 +

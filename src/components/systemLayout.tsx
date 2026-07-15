@@ -47,7 +47,8 @@ export const estimateNotesWidthSs = (children: ReactNode): number => {
       child.type === BeamContainer ||
       role === "slur" ||
       role === "hairpin" ||
-      role === "tuplet"
+      role === "tuplet" ||
+      role === "ottava"
     ) {
       width += estimateNotesWidthSs(child.props.children);
       return;
