@@ -18,9 +18,14 @@ import {
 const TRANSPARENT_GROUPS = new Set(["slur", "tuplet", "hairpin"]);
 
 interface VoiceProps {
-  // Stem direction forced onto every note in the voice (upper voice up,
-  // lower voice down, by convention). Notes that set their own stem win.
+  /**
+   * Stem direction forced onto every note in the voice (upper voice up,
+   * lower voice down, by convention). Notes that set their own stem win.
+   * Also sets the voice's "outer side" used for tie curves and articulation
+   * placement.
+   */
   stem: "upStem" | "downStem";
+  /** The voice's events: notes, chords, beams, tuplets, slurs, hairpins. */
   children?: ReactNode;
 }
 
@@ -96,11 +101,24 @@ const VoiceComponent = ({ stem, children }: VoiceProps) => {
   );
 };
 
-/*
-  musicRole lets layout.tsx and Measure recognize Voice elements without
-  importing this module (Voice imports layout, so a direct import would be
-  circular).
-*/
+// musicRole lets layout.tsx and Measure recognize Voice elements without
+// importing this module (Voice imports layout, so a direct import would be
+// circular)
+/**
+ * One of two rhythmically independent voices sharing a staff. Place two
+ * `Voice` elements directly inside a `Measure`: their events lay out on the
+ * measure's shared onset grid so the voices align with each other (and, in
+ * a grand/score measure, with the other staves). Stems, rest heights, tie
+ * directions, and articulation sides all default to the voice's convention.
+ *
+ * @example
+ * ```tsx
+ * <Measure clef="gClef">
+ *   <Voice stem="upStem">{"..."}</Voice>
+ *   <Voice stem="downStem">{"..."}</Voice>
+ * </Measure>
+ * ```
+ */
 export const Voice = Object.assign(VoiceComponent, {
   musicRole: "voice" as const,
 });

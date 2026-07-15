@@ -37,6 +37,22 @@ interface AnnotatedMeasure {
   systems justify to full width; a mostly-empty final system stays at
   natural width instead of stretching its measures.
 */
+/**
+ * Wraps a run of `Measure` children into a single-staff system layout:
+ * breaks measures into systems (lines) from the measured container width,
+ * tracks the running clef and key signature across measures that don't
+ * restate them, and restates both on the first measure of every system
+ * after the first. A mostly-empty final system keeps its natural width
+ * instead of justifying.
+ *
+ * @example
+ * ```tsx
+ * <Staff>
+ *   <Measure clef="gClef" time={{ beat: 4, beatType: 4 }}>...</Measure>
+ *   <Measure>...</Measure>
+ * </Staff>
+ * ```
+ */
 export const Staff = ({ children }: StaffProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [widthSs, setWidthSs] = useState(0);

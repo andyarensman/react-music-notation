@@ -20,9 +20,13 @@ import {
 } from "./systemLayout";
 
 interface ScoreProps {
-  // Instrument names shown in a left gutter on the first system, one per
-  // part (top staff first)
+  /**
+   * Instrument names shown in a left gutter on the first system, one per
+   * part (top staff first). The gutter's width persists on later systems so
+   * measures stay aligned, but the names render only once.
+   */
   partNames?: string[];
+  /** The score's measures: `ScoreMeasure` elements. */
   children?: ReactNode;
 }
 
@@ -34,12 +38,19 @@ interface AnnotatedScoreMeasure {
   startWidthSs: number;
 }
 
-/*
-  A multi-instrument score: any number of parts stacked per measure
-  (ScoreMeasure), broken into systems from the measured container width.
-  Every system starts with a systemic barline connecting all staves and
-  restates each part's running clef and key signature.
-*/
+/**
+ * A multi-instrument score: any number of parts stacked per measure (see
+ * `ScoreMeasure`), broken into systems from the measured container width.
+ * Every system starts with a systemic barline connecting all staves and
+ * restates each part's running clef and key signature.
+ *
+ * @example
+ * ```tsx
+ * <Score partNames={["Violin", "Cello"]}>
+ *   <ScoreMeasure parts={[trebleMeasure, bassMeasure]} />
+ * </Score>
+ * ```
+ */
 export const Score = ({ partNames, children }: ScoreProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [widthSs, setWidthSs] = useState(0);

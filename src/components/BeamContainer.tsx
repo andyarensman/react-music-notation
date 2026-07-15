@@ -23,8 +23,12 @@ import { beamCreator } from "../helpers/beamCreator";
 import { ClefContext } from "./ClefContext";
 
 interface BeamContainerProps {
+  /** Two or more `Note`/`NoteStack` elements to beam together. */
   children?: ReactNode;
-  // Optional so a surrounding Voice can inject its direction
+  /**
+   * Stem direction for the whole group. Defaults to `"upStem"`; inside a
+   * `Voice` the voice's direction is injected automatically.
+   */
   stem?: "upStem" | "downStem";
 }
 
@@ -49,6 +53,22 @@ const isBeamable = (child: ReactNode): child is ReactElement<BeamableProps> => {
 const BEAM_THICKNESS = 4; // half a staff-space, in viewBox units
 const SECOND_BEAM_GAP = 2; // quarter staff-space between beams
 
+/**
+ * Beams a run of eighth-or-shorter notes/chords together: it overrides each
+ * child's stem, draws the beam (sloped per engraving rules, clamped to one
+ * staff-space of rise), and adds secondary beams for 16ths and 32nds —
+ * mixed groups get per-level segments and partial stubs (dotted-8th + 16th
+ * works).
+ *
+ * @example
+ * ```tsx
+ * <BeamContainer stem="upStem">
+ *   <Note pitch={{ step: "C", octave: 5 }} noteValue="eighth" />
+ *   <Note pitch={{ step: "D", octave: 5 }} noteValue="16th" />
+ *   <Note pitch={{ step: "E", octave: 5 }} noteValue="16th" />
+ * </BeamContainer>
+ * ```
+ */
 export const BeamContainer = ({ stem = "upStem", children }: BeamContainerProps) => {
   const clef = useContext(ClefContext);
   const beamedNotesArray = Children.toArray(children).filter(isBeamable);

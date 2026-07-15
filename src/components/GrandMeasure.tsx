@@ -6,25 +6,65 @@ import { ClefType, KeyRange } from "../helpers/types";
 import { getOnsetBoundaries, unionBoundaries } from "./layout";
 
 export interface GrandMeasureProps {
+  /** The treble/upper staff's `Measure` element. */
   upper: ReactElement<MeasureProps>;
+  /** The bass/lower staff's `Measure` element. */
   lower: ReactElement<MeasureProps>;
+  /**
+   * Barline drawn across both staves at the measure's right edge. Defaults
+   * to `"regular"`. `"repeatEnd"` is drawn per staff instead (its repeat
+   * dots sit on each staff individually); every other type spans both
+   * staves as one barline.
+   */
   barline?: BarlineType;
+  /** Draws a `"repeatStart"` barline at the left edge of both staves. */
   startRepeat?: boolean;
-  // Set by GrandStaff: running clef/key per staff, system-start restating,
-  // and loose-system sizing
+  /**
+   * @internal Set by `GrandStaff`: the clef still in effect for the upper
+   * staff from earlier measures; not usually set manually.
+   */
   inheritedUpperClef?: ClefType;
+  /**
+   * @internal Set by `GrandStaff`: the clef still in effect for the lower
+   * staff from earlier measures; not usually set manually.
+   */
   inheritedLowerClef?: ClefType;
+  /**
+   * @internal Set by `GrandStaff`: the key still in effect for the upper
+   * staff from earlier measures; not usually set manually.
+   */
   inheritedUpperFifths?: KeyRange;
+  /**
+   * @internal Set by `GrandStaff`: the key still in effect for the lower
+   * staff from earlier measures; not usually set manually.
+   */
   inheritedLowerFifths?: KeyRange;
+  /**
+   * @internal Set by `GrandStaff` on the first measure of each system:
+   * restate the running clef and key signature on both staves.
+   */
   systemStart?: boolean;
+  /**
+   * @internal Set by `GrandStaff` for non-justified (loose) final systems;
+   * not usually set manually.
+   */
   style?: CSSProperties;
 }
 
-/*
-  One measure of a grand staff: the upper and lower measures share an onset
-  grid (the union of both staves' note onsets) so simultaneous notes line up,
-  and one barline spans both staves.
-*/
+/**
+ * One measure of a grand staff (piano-style pair of staves): the `upper` and
+ * `lower` measures share an onset grid — the union of both staves' note
+ * onsets — so simultaneous notes line up vertically, and one barline spans
+ * both staves. Use inside a `GrandStaff`.
+ *
+ * @example
+ * ```tsx
+ * <GrandMeasure
+ *   upper={<Measure clef="gClef">{"..."}</Measure>}
+ *   lower={<Measure clef="fClef">{"..."}</Measure>}
+ * />
+ * ```
+ */
 export const GrandMeasure = ({
   upper,
   lower,

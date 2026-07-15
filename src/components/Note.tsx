@@ -26,6 +26,18 @@ import {
 import { NoteProps } from "../helpers/types";
 import { ClefContext } from "./ClefContext";
 
+/**
+ * Renders a single note or rest: notehead/rest glyph, optional accidental,
+ * ledger lines, augmentation dot, stem, tie curve, articulation mark,
+ * dynamic marking, and expression text. Accepts either a pitched note
+ * (`NoteValueProps`) or a rest (`RestProps`) — see `NoteProps`.
+ *
+ * @example
+ * ```tsx
+ * <Note pitch={{ step: "C", octave: 5 }} noteValue="quarter" />
+ * <Note rest noteValue="quarter" dotted={1} />
+ * ```
+ */
 export const Note = (props: NoteProps) => {
   const clef = useContext(ClefContext);
   const { noteValue, rest, dotted, stemEndValue } = props;

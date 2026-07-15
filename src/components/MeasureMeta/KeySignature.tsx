@@ -5,10 +5,17 @@ import { accidentalGlyphs } from "../../helpers/glyphs";
 import { keySignaturePositions } from "../../helpers/helpers";
 
 interface KeySignatureProps {
+  /** Sharps (positive) or flats (negative), `-7`..`7`. */
   fifths: KeyRange;
+  /** Clef whose accidental positions to use. Defaults to `"gClef"`. */
   clef?: ClefType;
 }
 
+/**
+ * A key signature: `|fifths|` sharps or flats placed for the given clef.
+ * Usually driven by `Measure`'s `fifths` prop (and restated automatically at
+ * system starts) rather than rendered directly.
+ */
 export const KeySignature = ({ fifths, clef = "gClef" }: KeySignatureProps) => {
   const sharpsOrFlats = fifths > 0 ? "sharp" : "flat";
   const absoluteKey = Math.abs(fifths);

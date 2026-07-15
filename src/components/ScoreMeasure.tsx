@@ -10,23 +10,53 @@ import { getOnsetBoundaries, unionBoundaries } from "./layout";
 export const PART_STRIDE_SS = 12.125;
 
 export interface ScoreMeasureProps {
-  // One Measure per part, top staff first
+  /** One `Measure` element per instrument part, top staff first. */
   parts: ReactElement<MeasureProps>[];
+  /**
+   * Barline drawn across all staves at the measure's right edge. Defaults
+   * to `"regular"`. `"repeatEnd"` is drawn per staff instead (its repeat
+   * dots sit on each staff individually).
+   */
   barline?: BarlineType;
+  /** Draws a `"repeatStart"` barline at the left edge of every staff. */
   startRepeat?: boolean;
-  // Set by Score: running clef/key per part, system-start restating, and
-  // loose-system sizing
+  /**
+   * @internal Set by `Score`: the clef still in effect for each part from
+   * earlier measures; not usually set manually.
+   */
   inheritedClefs?: ClefType[];
+  /**
+   * @internal Set by `Score`: the key still in effect for each part from
+   * earlier measures; not usually set manually.
+   */
   inheritedFifths?: (KeyRange | undefined)[];
+  /**
+   * @internal Set by `Score` on the first measure of each system: restate
+   * the running clef and key signature on every staff.
+   */
   systemStart?: boolean;
+  /**
+   * @internal Set by `Score` for non-justified (loose) final systems; not
+   * usually set manually.
+   */
   style?: CSSProperties;
 }
 
-/*
-  One measure of a multi-part score: every part shares the union onset grid
-  so simultaneous notes align across all staves, and one barline spans from
-  the top staff to the bottom staff.
-*/
+/**
+ * One measure of a multi-instrument score: every part shares the union
+ * onset grid so simultaneous notes align across all staves, and one barline
+ * spans from the top staff to the bottom staff. Use inside a `Score`.
+ *
+ * @example
+ * ```tsx
+ * <ScoreMeasure
+ *   parts={[
+ *     <Measure clef="gClef">{...}</Measure>,
+ *     <Measure clef="fClef">{...}</Measure>,
+ *   ]}
+ * />
+ * ```
+ */
 export const ScoreMeasure = ({
   parts,
   barline,

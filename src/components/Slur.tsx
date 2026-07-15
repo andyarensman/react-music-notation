@@ -13,11 +13,19 @@ import { BeamContainer } from "./BeamContainer";
 import { getEventFlex, getLastLeafFlex } from "./layout";
 
 interface SlurProps {
-  // Default: below when every stem in the group points up (slur sits at the
-  // noteheads, per Gould), otherwise above
+  /**
+   * Which side the curve sits on. Defaults to `"below"` when every stem in
+   * the group points up (the slur sits at the noteheads, per Gould),
+   * otherwise `"above"`; inside a `Voice`, defaults to the voice's outer
+   * side.
+   */
   direction?: "above" | "below";
-  // Injected by Voice: slurs go on the voice's outer side
+  /**
+   * @internal Injected by `Voice` so slurs go on the voice's outer side;
+   * not usually set manually.
+   */
   stem?: "upStem" | "downStem";
+  /** The contiguous run of events under the slur (notes, chords, beam groups). */
   children?: ReactNode;
 }
 
@@ -182,6 +190,20 @@ const SlurComponent = ({ direction, stem, children }: SlurProps) => {
   );
 };
 
+/**
+ * A slur over a contiguous run of events: the curve spans from the first
+ * notehead to the last, staying clear of every stem and beam it covers.
+ * Same-measure only — a slur cannot cross a barline yet.
+ *
+ * @example
+ * ```tsx
+ * <Slur>
+ *   <Note pitch={{ step: "E", octave: 5 }} noteValue="quarter" />
+ *   <Note pitch={{ step: "D", octave: 5 }} noteValue="quarter" />
+ *   <Note pitch={{ step: "C", octave: 5 }} noteValue="quarter" />
+ * </Slur>
+ * ```
+ */
 export const Slur = Object.assign(SlurComponent, {
   musicRole: "slur" as const,
 });

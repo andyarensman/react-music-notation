@@ -1,5 +1,11 @@
 import { ReactElement } from "react";
 
+/**
+ * Number of sharps (positive) or flats (negative) in a key signature,
+ * `-7`..`7` — the same "fifths" convention MusicXML uses. `0` renders no
+ * accidentals (C major / A minor). Positive values draw sharps, negative
+ * values draw flats. Used as `Measure`'s `fifths` prop.
+ */
 export type KeyRange =
   | -7
   | -6
@@ -17,8 +23,18 @@ export type KeyRange =
   | 6
   | 7;
 
+/** Supported clef shapes: `"gClef"` (treble), `"fClef"` (bass), or `"cClef"` (alto/tenor). */
 export type ClefType = "gClef" | "fClef" | "cClef";
 
+/**
+ * One of the 25 staff positions this library can place a notehead, rest, or
+ * accidental at: four ledger-line positions above the staff, the five staff
+ * lines and four spaces, and four ledger-line positions below. `"line-*"`
+ * entries sit on a line, `"space-*"` entries sit in a space; `"line-3"` is
+ * the middle line and `"line-5"`/`"line-1"` are the top/bottom staff lines.
+ * Usually derived automatically from a `Pitch` and the active clef
+ * (`derivePosition` in `helpers.ts`) rather than set directly.
+ */
 export type PitchPosition =
   | "line-above-4"
   | "space-above-4"
@@ -46,6 +62,13 @@ export type PitchPosition =
   | "space-below-4"
   | "line-below-4";
 
+/**
+ * Articulation mark placed on a `Note`/`NoteStack`: the single marks
+ * (`"accent"`, `"staccato"`, `"tenuto"`, `"staccatissimo"`, `"marcato"`) plus
+ * the combined forms (`"marcatoStaccato"`, `"accentStaccato"`,
+ * `"tenutoStaccato"`, `"accentTenuto"`). Placement follows Gould, "Behind
+ * Bars" pp. 115-121 — see `articulation` on `NoteValueProps`/`NoteStackProps`.
+ */
 export type ArticulationType =
   | "accent"
   | "staccato"
@@ -57,6 +80,11 @@ export type ArticulationType =
   | "tenutoStaccato"
   | "accentTenuto";
 
+/**
+ * Dynamic marking rendered below the staff at an event's position: the
+ * standard dynamics `"p"` through `"ff"`, plus the accented/sforzando forms
+ * `"fp"`, `"sf"`, `"sfz"`, `"rf"`, `"rfz"`.
+ */
 export type DynamicType =
   | "p"
   | "pp"
@@ -71,65 +99,133 @@ export type DynamicType =
   | "rfz";
 
 interface BaseNoteProps {
+  /**
+   * Duration of the note or rest, from whole down to 32nd. Finer
+   * subdivisions (64th and shorter) are not implemented yet.
+   */
   noteValue: "whole" | "half" | "quarter" | "eighth" | "16th" | "32nd";
   // | "64th"
   // | "128th"
   // | "256th"
   // | "512th"
   // | "1024th";
+  /**
+   * Adds an augmentation dot: extends the sounding duration by half and
+   * multiplies the note's horizontal flex-grow by 1.5. Only a single dot is
+   * supported (hence the literal `1` type).
+   */
   dotted?: 1;
-  // Rendered below the staff at this event's position
+  /** Dynamic marking rendered below the staff at this event's position. */
   dynamic?: DynamicType;
-  // Expression text ("dolce", "cresc.") in italics below the staff
+  /** Expression text ("dolce", "cresc.") in italics below the staff. */
   text?: string;
 }
 
 interface RestProps extends BaseNoteProps {
+  /** Marks this as a rest rather than a pitched note. */
   rest: true;
+  /** Rests have no pitch. */
   pitch?: never;
+  /**
+   * Explicit staff position for the rest glyph. Defaults to the middle line
+   * (`"line-3"`) when omitted; inside a `Voice`, defaults to `"space-4"`
+   * (up voice) or `"space-1"` (down voice) instead.
+   */
   position?: PitchPosition;
+  /** Rests have no stem. */
   stem?: never;
+  /** Rests have no stem. */
   stemEndValue?: never;
+  /** Rests cannot be tied. */
   tie?: never;
+  /** Rests cannot be tied. */
   tieDirection?: never;
+  /** Rests cannot carry an articulation mark. */
   articulation?: never;
+  /** Rests cannot carry an articulation mark. */
   articulationPlacement?: never;
 }
 
+/** A single pitch: diatonic step, optional accidental, and octave. */
 export interface Pitch {
+  /** Diatonic letter name of the pitch. */
   step?: "A" | "B" | "C" | "D" | "E" | "F" | "G";
+  /** Accidental drawn beside the notehead. */
   alter?: "sharp" | "flat" | "natural" | "doubleSharp" | "doubleFlat";
+  /** Octave number, scientific pitch notation (middle C = octave 4). */
   octave?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 }
 
 export interface NoteValueProps extends BaseNoteProps {
+  /**
+   * Pitch of the note. When `position` is omitted, the staff position is
+   * derived from `pitch.step`/`pitch.octave` and the measure's active clef.
+   */
   pitch?: Pitch;
-  // When omitted, the position is derived from pitch.step/octave and the
-  // measure's clef
+  /**
+   * Explicit staff position for the notehead; wins over `pitch` when both
+   * are given. When omitted, the position is derived from `pitch.step`/
+   * `pitch.octave` and the measure's clef, falling back to the middle line
+   * (`"line-3"`) if neither is given.
+   */
   position?: PitchPosition;
+  /**
+   * Stem direction. Defaults to the direction implied by the note's
+   * position (notes on/above the middle line point down, others point up)
+   * unless overridden here, by a `Voice` (forces one direction), or by
+   * `BeamContainer` (sets `"noStem"` and drives the stem via
+   * `stemEndValue` instead).
+   */
   stem?: "upStem" | "downStem" | "noStem";
+  /** Discriminates this variant from `RestProps`; omit or leave `false` for a pitched note. */
   rest?: false;
+  /**
+   * @internal Set by `BeamContainer` to draw a custom-length stem that
+   * meets the beam line; not usually set manually.
+   */
   stemEndValue?: number;
-  // "start" draws a tie curve to the next note (same measure); "stop" marks
-  // the receiving note
+  /**
+   * `"start"` draws a tie curve to the next note (same measure); `"stop"`
+   * marks the receiving note.
+   */
   tie?: "start" | "stop";
-  // Default: opposite the stem. Voices override this so ties curve toward
-  // the voice's outer side (up voice above, down voice below).
+  /**
+   * Tie curve direction. Defaults to the side opposite the stem. Inside a
+   * `Voice`, defaults to the voice's outer side instead (above for the
+   * up-stem voice, below for the down-stem voice); set this explicitly to
+   * override either default.
+   */
   tieDirection?: "above" | "below";
-  // Rendered on the notehead side (opposite the stem); accents/marcato go
-  // outside the staff per engraving convention
+  /**
+   * Rendered on the notehead side (opposite the stem) by default;
+   * accents/marcato go outside the staff per engraving convention.
+   */
   articulation?: ArticulationType;
-  // Forces the mark's side. Voices set this so articulation sits at the stem
-  // end (Gould's double-stemmed rule), never the notehead side.
+  /**
+   * Forces the mark's side, overriding the notehead-side default. Inside a
+   * `Voice`, this is set automatically so articulation sits at the stem end
+   * (Gould's double-stemmed rule) instead of the notehead side; set this
+   * explicitly to override either default.
+   */
   articulationPlacement?: "above" | "below";
 }
 
-// One notehead within a NoteStack chord
+/** One notehead within a `NoteStack` chord. */
 export interface StackedNote {
+  /**
+   * Pitch of this notehead. Same derivation rule as `NoteValueProps.pitch`:
+   * used only when `position` is omitted.
+   */
   pitch?: Pitch;
+  /** Explicit staff position for this notehead; wins over `pitch` when both are given. */
   position?: PitchPosition;
 }
 
+/**
+ * Props accepted by `Note`: either `RestProps` (`rest: true`, no pitch/stem/
+ * tie) or `NoteValueProps` (a pitched note, optionally with `pitch`/
+ * `position`, `stem`, `tie`, articulation, etc).
+ */
 export type NoteProps = RestProps | NoteValueProps;
 
 export type NoteElement = ReactElement<NoteValueProps>; //Nonrest

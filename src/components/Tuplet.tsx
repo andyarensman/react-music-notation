@@ -4,11 +4,19 @@ import { tupletGlyphs } from "../helpers/glyphs";
 import { getEventFlex, getLastLeafFlex } from "./layout";
 
 interface TupletProps {
-  // [actual, normal]: e.g. [3, 2] plays three notes in the time of two
+  /**
+   * `[actual, normal]`: e.g. `[3, 2]` plays three notes in the time of two
+   * (a triplet). Children's durations scale by `normal / actual`.
+   */
   ratio: [number, number];
+  /** Which side the bracket-and-number sits on. Defaults to `"above"` (or `"below"` in a down-stem voice). */
   position?: "above" | "below";
-  // Injected by Voice: the bracket defaults to the voice's outer side
+  /**
+   * @internal Injected by `Voice`: the bracket defaults to the voice's
+   * outer side; not usually set manually.
+   */
   stem?: "upStem" | "downStem";
+  /** The tuplet's events: notes, chords, or a `BeamContainer`. */
   children?: ReactNode;
 }
 
@@ -54,6 +62,21 @@ const TupletComponent = ({ ratio, position, stem, children }: TupletProps) => {
   );
 };
 
+/**
+ * An irregular division (triplet, quintuplet, ...): scales its children's
+ * durations by the tuplet `ratio` and draws the square bracket with the
+ * tuplet numeral, ending at the final notehead's right edge per engraving
+ * convention (Gould p. 195).
+ *
+ * @example
+ * ```tsx
+ * <Tuplet ratio={[3, 2]}>
+ *   <Note pitch={{ step: "A", octave: 4 }} noteValue="quarter" />
+ *   <Note pitch={{ step: "B", octave: 4 }} noteValue="quarter" />
+ *   <Note pitch={{ step: "C", octave: 5 }} noteValue="quarter" />
+ * </Tuplet>
+ * ```
+ */
 export const Tuplet = Object.assign(TupletComponent, {
   musicRole: "tuplet" as const,
 });

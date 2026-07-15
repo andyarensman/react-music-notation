@@ -41,6 +41,22 @@ const BRACE_WIDTH_SS = 2;
   into systems itself: every system gets a brace and restates the running
   clef and key signature on both staves.
 */
+/**
+ * A piano-style pair of staves. Like `Staff`, `GrandStaff` breaks its
+ * `GrandMeasure` children into systems from the measured container width;
+ * every system gets its own brace and restates the running clef and key
+ * signature on both staves.
+ *
+ * @example
+ * ```tsx
+ * <GrandStaff>
+ *   <GrandMeasure
+ *     upper={<Measure clef="gClef" time={{ beat: 4, beatType: 4 }}>...</Measure>}
+ *     lower={<Measure clef="fClef" time={{ beat: 4, beatType: 4 }}>...</Measure>}
+ *   />
+ * </GrandStaff>
+ * ```
+ */
 export const GrandStaff = ({ children }: GrandStaffProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [widthSs, setWidthSs] = useState(0);

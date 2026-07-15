@@ -3,7 +3,9 @@ import "./Hairpin.css";
 import { getEventFlex, getLastLeafFlex } from "./layout";
 
 interface HairpinProps {
+  /** Wedge direction: opening rightward (`"crescendo"`, the default) or closing (`"diminuendo"`). */
   type?: "crescendo" | "diminuendo";
+  /** The contiguous run of events the wedge spans. */
   children?: ReactNode;
 }
 
@@ -46,6 +48,20 @@ const HairpinComponent = ({ type = "crescendo", children }: HairpinProps) => {
   );
 };
 
+/**
+ * A crescendo/diminuendo wedge drawn at dynamics height under the wrapped
+ * events, spanning from the first notehead to the last. Pairs naturally
+ * with `dynamic` markings on the surrounding notes.
+ *
+ * @example
+ * ```tsx
+ * <Note pitch={{ step: "A", octave: 4 }} noteValue="quarter" dynamic="p" />
+ * <Hairpin type="crescendo">
+ *   <Note pitch={{ step: "B", octave: 4 }} noteValue="quarter" />
+ *   <Note pitch={{ step: "C", octave: 5 }} noteValue="quarter" />
+ * </Hairpin>
+ * ```
+ */
 export const Hairpin = Object.assign(HairpinComponent, {
   musicRole: "hairpin" as const,
 });

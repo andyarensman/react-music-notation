@@ -33,21 +33,67 @@ import {
 import { ClefContext } from "./ClefContext";
 
 export interface NoteStackProps {
+  /**
+   * One notehead per chord tone (`StackedNote`: a `pitch` or an explicit
+   * `position`). Resolved and sorted top-of-staff first internally.
+   */
   pitches: StackedNote[];
+  /** Duration shared by every notehead in the chord. */
   noteValue: NoteProps["noteValue"];
+  /** Adds an augmentation dot to every notehead in the chord. */
   dotted?: 1;
+  /**
+   * Stem direction for the shared stem. Defaults to the direction implied
+   * by the notehead farthest from the middle line (`getChordStem`) unless
+   * overridden here, by a `Voice`, or by `BeamContainer`. Whole-note chords
+   * are always stemless regardless of this prop; `"noStem"` combined with
+   * `stemEndValue` draws a custom-length beamed stem.
+   */
   stem?: "upStem" | "downStem" | "noStem";
+  /**
+   * @internal Set by `BeamContainer` to draw a custom-length shared stem
+   * that meets the beam line; not usually set manually.
+   */
   stemEndValue?: number;
+  /**
+   * Articulation mark applied at the chord's outer notehead (the one
+   * farthest from the stem); follows the same placement rules as `Note`'s
+   * `articulation`.
+   */
   articulation?: ArticulationType;
+  /**
+   * Forces the mark's side, overriding the notehead-side default. Inside a
+   * `Voice`, this is set automatically so articulation sits at the stem end
+   * instead of the notehead side; set this explicitly to override either
+   * default.
+   */
   articulationPlacement?: "above" | "below";
+  /** Dynamic marking rendered below the staff at the chord's position. */
   dynamic?: DynamicType;
-  // Expression text ("dolce", "cresc.") in italics below the staff
+  /** Expression text ("dolce", "cresc.") in italics below the staff. */
   text?: string;
 }
 
 const STEM_LENGTH = 28; // 3.5 staff-spaces in viewBox units
 const MIDDLE_LINE_STEM_Y = 64; // StemPositions["line-3"], the viewBox origin for css tops
 
+/**
+ * Renders a chord: a shared stem sized to the outer noteheads, seconds
+ * flipped across the stem, accidentals stacked into non-colliding columns,
+ * and (for unbeamed 8th/16th/32nd chords) a standalone flag glyph. See
+ * "Chords (`NoteStack`)" in the README for the full derivation rules.
+ *
+ * @example
+ * ```tsx
+ * <NoteStack
+ *   noteValue="quarter"
+ *   pitches={[
+ *     { pitch: { step: "C", octave: 3, alter: "sharp" } },
+ *     { pitch: { step: "D", octave: 3, alter: "flat" } },
+ *   ]}
+ * />
+ * ```
+ */
 export const NoteStack = (props: NoteStackProps) => {
   const clef = useContext(ClefContext);
   const { pitches, noteValue, dotted, stemEndValue } = props;

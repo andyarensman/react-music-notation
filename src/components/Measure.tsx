@@ -17,31 +17,88 @@ import {
 } from "./layout";
 
 export interface MeasureProps {
+  /**
+   * Optional identifier for this measure. Currently not rendered by the
+   * library (no measure-number glyph is drawn) — reserved for consumers
+   * that want to track/display numbering externally.
+   */
   measureNumber?: number;
+  /**
+   * Clef for this measure. When omitted, inherits the running clef from
+   * earlier measures (tracked by `Staff`/`GrandStaff`/`Score`), defaulting
+   * to `"gClef"` if none has been set yet.
+   */
   clef?: ClefType;
-  // Set by Staff/GrandStaff when an earlier measure's clef is still in effect
+  /**
+   * @internal Set by `Staff`/`GrandStaff`/`Score` when an earlier measure's
+   * clef is still in effect; not usually set manually.
+   */
   inheritedClef?: ClefType;
+  /**
+   * Key signature for this measure. When omitted, inherits the running key
+   * from earlier measures, the same way `clef` does.
+   */
   fifths?: KeyRange;
-  // Set by Staff/GrandStaff: the key still in effect from earlier measures
+  /**
+   * @internal Set by `Staff`/`GrandStaff`/`Score`: the key still in effect
+   * from earlier measures; not usually set manually.
+   */
   inheritedFifths?: KeyRange;
-  // Tempo indication rendered above the staff at the measure's start
+  /** Tempo indication rendered above the staff at the measure's start. */
   tempo?: TempoProps;
-  // Set by Staff/GrandStaff on the first measure of each system: restate
-  // the running clef and key signature
+  /**
+   * @internal Set by `Staff`/`GrandStaff`/`Score` on the first measure of
+   * each system: restate the running clef and key signature.
+   */
   systemStart?: boolean;
-  // Set by Staff/GrandStaff for non-justified (loose) final systems
+  /**
+   * @internal Set by `Staff`/`GrandStaff`/`Score` for non-justified (loose)
+   * final systems; not usually set manually.
+   */
   style?: CSSProperties;
+  /**
+   * Time signature for this measure. Unlike `clef`/`fifths`, time signatures
+   * are not restated automatically on later measures or systems — set it
+   * again explicitly when the meter changes.
+   */
   time?: TimeSignatureProps;
-  // "none" is used by GrandMeasure, which draws one barline across both staves
+  /**
+   * Barline drawn at the measure's right edge. Defaults to `"regular"`.
+   * `"none"` is used by `GrandMeasure`/`ScoreMeasure`, which draw one
+   * barline spanning all their staves instead of one per `Measure`.
+   */
   barline?: BarlineType | "none";
+  /** Draws a `"repeatStart"` barline at the measure's left edge. */
   startRepeat?: boolean;
-  // Onset boundaries (in flex units) shared with the other staff of a grand
-  // measure; set by GrandMeasure. When present the notes lay out on a grid
-  // of these columns instead of plain flex, so both staves align.
+  /**
+   * @internal Onset boundaries (in flex units) shared with the other
+   * staff(s) of a grand measure or score measure; set by `GrandMeasure`/
+   * `ScoreMeasure`. When present, notes lay out on a grid of these columns
+   * instead of plain flex, so every staff aligns. Not usually set manually.
+   */
   grid?: number[];
+  /** The measure's content: `Note`, `NoteStack`, `BeamContainer`, `Voice`, `Tuplet`, `Slur`, and `Hairpin` elements. */
   children?: ReactNode;
 }
 
+/**
+ * Renders one measure of a single staff: the five staff lines, an optional
+ * clef/key-signature/time-signature/tempo header, a barline at the right
+ * edge (and optionally a repeat barline at the left), and the measure's
+ * notes/rests. Typically used inside a `Staff` (or as the `upper`/`lower`
+ * of a `GrandMeasure`, or a part of a `ScoreMeasure`), which supply the
+ * running clef/key and system-start behavior automatically.
+ *
+ * @example
+ * ```tsx
+ * <Staff>
+ *   <Measure clef="gClef" fifths={2} time={{ beat: 4, beatType: 4 }}>
+ *     <Note position="line-4" noteValue="quarter" dotted={1} />
+ *     <Note position="space-3" noteValue="eighth" />
+ *   </Measure>
+ * </Staff>
+ * ```
+ */
 export const Measure = ({
   clef,
   inheritedClef,
