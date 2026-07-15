@@ -88,12 +88,16 @@ afternoon) can handle. Grounded against the
 - ~~**Lyrics**~~ — shipped: verse-stacked syllables with hyphenation, slot
   widths fed into the spacing engine, MusicXML `<lyric>` mapped. Still
   open: melisma extender lines, elisions, verse numbers, 3+ verses.
-- **Grace notes** (`<grace>`) and cue notes (`<cue>`) — zero-duration events
-  break the duration-proportional flex model's core assumption; need their
-  own width treatment inside the onset grid.
-- **Volta endings** (`<ending>`), **segno/coda** navigation — need
-  system-layout awareness (brackets spanning measures, possibly across
-  breaks).
+- ~~**Grace notes** (`<grace>`)~~ — shipped: pre-scaled SMuFL grace glyphs
+  spaced like accidentals (margin reservation, so the flex/onset model is
+  untouched), acciaccatura/appoggiatura variants, MusicXML `<grace>` runs
+  collected onto the next host note. Still open: grace-note accidentals,
+  beamed grace runs, grace slurs, cue notes (`<cue>`).
+- ~~**Volta endings** (`<ending>`)~~ — shipped: per-measure `ending` prop
+  with `{ text, open, continues }` composition for multi-measure spans;
+  MusicXML start/stop/discontinue mapped. Still open: **segno/coda**
+  navigation marks, and voltas restating their label after a system break
+  (a continuation line renders, but unlabeled).
 - **Cross-measure/system slurs and ties** — half-curves at system breaks;
   requires plumbing system-position knowledge into the curve renderers.
 - **Voice collision engine** — offsetting unisons/seconds between voices,

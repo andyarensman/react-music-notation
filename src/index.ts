@@ -25,13 +25,18 @@ export { TimeSignature } from "./components/MeasureMeta/TimeSignature";
 export type { TimeSignatureProps } from "./components/MeasureMeta/TimeSignature";
 export { Tempo } from "./components/MeasureMeta/Tempo";
 export type { TempoProps } from "./components/MeasureMeta/Tempo";
+export { Volta } from "./components/MeasureMeta/Volta";
+export type { EndingProps } from "./components/MeasureMeta/Volta";
 export { StaffLines } from "./components/StaffLines";
 
 export type {
   ArticulationType,
   ClefType,
   DynamicType,
+  GraceNote,
   KeyRange,
+  Lyric,
+  LyricInput,
   NoteProps,
   NoteValueProps,
   Pitch,

@@ -14,10 +14,12 @@ import { Score } from "../components/Score";
 import { ScoreMeasure } from "../components/ScoreMeasure";
 import { BarlineType } from "../components/MeasureMeta/Barline";
 import { TempoProps } from "../components/MeasureMeta/Tempo";
+import { EndingProps } from "../components/MeasureMeta/Volta";
 import {
   ArticulationType,
   ClefType,
   DynamicType,
+  GraceNote,
   KeyRange,
   Lyric,
   NoteProps,
@@ -113,6 +115,10 @@ interface ParsedNote {
   slurStop: boolean;
   articulation?: ArticulationType;
   lyrics?: Lyric[];
+  // grace notes preceding this note in the stream, attached as its lead-in
+  grace?: GraceNote[];
+  isGrace?: boolean;
+  graceSlash?: boolean;
   // attached from preceding <direction> elements
   dynamic?: DynamicType;
   text?: string;
@@ -132,6 +138,9 @@ interface ParsedMeasure {
   tempo?: TempoProps;
   barline?: BarlineType;
   startRepeat: boolean;
+  endingStart?: string;
+  endingStop?: "closed" | "open";
+  ending?: EndingProps;
   // staff number -> voice id -> notes in order
   staves: Map<number, Map<string, ParsedNote[]>>;
 }
@@ -176,15 +185,50 @@ export function parseMusicXML(xml: string): MusicXMLResult {
     throw new Error("The MusicXML document contains no parts");
   }
 
-  const parsedParts = parts.map((part) => ({
-    id: part.getAttribute("id") ?? "",
-    measures: directChildren(part, "measure").map((measure) =>
+  const parsedParts = parts.map((part) => {
+    const measures = directChildren(part, "measure").map((measure) =>
       parseMeasure(measure, warn)
-    ),
-  }));
+    );
+    attachEndings(measures);
+    return { id: part.getAttribute("id") ?? "", measures };
+  });
 
   const element = assemble(parsedParts, partNames, warn);
   return { element, warnings: Array.from(warnings) };
+}
+
+/*
+  Turn the per-measure ending start/stop markers into composable Volta
+  props: the start measure carries the label, continuation measures draw
+  the line only, and the bracket stays open on the right until (and
+  including, for "discontinue") the measure that ends it.
+*/
+function attachEndings(measures: ParsedMeasure[]) {
+  let inEnding = false;
+  for (const measure of measures) {
+    let ending: EndingProps | undefined;
+    if (measure.endingStart !== undefined) {
+      const text = measure.endingStart
+        .split(",")
+        .filter((part) => part.trim())
+        .map((part) => `${part.trim()}.`)
+        .join(" ");
+      ending = { text: text || undefined };
+      inEnding = true;
+    } else if (inEnding) {
+      ending = { continues: true };
+    }
+    if (ending && inEnding) {
+      if (measure.endingStop) {
+        ending.open = measure.endingStop === "open" || undefined;
+        inEnding = false;
+      } else {
+        // the bracket continues into the next measure
+        ending.open = true;
+      }
+    }
+    measure.ending = ending;
+  }
 }
 
 function parseMeasure(
@@ -211,6 +255,7 @@ function parseMeasure(
     if (!pending.has(staff)) pending.set(staff, {});
     return pending.get(staff)!;
   };
+  const pendingGraces = new Map<number, GraceNote[]>();
   let sawNote = false;
 
   for (const child of Array.from(measureElement.children)) {
@@ -226,7 +271,22 @@ function parseMeasure(
       case "note": {
         const note = parseNote(child, warn);
         if (!note) break;
+        if (note.isGrace) {
+          if (!note.rest && note.pitch) {
+            if (note.pitch.alter) {
+              warn("Accidentals on grace notes are not drawn");
+            }
+            const list = pendingGraces.get(note.staff) ?? [];
+            list.push({ pitch: note.pitch, slash: note.graceSlash });
+            pendingGraces.set(note.staff, list);
+          }
+          break;
+        }
         sawNote = true;
+        if (!note.chordWithPrevious && pendingGraces.has(note.staff)) {
+          note.grace = pendingGraces.get(note.staff);
+          pendingGraces.delete(note.staff);
+        }
         const claim = pendingFor(note.staff);
         note.dynamic = claim.dynamic;
         note.text = claim.text;
@@ -246,6 +306,14 @@ function parseMeasure(
         const style = childText(child, "bar-style");
         const repeat = child.getElementsByTagName("repeat")[0];
         const location = child.getAttribute("location") ?? "right";
+        const endingElement = child.getElementsByTagName("ending")[0];
+        if (endingElement) {
+          const type = endingElement.getAttribute("type");
+          const number = endingElement.getAttribute("number") ?? "";
+          if (type === "start") measure.endingStart = number;
+          else if (type === "stop") measure.endingStop = "closed";
+          else if (type === "discontinue") measure.endingStop = "open";
+        }
         if (repeat) {
           const direction = repeat.getAttribute("direction");
           if (direction === "forward" || location === "left") {
@@ -398,10 +466,7 @@ function parseNote(
   noteElement: Element,
   warn: (message: string) => void
 ): ParsedNote | undefined {
-  if (noteElement.getElementsByTagName("grace").length > 0) {
-    warn("Skipped grace notes");
-    return undefined;
-  }
+  const graceElement = noteElement.getElementsByTagName("grace")[0];
   if (noteElement.getElementsByTagName("cue").length > 0) {
     warn("Skipped cue notes");
     return undefined;
@@ -439,8 +504,10 @@ function parseNote(
     noteValue = "quarter";
   }
   if (!noteValue) {
-    // whole-measure rests carry no <type>
+    // whole-measure rests carry no <type>; grace notes usually render as
+    // eighths when unspecified
     if (restElement) noteValue = "whole";
+    else if (graceElement) noteValue = "eighth";
     else {
       warn("Skipped a <note> with no <type>");
       return undefined;
@@ -462,6 +529,8 @@ function parseNote(
     slurStop: false,
     wedgeStop: false,
     lyrics,
+    isGrace: Boolean(graceElement),
+    graceSlash: graceElement?.getAttribute("slash") === "yes",
   };
   if (noteElement.getElementsByTagName("dot").length > 1) {
     warn("Double dots reduced to a single dot");
@@ -607,6 +676,7 @@ function buildVoiceEvents(
             dynamic={first.dynamic}
             text={first.text}
             lyrics={first.lyrics}
+            grace={first.grace}
           />
         ),
         ...shared,
@@ -639,6 +709,7 @@ function buildVoiceEvents(
           dynamic={first.dynamic}
           text={first.text}
           lyrics={first.lyrics}
+          grace={first.grace}
         />
       ),
       ...shared,
@@ -804,6 +875,7 @@ function buildMeasureElement(
       fifths={attributes.fifths}
       time={attributes.time}
       tempo={staff === 1 ? measure.tempo : undefined}
+      ending={staff === 1 ? measure.ending : undefined}
       barline={measure.barline}
       startRepeat={measure.startRepeat || undefined}
     >

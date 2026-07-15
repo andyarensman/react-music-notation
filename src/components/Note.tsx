@@ -6,6 +6,7 @@ import {
   articulationGlyphs,
   dottedGlyph,
   dynamicGlyphs,
+  graceNoteGlyphs,
   noteGlyphs,
 } from "../helpers/glyphs";
 import {
@@ -122,6 +123,13 @@ export const Note = (props: NoteProps) => {
       : 1.5
     : 0;
 
+  // Grace notes sit before the accidental, ~1.6 staff-spaces each
+  const graces = !rest ? props.grace : undefined;
+  // Each grace glyph's ink is ~1.6ss wide (notehead + stem + flag), so a
+  // 1.7ss slot per grace plus a 0.5ss gap before the host (and 0.3ss lead-in)
+  const graceMargin = graces?.length ? graces.length * 1.7 + 0.8 : 0;
+  const leadingMargin = accidentalMargin + graceMargin;
+
   const lyrics = !rest ? props.lyrics : undefined;
 
   return (
@@ -130,8 +138,8 @@ export const Note = (props: NoteProps) => {
       style={
         {
           flexGrow: getNoteFlex(props),
-          marginLeft: accidentalMargin
-            ? `calc(var(--staff-space) * ${accidentalMargin})`
+          marginLeft: leadingMargin
+            ? `calc(var(--staff-space) * ${leadingMargin})`
             : undefined,
           // widens the slot for long syllables; beam groups still override
           // via CSS so beam geometry stays flex-proportional
@@ -147,6 +155,21 @@ export const Note = (props: NoteProps) => {
           className={`ledger-line ledger-${ledger}${isWide ? " ledger-wide" : ""}`}
         ></div>
       ))}
+      {graces?.map((graceNote, index) => {
+        const gracePosition = resolvePosition(graceNote, clef);
+        const left = -(accidentalMargin + 0.5 + (graces.length - index) * 1.7);
+        return (
+          <div
+            key={`grace-${index}`}
+            className={`leland note ${gracePosition}`}
+            style={{ left: `calc(var(--staff-space) * ${left})` }}
+          >
+            {graceNote.slash
+              ? graceNoteGlyphs.acciaccaturaUp
+              : graceNoteGlyphs.appoggiaturaUp}
+          </div>
+        );
+      })}
       {pitch && pitch.alter && (
         <div className={`leland note ${pitch.alter} ${position}`}>
           {accidentalGlyphs[pitch.alter]}

@@ -146,6 +146,8 @@ interface RestProps extends BaseNoteProps {
   articulationPlacement?: never;
   /** Rests cannot carry lyrics. */
   lyrics?: never;
+  /** Rests cannot carry grace notes. */
+  grace?: never;
 }
 
 /** One lyric syllable under a note. */
@@ -235,6 +237,25 @@ export interface NoteValueProps extends BaseNoteProps {
    * neighboring lyrics don't collide.
    */
   lyrics?: LyricInput[];
+  /**
+   * Grace notes rendered small before this note (and before its
+   * accidental), in playing order. Accidentals on the grace notes
+   * themselves are not drawn yet.
+   */
+  grace?: GraceNote[];
+}
+
+/** One grace note preceding a host note or chord. */
+export interface GraceNote {
+  /** Pitch of the grace note (same derivation rules as a normal note). */
+  pitch?: Pitch;
+  /** Explicit staff position; wins over `pitch` when both are given. */
+  position?: PitchPosition;
+  /**
+   * Draws the acciaccatura slash through the stem. Omit for an
+   * appoggiatura (no slash).
+   */
+  slash?: boolean;
 }
 
 /** One notehead within a `NoteStack` chord. */

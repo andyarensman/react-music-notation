@@ -86,6 +86,19 @@ export const flagGlyphs: Record<
 // Spans a grand staff's two staves; scaled via font-size (see GrandStaff.css)
 export const braceGlyph = "";
 
+// Combined grace-note glyphs (small note + stem + flag, pre-scaled to cue size).
+// NOTE: Leland deviates from the SMuFL codepoint order here — it groups the
+// glyphs by slash instead of stem direction, so U+E561 is the stem-DOWN
+// acciaccatura and U+E562 the stem-up appoggiatura (verified from the
+// font's ink bounds). The keys below keep SMuFL semantics; the values map
+// to what Leland actually draws.
+export const graceNoteGlyphs = {
+  acciaccaturaUp: "\ue560",
+  appoggiaturaUp: "\ue562",
+  acciaccaturaDown: "\ue561",
+  appoggiaturaDown: "\ue563",
+};
+
 // Tuplet number digits (SMuFL tuplet0-tuplet9)
 export const tupletGlyphs: Record<number, string> = {
   0: "\uE880",

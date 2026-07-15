@@ -6,6 +6,7 @@ import { ClefType, KeyRange } from "../helpers/types";
 import { KeySignature } from "./MeasureMeta/KeySignature";
 import { TimeSignature, TimeSignatureProps } from "./MeasureMeta/TimeSignature";
 import { Tempo, TempoProps } from "./MeasureMeta/Tempo";
+import { Volta, EndingProps } from "./MeasureMeta/Volta";
 import { Barline, BarlineType } from "./MeasureMeta/Barline";
 import { ClefContext } from "./ClefContext";
 import { GridContext } from "./GridContext";
@@ -46,6 +47,11 @@ export interface MeasureProps {
   inheritedFifths?: KeyRange;
   /** Tempo indication rendered above the staff at the measure's start. */
   tempo?: TempoProps;
+  /**
+   * Volta (ending) bracket over the measure: a label string (`"1."`) or
+   * `EndingProps` for open/continuing brackets spanning several measures.
+   */
+  ending?: string | EndingProps;
   /**
    * @internal Set by `Staff`/`GrandStaff`/`Score` on the first measure of
    * each system: restate the running clef and key signature.
@@ -105,6 +111,7 @@ export const Measure = ({
   fifths,
   inheritedFifths,
   tempo,
+  ending,
   systemStart,
   style,
   time,
@@ -129,6 +136,9 @@ export const Measure = ({
       <div className="measure-container" style={style}>
         <StaffLines />
         {tempo && <Tempo {...tempo} />}
+        {ending && (
+          <Volta {...(typeof ending === "string" ? { text: ending } : ending)} />
+        )}
         {barline !== "none" && (
           <Barline type={barline ?? "regular"} placement="end" />
         )}

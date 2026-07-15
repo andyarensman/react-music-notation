@@ -7,6 +7,7 @@ import {
   dottedGlyph,
   dynamicGlyphs,
   flagGlyphs,
+  graceNoteGlyphs,
   noteGlyphs,
 } from "../helpers/glyphs";
 import {
@@ -29,6 +30,7 @@ import {
 import {
   ArticulationType,
   DynamicType,
+  GraceNote,
   LyricInput,
   NoteProps,
   StackedNote,
@@ -80,6 +82,8 @@ export interface NoteStackProps {
    * `Note`'s `lyrics`.
    */
   lyrics?: LyricInput[];
+  /** Grace notes rendered small before the chord, in playing order. */
+  grace?: GraceNote[];
 }
 
 const STEM_LENGTH = 28; // 3.5 staff-spaces in viewBox units
@@ -188,6 +192,13 @@ export const NoteStack = (props: NoteStackProps) => {
     ? 1.5 + flipClearance + maxColumn * 1.1
     : 0;
 
+  // Grace notes sit before the accidental block, ~1.6 staff-spaces each
+  // Same slot math as Note: 1.7ss per grace + 0.5ss host gap + 0.3ss lead-in
+  const graceMargin = props.grace?.length
+    ? props.grace.length * 1.7 + 0.8
+    : 0;
+  const leadingMargin = accidentalMargin + graceMargin;
+
   const ledgerLines = Array.from(
     new Set(notes.flatMap((note) => getLedgerLines(note.position)))
   );
@@ -238,8 +249,8 @@ export const NoteStack = (props: NoteStackProps) => {
       style={
         {
           flexGrow: getNoteFlex(props),
-          marginLeft: accidentalMargin
-            ? `calc(var(--staff-space) * ${accidentalMargin})`
+          marginLeft: leadingMargin
+            ? `calc(var(--staff-space) * ${leadingMargin})`
             : undefined,
           // widens the slot for long syllables; beam groups still override
           // via CSS so beam geometry stays flex-proportional
@@ -255,6 +266,25 @@ export const NoteStack = (props: NoteStackProps) => {
           className={`ledger-line ledger-${ledger}${isWide || anyRightFlip ? " ledger-wide" : ""}`}
         ></div>
       ))}
+      {props.grace?.map((graceNote, index) => {
+        const gracePosition = resolvePosition(graceNote, clef);
+        const left = -(
+          accidentalMargin +
+          0.5 +
+          (props.grace!.length - index) * 1.7
+        );
+        return (
+          <div
+            key={`grace-${index}`}
+            className={`leland note ${gracePosition}`}
+            style={{ left: `calc(var(--staff-space) * ${left})` }}
+          >
+            {graceNote.slash
+              ? graceNoteGlyphs.acciaccaturaUp
+              : graceNoteGlyphs.appoggiaturaUp}
+          </div>
+        );
+      })}
       {notesWithAccidentals.map((note, accidentalIdx) => {
         const alter = note.pitch!.alter!;
         const baseOffset = alter.startsWith("double") ? 1.6 : 1.25;
