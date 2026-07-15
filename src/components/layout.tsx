@@ -1,6 +1,10 @@
 import { Children, ReactElement, ReactNode, isValidElement } from "react";
-import { getNoteFlex } from "../helpers/helpers";
-import { NoteProps } from "../helpers/types";
+import {
+  getNoteFlex,
+  positionIndex,
+  resolvePosition,
+} from "../helpers/helpers";
+import { ClefType, NoteProps, StackedNote } from "../helpers/types";
 import { BeamContainer } from "./BeamContainer";
 
 /*
@@ -135,10 +139,14 @@ export const getLastLeafFlex = (nodes: ReactNode): number => {
 };
 
 // Wrap each event in a grid item spanning its onset columns. The wrapper is
-// a flex row, so the event's own flex-grow just fills it.
+// a flex row, so the event's own flex-grow just fills it. `collisionShifts`
+// (onset → staff-spaces) nudges single note events sideways with a paint
+// transform, so the grid columns — and every other voice/staff aligned to
+// them — are untouched.
 export const placeEventsOnGrid = (
   children: ReactNode,
-  boundaries: number[]
+  boundaries: number[],
+  collisionShifts?: Map<number, number>
 ): ReactNode[] => {
   const columnOf = new Map(
     boundaries.map((boundary, index) => [round3(boundary), index + 1])
@@ -149,6 +157,12 @@ export const placeEventsOnGrid = (
     if (flex === 0) {
       return child;
     }
+    const isPlainNote =
+      isValidElement(child) &&
+      (child.props as { noteValue?: unknown }).noteValue !== undefined;
+    const shift = isPlainNote
+      ? collisionShifts?.get(round3(onset))
+      : undefined;
     const start = columnOf.get(round3(onset));
     const end = columnOf.get(round3(onset + flex));
     onset = round3(onset + flex);
@@ -161,10 +175,124 @@ export const placeEventsOnGrid = (
       <div
         key={index}
         className="grid-event"
-        style={{ gridColumn: `${start} / ${end}` }}
+        style={{
+          gridColumn: `${start} / ${end}`,
+          transform: shift
+            ? `translateX(calc(var(--staff-space) * ${shift}))`
+            : undefined,
+        }}
       >
         {child}
       </div>
     );
   });
+};
+
+/* ------------------------- two-voice collisions ------------------------- */
+
+interface TimedNote {
+  onset: number;
+  indices: number[];
+  value: NoteProps["noteValue"];
+  dotted: boolean;
+  chord: boolean;
+}
+
+// The sounding notes of one voice with their onsets, walking through
+// timing-transparent wrappers and beam groups (tuplets stay opaque, like
+// the onset grid itself)
+const collectTimedNotes = (children: ReactNode, clef: ClefType): TimedNote[] => {
+  const notes: TimedNote[] = [];
+  let onset = 0;
+  const walk = (nodes: ReactNode) => {
+    Children.toArray(nodes).forEach((child) => {
+      if (!isValidElement(child)) return;
+      const role = getMusicRole(child);
+      const props = child.props as {
+        noteValue?: NoteProps["noteValue"];
+        dotted?: 1;
+        rest?: boolean;
+        pitches?: StackedNote[];
+        position?: NoteProps["position"];
+        pitch?: StackedNote["pitch"];
+        children?: ReactNode;
+      };
+      if (
+        role === "slur" ||
+        role === "hairpin" ||
+        child.type === BeamContainer
+      ) {
+        walk(props.children);
+        return;
+      }
+      if (role === "tuplet") {
+        onset = round3(onset + getEventFlex(child));
+        return;
+      }
+      if (props.noteValue === undefined) return;
+      if (!props.rest) {
+        const indices = props.pitches
+          ? props.pitches.map((note) =>
+              positionIndex(resolvePosition(note, clef))
+            )
+          : [positionIndex(resolvePosition(props, clef))];
+        notes.push({
+          onset,
+          indices,
+          value: props.noteValue,
+          dotted: props.dotted !== undefined,
+          chord: props.pitches !== undefined,
+        });
+      }
+      onset = round3(onset + getEventFlex(child));
+    });
+  };
+  walk(children);
+  return notes;
+};
+
+/*
+  Two voices sharing a staff collide when simultaneous notes sit a second
+  apart or in unison (Gould, "Two voices on one stave"): the down-stem
+  voice's note moves right of the up-stem voice's note. A unison of two
+  single notes with the same value and dotting needs no shift — the
+  superimposed noteheads with their up and down stems read as the shared
+  notehead engravers use. Returns onset → shift (in staff-spaces) for the
+  down-stem voice.
+*/
+export const getVoiceCollisionShifts = (
+  children: ReactNode,
+  clef: ClefType
+): Map<number, number> => {
+  const voices = Children.toArray(children).filter(
+    isVoiceElement
+  ) as ReactElement<{ stem?: string; children?: ReactNode }>[];
+  const up = voices.find((voice) => voice.props.stem === "upStem");
+  const down = voices.find((voice) => voice.props.stem === "downStem");
+  const shifts = new Map<number, number>();
+  if (!up || !down) return shifts;
+  const upNotes = collectTimedNotes(up.props.children, clef);
+  const downNotes = collectTimedNotes(down.props.children, clef);
+  for (const downNote of downNotes) {
+    const upNote = upNotes.find((note) => note.onset === downNote.onset);
+    if (!upNote) continue;
+    const gap = Math.min(
+      ...upNote.indices.flatMap((iu) =>
+        downNote.indices.map((id) => Math.abs(iu - id))
+      )
+    );
+    if (gap > 1) continue;
+    const mergedUnison =
+      gap === 0 &&
+      !upNote.chord &&
+      !downNote.chord &&
+      upNote.value === downNote.value &&
+      upNote.dotted === downNote.dotted &&
+      upNote.value !== "whole";
+    if (mergedUnison) continue;
+    // clear the up-voice notehead (wholes are wider), and its dot if any
+    const shift = upNote.value === "whole" ? 1.75 : upNote.dotted ? 2.0 : 1.2;
+    shifts.set(downNote.onset, shift);
+  }
+  return shifts;
 };

@@ -1,4 +1,11 @@
-import { CSSProperties, ReactNode } from "react";
+import {
+  CSSProperties,
+  Children,
+  ReactElement,
+  ReactNode,
+  cloneElement,
+  isValidElement,
+} from "react";
 import "./Measure.css";
 import { StaffLines } from "./StaffLines";
 import { Clef } from "./MeasureMeta/Clef";
@@ -12,8 +19,10 @@ import { ClefContext } from "./ClefContext";
 import { GridContext } from "./GridContext";
 import {
   getOnsetBoundaries,
+  getVoiceCollisionShifts,
   gridTemplateFromBoundaries,
   hasVoices,
+  isVoiceElement,
   placeEventsOnGrid,
 } from "./layout";
 
@@ -139,6 +148,28 @@ export const Measure = ({
     : null;
   const gridMode = !voiceMode && grid !== undefined && grid.length > 1;
 
+  // Unisons/seconds between the voices: the down-stem voice's colliding
+  // notes get paint-only sideways shifts (Gould's two-voice offsets); the
+  // onset grid itself is untouched so cross-staff alignment holds
+  let voiceChildren = children;
+  if (voiceMode) {
+    const shifts = getVoiceCollisionShifts(children, activeClef);
+    if (shifts.size > 0) {
+      voiceChildren = Children.map(children, (child) =>
+        isValidElement(child) &&
+        isVoiceElement(child) &&
+        (child.props as { stem?: string }).stem === "downStem"
+          ? cloneElement(
+              child as ReactElement<{
+                collisionShifts?: Map<number, number>;
+              }>,
+              { collisionShifts: shifts }
+            )
+          : child
+      );
+    }
+  }
+
   return (
     <ClefContext.Provider value={activeClef}>
       <div
@@ -178,7 +209,7 @@ export const Measure = ({
           >
             {voiceMode ? (
               <GridContext.Provider value={voiceBoundaries}>
-                {children}
+                {voiceChildren}
               </GridContext.Provider>
             ) : gridMode ? (
               placeEventsOnGrid(children, grid)

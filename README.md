@@ -150,7 +150,17 @@ The project is built in phases; each completed phase has a kitchen-sink story un
 - MusicXML: cross-measure `<slur>` boundaries become marker props (the
   `number` attribute is the pairing id); `<tie>` start/stop already mapped
 
-**Still out**: grace-note accidentals and beamed/slurred grace-note runs, D.S./D.C./segno/coda navigation marks, cross-staff beaming, ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), courtesy naturals on key changes, bracketed instrument-family groups in scores, a grand-staff part inside a `Score`, melisma extender lines and elisions, verse numbers, 3+ lyric verses (they overflow toward the next system), `.mxl` unzipping (pass the contained XML string yourself), MusicXML export, MIDI, playback, and print layout. See `ROADMAP.md` for the full coverage audit against Behind Bars and the MusicXML element reference.
+**Phase 14**
+
+- Two-voice collision handling (Gould, "Two voices on one stave"):
+  simultaneous notes a second apart or in unison offset the down-stem
+  voice's note to the right — paint-only transforms on the onset grid,
+  so cross-staff alignment holds. Same-value unisons stay superimposed
+  (they read as the engravers' shared notehead); mixed values, wholes,
+  and chords separate; dotted up-voice notes widen the shift to clear
+  the dot. Applies automatically to two-voice MusicXML imports.
+
+**Still out**: grace-note accidentals and beamed/slurred grace-note runs, D.S./D.C./segno/coda navigation marks, cross-staff beaming, collisions inside beamed groups between voices, ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, courtesy naturals on key changes, bracketed instrument-family groups in scores, a grand-staff part inside a `Score`, melisma extender lines and elisions, verse numbers, 3+ lyric verses (they overflow toward the next system), `.mxl` unzipping (pass the contained XML string yourself), MusicXML export, MIDI, playback, and print layout. See `ROADMAP.md` for the full coverage audit against Behind Bars and the MusicXML element reference.
 
 **MusicXML coverage roadmap** — auditing the [MusicXML 4.0 element reference](https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/) against what renders today, the notable visual-notation elements still missing are: ornaments (`trill-mark`, `turn`/`inverted-turn`, `mordent`/`inverted-mordent`, `wavy-line`), `cue` notes, `fermata`, `breath-mark`/`caesura`, `tremolo`, `arpeggiate`, `glissando`/`slide`, `octave-shift` (8va), `pedal`, `segno`/`coda`, `rehearsal` marks, `multiple-rest` (multi-measure rests), harmony/chord symbols, tablature, and percussion notation. These are the candidate pool for future phases.
 
@@ -464,6 +474,8 @@ The importer accepts score-partwise MusicXML as a string (unzip `.mxl` files you
 ```
 
 `Voice` forces `stem` onto every child that doesn't set its own, defaults rests to `"space-4"` (up voice) or `"space-1"` (down voice) when the rest doesn't set an explicit `position`, and defaults `tieDirection` to the voice's outer side. Voices in the same measure — and, inside a grand measure, across both staves — lay their events out on a shared onset grid so simultaneous notes line up (see [Layout engine](#layout-engine)).
+
+Colliding simultaneous notes are offset automatically per Gould's two-voice rules: when the voices sound a second apart or in unison, the down-stem voice's note shifts right of the up-stem note (a paint-only transform, so the onset grid and cross-staff alignment are untouched). A unison of two single notes with the same value and dotting is left superimposed — the merged heads with both stems read as the shared notehead engravers use. Wholes and mixed-value unisons always separate; a dotted up-voice note widens the shift to clear its dot. Not yet handled: colliding notes *inside a beamed group* of the down-stem voice (shifting one head would detach it from the beam's geometry), and accidental collisions between voices.
 
 ## Sizing system
 

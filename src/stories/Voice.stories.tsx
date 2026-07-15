@@ -51,6 +51,27 @@ export const TwoVoices: Story = {
   ),
 };
 
+// Unisons and seconds between the voices: the down-stem note shifts right
+// (Gould's two-voice offsets); a same-value unison needs no shift — the
+// superimposed heads with both stems read as one shared notehead
+export const Collisions: Story = {
+  render: () => (
+    <Measure clef="gClef" time={{ beat: 4, beatType: 4 }}>
+      <Voice stem="upStem">
+        <Note pitch={{ step: "D", octave: 5 }} noteValue="quarter" />
+        <Note pitch={{ step: "G", octave: 4 }} noteValue="quarter" />
+        <Note pitch={{ step: "B", octave: 4 }} noteValue="half" />
+      </Voice>
+      <Voice stem="downStem">
+        <Note pitch={{ step: "C", octave: 5 }} noteValue="quarter" />
+        <Note pitch={{ step: "G", octave: 4 }} noteValue="quarter" />
+        <Note pitch={{ step: "B", octave: 4 }} noteValue="quarter" />
+        <Note pitch={{ step: "A", octave: 4 }} noteValue="quarter" />
+      </Voice>
+    </Measure>
+  ),
+};
+
 // Rests default high in the up voice and low in the down voice
 export const VoiceRests: Story = {
   render: () => (

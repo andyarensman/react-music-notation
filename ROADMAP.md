@@ -105,9 +105,12 @@ afternoon) can handle. Grounded against the
   at system breaks and sampling the bezier against every covered
   stem/beam. Still open: ties on chord members, curves anchored to grace
   notes.
-- **Voice collision engine** — offsetting unisons/seconds between voices,
-  and more generally collision-aware horizontal spacing (accidentals inside
-  beams currently shift stems slightly off the beam math).
+- ~~**Voice collision engine**~~ — shipped: unisons/seconds between the
+  two voices offset the down-stem note per Gould (paint-only transforms
+  on the onset grid; same-value unisons merge visually). Still open:
+  collisions inside beamed groups, cross-voice accidental collisions,
+  and the more general collision-aware horizontal spacing (accidentals
+  inside beams shift stems slightly off the beam math).
 - **Octave shift / 8va** (`<octave-shift>`) — dashed bracket + changing the
   pitch-to-position mapping under it.
 - **Interactivity + accessibility pack** — onNoteClick/hover/selection

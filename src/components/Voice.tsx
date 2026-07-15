@@ -25,6 +25,12 @@ interface VoiceProps {
    * placement.
    */
   stem: "upStem" | "downStem";
+  /**
+   * @internal Onset → sideways shift (in staff-spaces) for notes that
+   * collide with the other voice (unisons/seconds); computed and injected
+   * by `Measure`, not usually set manually.
+   */
+  collisionShifts?: Map<number, number>;
   /** The voice's events: notes, chords, beams, tuplets, slurs, hairpins. */
   children?: ReactNode;
 }
@@ -37,7 +43,7 @@ interface StemmableProps {
   articulationPlacement?: "above" | "below";
 }
 
-const VoiceComponent = ({ stem, children }: VoiceProps) => {
+const VoiceComponent = ({ stem, collisionShifts, children }: VoiceProps) => {
   const boundaries = useContext(GridContext);
 
   const applyVoiceDefaults = (nodes: ReactNode): ReactNode =>
@@ -96,7 +102,7 @@ const VoiceComponent = ({ stem, children }: VoiceProps) => {
         gridTemplateColumns: gridTemplateFromBoundaries(boundaries),
       }}
     >
-      {placeEventsOnGrid(stemmedChildren, boundaries)}
+      {placeEventsOnGrid(stemmedChildren, boundaries, collisionShifts)}
     </div>
   );
 };
