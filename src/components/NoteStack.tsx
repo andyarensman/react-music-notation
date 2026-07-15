@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { CSSProperties, Fragment, useContext } from "react";
 import "./Note.css";
 import "../global.css";
 import {
@@ -19,6 +19,8 @@ import {
   getChordStem,
   getLedgerLines,
   getNoteFlex,
+  lyricsMinWidthSs,
+  normalizeLyric,
   noteTranslations,
   positionIndex,
   resolvePosition,
@@ -27,6 +29,7 @@ import {
 import {
   ArticulationType,
   DynamicType,
+  LyricInput,
   NoteProps,
   StackedNote,
 } from "../helpers/types";
@@ -72,6 +75,11 @@ export interface NoteStackProps {
   dynamic?: DynamicType;
   /** Expression text ("dolce", "cresc.") in italics below the staff. */
   text?: string;
+  /**
+   * Lyric syllables under the chord, one entry per verse — same behavior as
+   * `Note`'s `lyrics`.
+   */
+  lyrics?: LyricInput[];
 }
 
 const STEM_LENGTH = 28; // 3.5 staff-spaces in viewBox units
@@ -227,12 +235,19 @@ export const NoteStack = (props: NoteStackProps) => {
   return (
     <div
       className="note-container"
-      style={{
-        flexGrow: getNoteFlex(props),
-        marginLeft: accidentalMargin
-          ? `calc(var(--staff-space) * ${accidentalMargin})`
-          : undefined,
-      }}
+      style={
+        {
+          flexGrow: getNoteFlex(props),
+          marginLeft: accidentalMargin
+            ? `calc(var(--staff-space) * ${accidentalMargin})`
+            : undefined,
+          // widens the slot for long syllables; beam groups still override
+          // via CSS so beam geometry stays flex-proportional
+          "--note-min-width": props.lyrics?.length
+            ? `calc(var(--staff-space) * ${lyricsMinWidthSs(props.lyrics)})`
+            : undefined,
+        } as CSSProperties
+      }
     >
       {ledgerLines.map((ledger) => (
         <div
@@ -318,6 +333,22 @@ export const NoteStack = (props: NoteStackProps) => {
         </div>
       )}
       {props.text && <div className="note-text">{props.text}</div>}
+      {props.lyrics?.map((entry, verse) => {
+        const lyric = normalizeLyric(entry);
+        const top = `calc(var(--staff-space) * ${13.1 + verse * 1.9})`;
+        return (
+          <Fragment key={`lyric-${verse}`}>
+            <div className="lyric" style={{ top }}>
+              {lyric.text}
+            </div>
+            {(lyric.syllabic === "begin" || lyric.syllabic === "middle") && (
+              <div className="lyric lyric-hyphen" style={{ top }}>
+                -
+              </div>
+            )}
+          </Fragment>
+        );
+      })}
       {stemLine && (
         <div className={"stem-container " + (stemUp ? "stem-above" : "")}>
           <svg

@@ -2,6 +2,8 @@ import { NoteGlyphs } from "./glyphs";
 import {
   ArticulationType,
   ClefType,
+  Lyric,
+  LyricInput,
   NoteProps,
   Pitch,
   PitchPosition,
@@ -276,6 +278,29 @@ export const articulationLeftSs: Record<ArticulationType, number> = {
 export const articulationCentersOnStem = (
   articulation: ArticulationType
 ): boolean => articulation === "staccato" || articulation === "staccatissimo";
+
+/** Expand the string shorthand for a lyric entry. */
+export const normalizeLyric = (entry: LyricInput): Lyric =>
+  typeof entry === "string" ? { text: entry } : entry;
+
+// The default minimum width every note slot gets, in staff-spaces
+export const NOTE_MIN_WIDTH_SS = 2.2;
+
+/*
+  Minimum slot width (in staff-spaces) a note needs so its widest lyric
+  syllable doesn't collide with its neighbors'. Estimated per character at
+  the lyric font size (1.6 staff-spaces, ~0.55em average glyph width) —
+  no DOM measurement, so it also feeds the system-breaking estimates.
+*/
+export const lyricsMinWidthSs = (lyrics?: LyricInput[]): number => {
+  if (!lyrics || lyrics.length === 0) return NOTE_MIN_WIDTH_SS;
+  return Math.max(
+    NOTE_MIN_WIDTH_SS,
+    ...lyrics.map(
+      (entry) => normalizeLyric(entry).text.length * 0.88 + 0.6
+    )
+  );
+};
 
 // Notes on or above the middle line take down-stems by default
 export const getDefaultStem = (

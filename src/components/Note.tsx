@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { CSSProperties, Fragment, useContext } from "react";
 import "./Note.css";
 import "../global.css";
 import {
@@ -18,6 +18,8 @@ import {
   getDefaultStem,
   getLedgerLines,
   getNoteFlex,
+  lyricsMinWidthSs,
+  normalizeLyric,
   noteTranslations,
   positionIndex,
   resolvePosition,
@@ -120,15 +122,24 @@ export const Note = (props: NoteProps) => {
       : 1.5
     : 0;
 
+  const lyrics = !rest ? props.lyrics : undefined;
+
   return (
     <div
       className="note-container"
-      style={{
-        flexGrow: getNoteFlex(props),
-        marginLeft: accidentalMargin
-          ? `calc(var(--staff-space) * ${accidentalMargin})`
-          : undefined,
-      }}
+      style={
+        {
+          flexGrow: getNoteFlex(props),
+          marginLeft: accidentalMargin
+            ? `calc(var(--staff-space) * ${accidentalMargin})`
+            : undefined,
+          // widens the slot for long syllables; beam groups still override
+          // via CSS so beam geometry stays flex-proportional
+          "--note-min-width": lyrics?.length
+            ? `calc(var(--staff-space) * ${lyricsMinWidthSs(lyrics)})`
+            : undefined,
+        } as CSSProperties
+      }
     >
       {ledgerLines.map((ledger) => (
         <div
@@ -176,6 +187,22 @@ export const Note = (props: NoteProps) => {
         </div>
       )}
       {props.text && <div className="note-text">{props.text}</div>}
+      {lyrics?.map((entry, verse) => {
+        const lyric = normalizeLyric(entry);
+        const top = `calc(var(--staff-space) * ${13.1 + verse * 1.9})`;
+        return (
+          <Fragment key={`lyric-${verse}`}>
+            <div className="lyric" style={{ top }}>
+              {lyric.text}
+            </div>
+            {(lyric.syllabic === "begin" || lyric.syllabic === "middle") && (
+              <div className="lyric lyric-hyphen" style={{ top }}>
+                -
+              </div>
+            )}
+          </Fragment>
+        );
+      })}
       {tie === "start" && (
         <div
           className="tie-container"

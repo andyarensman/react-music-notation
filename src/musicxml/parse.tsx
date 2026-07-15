@@ -19,6 +19,7 @@ import {
   ClefType,
   DynamicType,
   KeyRange,
+  Lyric,
   NoteProps,
   Pitch,
   StackedNote,
@@ -111,6 +112,7 @@ interface ParsedNote {
   slurStart: boolean;
   slurStop: boolean;
   articulation?: ArticulationType;
+  lyrics?: Lyric[];
   // attached from preceding <direction> elements
   dynamic?: DynamicType;
   text?: string;
@@ -404,8 +406,29 @@ function parseNote(
     warn("Skipped cue notes");
     return undefined;
   }
-  if (noteElement.getElementsByTagName("lyric").length > 0) {
-    warn("Skipped <lyric> elements");
+  const lyricElements = Array.from(noteElement.getElementsByTagName("lyric"));
+  let lyrics: Lyric[] | undefined;
+  if (lyricElements.length > 0) {
+    const byVerse = new Map<number, Lyric>();
+    lyricElements.forEach((lyricElement, order) => {
+      const verse = Number(lyricElement.getAttribute("number") ?? order + 1);
+      const text = childText(lyricElement, "text");
+      if (!text) return;
+      byVerse.set(verse, {
+        text,
+        syllabic: childText(lyricElement, "syllabic") as Lyric["syllabic"],
+      });
+      if (lyricElement.getElementsByTagName("extend").length > 0) {
+        warn("Skipped lyric <extend> (melisma extender lines)");
+      }
+    });
+    if (byVerse.size > 0) {
+      const verseCount = Math.max(...byVerse.keys());
+      lyrics = Array.from(
+        { length: verseCount },
+        (_, index) => byVerse.get(index + 1) ?? { text: "" }
+      );
+    }
   }
 
   const restElement = noteElement.getElementsByTagName("rest")[0];
@@ -438,6 +461,7 @@ function parseNote(
     slurStart: false,
     slurStop: false,
     wedgeStop: false,
+    lyrics,
   };
   if (noteElement.getElementsByTagName("dot").length > 1) {
     warn("Double dots reduced to a single dot");
@@ -582,6 +606,7 @@ function buildVoiceEvents(
             articulation={first.articulation}
             dynamic={first.dynamic}
             text={first.text}
+            lyrics={first.lyrics}
           />
         ),
         ...shared,
@@ -613,6 +638,7 @@ function buildVoiceEvents(
           articulation={first.articulation}
           dynamic={first.dynamic}
           text={first.text}
+          lyrics={first.lyrics}
         />
       ),
       ...shared,

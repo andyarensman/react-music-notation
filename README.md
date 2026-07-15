@@ -108,7 +108,18 @@ The project is built in phases; each completed phase has a kitchen-sink story un
 - Graceful degradation: unsupported elements (ornaments, grace notes,
   lyrics, fermata, ...) are skipped and reported through `onWarnings`
 
-**Still out**: cross-staff beaming, cross-measure slurs and ties (both stop at the barline; no incoming half-curve on the next system), ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), courtesy naturals on key changes, bracketed instrument-family groups in scores, a grand-staff part inside a `Score`, `.mxl` unzipping (pass the contained XML string yourself), MusicXML export, MIDI, playback, and print layout.
+**Phase 11**
+
+- Lyrics (`lyrics` on `Note`/`NoteStack`): syllables in roman serif centered
+  under their noteheads, one line per verse; hyphens drawn between the parts
+  of split words (`syllabic: "begin" | "middle" | "end"`); long syllables
+  widen their note's slot (a CSS min-width floor that also feeds the
+  system-breaking estimates, and yields inside beam groups so beam geometry
+  stays exact)
+- MusicXML `<lyric>` elements import (number/syllabic/text; `<extend>`
+  melisma lines reported as skipped)
+
+**Still out**: cross-staff beaming, cross-measure slurs and ties (both stop at the barline; no incoming half-curve on the next system), ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), courtesy naturals on key changes, bracketed instrument-family groups in scores, a grand-staff part inside a `Score`, melisma extender lines and elisions, verse numbers, 3+ lyric verses (they overflow toward the next system), `.mxl` unzipping (pass the contained XML string yourself), MusicXML export, MIDI, playback, and print layout. See `ROADMAP.md` for the full coverage audit against Behind Bars and the MusicXML element reference.
 
 **MusicXML coverage roadmap** — auditing the [MusicXML 4.0 element reference](https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/) against what renders today, the notable visual-notation elements still missing are: ornaments (`trill-mark`, `turn`/`inverted-turn`, `mordent`/`inverted-mordent`, `wavy-line`), `grace` notes and `cue` notes, `fermata`, `breath-mark`/`caesura`, `tremolo`, `arpeggiate`, `glissando`/`slide`, `octave-shift` (8va), `pedal`, `lyric`, `ending` (volta brackets), `segno`/`coda`, `rehearsal` marks, `multiple-rest` (multi-measure rests), harmony/chord symbols, tablature, and percussion notation. These are the candidate pool for future phases.
 
@@ -262,6 +273,18 @@ A `Note` can take `pitch={{ step, octave }}` instead of an explicit `position`. 
 ```
 
 `Tuplet`, `Slur`, and `Hairpin` all wrap a contiguous run of events and can nest beam groups. A tuplet's `ratio={[actual, normal]}` scales its children's durations (three-in-the-time-of-two = each note at ⅔ width), so the measure's flex math and the onset grid keep working. Inside a `Voice`, all three inherit the voice's stem direction and outer side.
+
+### Lyrics
+
+```tsx
+<Note
+  pitch={{ step: "E", octave: 4 }}
+  noteValue="quarter"
+  lyrics={[{ text: "Sing", syllabic: "begin" }, "Voice"]}
+/>
+```
+
+`lyrics` (also on `NoteStack`) takes one entry per verse: a plain string for a whole word, or `{ text, syllabic }` where `syllabic: "begin" | "middle"` draws a hyphen toward the next syllable. Syllables center under the notehead; a long syllable raises its note's minimum slot width so neighboring verses never collide (the same estimate feeds system breaking). Two verses fit comfortably; more will crowd the next system.
 
 ### Rests
 

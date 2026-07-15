@@ -2,8 +2,9 @@
   position: relative;
   /* flex-grow: 1; */
   flex-basis: 0;
-  /* keep dense rhythms from crushing together */
-  min-width: calc(var(--staff-space) * 2.2);
+  /* keep dense rhythms from crushing together; notes with long lyric
+     syllables raise the floor via --note-min-width */
+  min-width: var(--note-min-width, calc(var(--staff-space) * 2.2));
 }
 
 /* Inside a beam group widths must stay exactly flex-proportional or stems
@@ -135,6 +136,25 @@
     (var(--staff-space) * 12.125 - var(--staff-line-thickness)) / 2 +
       var(--staff-space) * 8
   );
+}
+
+/* Lyric syllables: roman serif, centered under the notehead, one line per
+   verse. The hyphen for split words sits on the boundary to the next note. */
+.lyric {
+  position: absolute;
+  left: calc(var(--staff-space) * 0.59);
+  transform: translateX(-50%);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: calc(var(--staff-space) * 1.6);
+  line-height: 1;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.lyric.lyric-hyphen {
+  /* midpoint between this syllable's center (0.59ss) and the next note's
+     syllable center (container width + 0.59ss) */
+  left: calc(50% + var(--staff-space) * 0.59);
 }
 
 /* Expression text ("dolce") in italics on the dynamics line */

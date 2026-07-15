@@ -144,7 +144,27 @@ interface RestProps extends BaseNoteProps {
   articulation?: never;
   /** Rests cannot carry an articulation mark. */
   articulationPlacement?: never;
+  /** Rests cannot carry lyrics. */
+  lyrics?: never;
 }
+
+/** One lyric syllable under a note. */
+export interface Lyric {
+  /** The syllable text. */
+  text: string;
+  /**
+   * How the syllable relates to its word: `"single"` (a whole word, the
+   * default), or `"begin"`/`"middle"`/`"end"` for hyphenated word parts —
+   * `begin` and `middle` draw a hyphen toward the next syllable.
+   */
+  syllabic?: "single" | "begin" | "middle" | "end";
+}
+
+/**
+ * A lyric entry: a `Lyric` object or a plain string shorthand for
+ * `{ text, syllabic: "single" }`.
+ */
+export type LyricInput = string | Lyric;
 
 /** A single pitch: diatonic step, optional accidental, and octave. */
 export interface Pitch {
@@ -208,6 +228,13 @@ export interface NoteValueProps extends BaseNoteProps {
    * explicitly to override either default.
    */
   articulationPlacement?: "above" | "below";
+  /**
+   * Lyric syllables under the note, one entry per verse (verse 1 first).
+   * Strings are shorthand for whole words; use `{ text, syllabic }` for
+   * hyphenated word parts. Long syllables widen the note's slot so
+   * neighboring lyrics don't collide.
+   */
+  lyrics?: LyricInput[];
 }
 
 /** One notehead within a `NoteStack` chord. */

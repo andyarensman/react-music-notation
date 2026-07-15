@@ -1,5 +1,76 @@
 # Roadmap
 
+## Coverage audit (July 2026)
+
+A systematic pass over the three references — the chapter list of Gould,
+*Behind Bars* (`references/`), the MPA *Standard Music Notation Practice*
+booklet, and the [MusicXML 4.0 element
+reference](https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/)
+— listing everything the library does **not** yet render. Items overlap
+between sources; each appears once, under the source that treats it most
+fully.
+
+### From Behind Bars, Part I (general conventions)
+
+- **Ground rules (ch. 1)**: octave clefs (G8vb vocal tenor, 8va/8vb-marked
+  clefs), percussion clef, single-line staves, cue-size/small staves,
+  whole-bar rest centering (ours left-aligns), multi-measure rests (H-bar
+  with count), beam sub-grouping within long groups, stemlets over rests
+  inside beams, fanned/accelerando beams, engraving-grade (roughly
+  logarithmic) horizontal spacing.
+- **Chords, dotted notes, ties (ch. 2)**: ties on individual chord
+  noteheads, cross-measure/cross-system ties (half-curves), double dots,
+  laissez-vibrer ties.
+- **Accidentals & key signatures (ch. 3)**: courtesy/cautionary
+  accidentals (parenthesized), cancellation naturals on key changes,
+  microtonal accidentals.
+- **Dynamics & articulation (ch. 4)**: niente hairpins, dashed hairpins,
+  subito markings, dynamic alignment across a system.
+- **Grace notes etc. (ch. 5)**: the whole chapter — grace notes,
+  arpeggiated chords (wavy line), trills + wavy extension lines, turns,
+  mordents, glissandos/slides, vibrato lines.
+- **Metre (ch. 6)**: polymetre, metric modulation equations, unmetred
+  music/cadenza notation, senza-misura passages.
+- **Tuplets (ch. 7)**: nested tuplets, ratio-with-colon and
+  numeral-with-note-value displays, tuplets spanning barlines.
+- **Repeat signs (ch. 8)**: volta endings (1./2. brackets), D.C./D.S. al
+  Fine/Coda, segno & coda signs, single- and two-bar measure-repeat signs
+  (%), rhythmic slash notation.
+
+### From Behind Bars, Parts II-III (idiomatic notation & layout)
+
+- **Keyboard (ch. 11)**: cross-staff beaming, pedal lines/markings,
+  arpeggio lines spanning both staves, voice-collision offsets (unisons/
+  seconds between voices).
+- **Vocal (ch. 15)**: melisma extender (underscore) lines, verse numbers
+  before the first syllable, elision slurs between syllables, breath marks
+  and caesuras, 3+ verses without vertical collision.
+- **Percussion (ch. 10)**: unpitched staves, alternative noteheads (x,
+  diamond), stem tremolos, rolls.
+- **Strings (ch. 14)**: bowing marks (up/down bow), fingering numbers,
+  harmonics circles, divisi conventions, pizzicato/arco text handled only
+  as generic expression text.
+- **Harp/guitar (chs. 12-13)**: pedal diagrams, tablature, chord frames,
+  fingering.
+- **Score layout (chs. 16-18)**: square instrument-family brackets (we
+  draw only the keyboard brace), a grand-staff part inside a `Score`,
+  title/composer headers, bar numbering (the `measureNumber` prop is
+  currently unrendered), rehearsal marks, cue notes in parts, page/print
+  layout.
+
+### From the MusicXML 4.0 element reference (not already listed above)
+
+`<tremolo>`, `<arpeggiate>`/`<non-arpeggiate>`, `<glissando>`/`<slide>`,
+`<octave-shift>`, `<pedal>`, `<harp-pedals>`, `<scordatura>`,
+`<string-mute>`, `<ending>`, `<segno>`/`<coda>`, `<rehearsal>`,
+`<multiple-rest>`, `<breath-mark>`/`<caesura>`, `<fermata>`, `<grace>`,
+`<cue>`, lyric `<extend>` and `<elision>`, `<harmony>` (chord symbols),
+technical marks (`<hammer-on>`, `<bend>`, ...), `<soft-accent>`, and the
+tablature/percussion families. Importer-side only: `.mxl` unzipping,
+score-timewise documents, `<transpose>`.
+
+---
+
 Remaining work, split by how much heavy lifting it needs. The first list is
 architecture-shaping work worth doing with maximum model capability; the
 second is well-scoped follow-the-pattern work a smaller model (or a spare
@@ -14,9 +85,9 @@ afternoon) can handle. Grounded against the
   now grows with the notation roadmap: grace notes, lyrics, voltas, 8va,
   and ornaments below all have MusicXML elements waiting on renderer
   support.
-- **Lyrics** (`<lyric>`) — verse text under notes interacts with the
-  spacing engine (syllable widths can exceed note widths) and with
-  multi-verse alignment.
+- ~~**Lyrics**~~ — shipped: verse-stacked syllables with hyphenation, slot
+  widths fed into the spacing engine, MusicXML `<lyric>` mapped. Still
+  open: melisma extender lines, elisions, verse numbers, 3+ verses.
 - **Grace notes** (`<grace>`) and cue notes (`<cue>`) — zero-duration events
   break the duration-proportional flex model's core assumption; need their
   own width treatment inside the onset grid.

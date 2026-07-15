@@ -1,7 +1,8 @@
 import { Children, ReactElement, ReactNode, isValidElement } from "react";
 import { BeamContainer } from "./BeamContainer";
 import { getMusicRole, isVoiceElement } from "./layout";
-import { Pitch, StackedNote } from "../helpers/types";
+import { lyricsMinWidthSs } from "../helpers/helpers";
+import { LyricInput, Pitch, StackedNote } from "../helpers/types";
 
 /*
   System layout: Staff and GrandStaff break their measures into systems
@@ -16,6 +17,7 @@ interface CountableProps {
   noteValue?: unknown;
   pitch?: Pitch;
   pitches?: StackedNote[];
+  lyrics?: LyricInput[];
   children?: ReactNode;
 }
 
@@ -52,7 +54,9 @@ export const estimateNotesWidthSs = (children: ReactNode): number => {
     if (child.props.noteValue === undefined) {
       return;
     }
-    width += 2.2;
+    // base slot (raised by the widest lyric syllable, mirroring the CSS
+    // min-width floor)
+    width += lyricsMinWidthSs(child.props.lyrics);
     if (child.props.pitch?.alter) {
       width += 1.5;
     }
