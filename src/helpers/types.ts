@@ -140,6 +140,8 @@ interface RestProps extends BaseNoteProps {
   tie?: never;
   /** Rests cannot be tied. */
   tieDirection?: never;
+  /** Rests cannot carry slur markers. */
+  slur?: never;
   /** Rests cannot carry an articulation mark. */
   articulation?: never;
   /** Rests cannot carry an articulation mark. */
@@ -148,6 +150,25 @@ interface RestProps extends BaseNoteProps {
   lyrics?: never;
   /** Rests cannot carry grace notes. */
   grace?: never;
+}
+
+/**
+ * Marks a note as the start and/or end of a slur that may cross barlines
+ * and system breaks. Paired by id: an `end` matches the nearest unmatched
+ * `start` with the same id (`true` is shorthand for the default id). A
+ * note may end one slur and start another.
+ */
+export interface SlurMarker {
+  /** Starts a slur at this note. `true` uses the default pairing id. */
+  start?: string | boolean;
+  /** Ends a slur begun at an earlier `start` with the same id. */
+  end?: string | boolean;
+  /**
+   * Which side the curve sits on. Defaults to `"below"` when every covered
+   * stem points up, otherwise `"above"` (same rule as the `Slur` wrapper).
+   * Only read from the `start` note.
+   */
+  direction?: "above" | "below";
 }
 
 /** One lyric syllable under a note. */
@@ -207,10 +228,24 @@ export interface NoteValueProps extends BaseNoteProps {
    */
   stemEndValue?: number;
   /**
-   * `"start"` draws a tie curve to the next note (same measure); `"stop"`
-   * marks the receiving note.
+   * `"start"` draws a tie curve to the next note; `"stop"` marks the
+   * receiving note. When the next note is in a following measure (or on
+   * the next system), the enclosing `Staff`/`GrandStaff`/`Score` draws the
+   * curve across the barline — splitting it into two half-curves at a
+   * system break. Marking the receiving note with `"stop"` makes the
+   * cross-measure pairing explicit; without it, the tie connects to the
+   * next note in the same voice.
    */
   tie?: "start" | "stop";
+  /**
+   * Slur boundary markers for slurs that cross barlines (and system
+   * breaks). Set `{ start: true }` on the first note and `{ end: true }`
+   * on the last; the enclosing `Staff`/`GrandStaff`/`Score` draws the
+   * curve. Concurrent slurs disambiguate with string ids
+   * (`{ start: "a" }` … `{ end: "a" }`). For a slur contained in one
+   * measure, the `Slur` wrapper component is usually more convenient.
+   */
+  slur?: SlurMarker;
   /**
    * Tie curve direction. Defaults to the side opposite the stem. Inside a
    * `Voice`, defaults to the voice's outer side instead (above for the

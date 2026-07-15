@@ -24,6 +24,7 @@ import {
   Lyric,
   NoteProps,
   Pitch,
+  SlurMarker,
   StackedNote,
 } from "../helpers/types";
 
@@ -111,8 +112,10 @@ interface ParsedNote {
   tupletStart: boolean;
   tupletStop: boolean;
   timeMod?: [number, number];
-  slurStart: boolean;
-  slurStop: boolean;
+  // MusicXML slur "number" attribute (default "1"); slurs contained in one
+  // measure become Slur wrappers, unmatched boundaries become slur markers
+  slurStart?: string;
+  slurStop?: string;
   articulation?: ArticulationType;
   lyrics?: Lyric[];
   // grace notes preceding this note in the stream, attached as its lead-in
@@ -525,8 +528,6 @@ function parseNote(
     tieStop: false,
     tupletStart: false,
     tupletStop: false,
-    slurStart: false,
-    slurStop: false,
     wedgeStop: false,
     lyrics,
     isGrace: Boolean(graceElement),
@@ -577,8 +578,9 @@ function parseNote(
   if (notations) {
     for (const slur of Array.from(notations.getElementsByTagName("slur"))) {
       const type = slur.getAttribute("type");
-      if (type === "start") note.slurStart = true;
-      if (type === "stop") note.slurStop = true;
+      const number = slur.getAttribute("number") ?? "1";
+      if (type === "start") note.slurStart = number;
+      if (type === "stop") note.slurStop = number;
     }
     for (const tuplet of Array.from(
       notations.getElementsByTagName("tuplet")
@@ -648,6 +650,45 @@ function buildVoiceEvents(
     }
   }
 
+  /*
+    Slurs contained in this measure-voice become Slur wrappers below; a
+    boundary whose partner lies in another measure becomes a slur marker
+    prop instead, and the staff-level CurveOverlay draws that curve across
+    the barline (or system break). Stops resolve before starts so one note
+    can close a slur and open the next; the MusicXML "number" attribute
+    becomes the pairing id.
+  */
+  const groupSlurStart = groups.map((group) =>
+    group.map((n) => n.slurStart).find((v) => v !== undefined)
+  );
+  const groupSlurStop = groups.map((group) =>
+    group.map((n) => n.slurStop).find((v) => v !== undefined)
+  );
+  const startMatched = new Array<boolean>(groups.length).fill(false);
+  const stopMatched = new Array<boolean>(groups.length).fill(false);
+  const openStarts: number[] = [];
+  groups.forEach((_, index) => {
+    if (groupSlurStop[index] !== undefined) {
+      const startIndex = openStarts.pop();
+      if (startIndex !== undefined) {
+        startMatched[startIndex] = true;
+        stopMatched[index] = true;
+      }
+    }
+    if (groupSlurStart[index] !== undefined) openStarts.push(index);
+  });
+  const slurMarker = (index: number): SlurMarker | undefined => {
+    const start =
+      groupSlurStart[index] !== undefined && !startMatched[index]
+        ? `xml-${groupSlurStart[index]}`
+        : undefined;
+    const end =
+      groupSlurStop[index] !== undefined && !stopMatched[index]
+        ? `xml-${groupSlurStop[index]}`
+        : undefined;
+    return start || end ? { start, end } : undefined;
+  };
+
   let events: EventDesc[] = groups.map((group, index) => {
     const first = group[0];
     const shared = {
@@ -655,8 +696,8 @@ function buildVoiceEvents(
       tupletStart: group.some((n) => n.tupletStart),
       tupletStop: group.some((n) => n.tupletStop),
       timeMod: first.timeMod,
-      slurStart: group.some((n) => n.slurStart),
-      slurStop: group.some((n) => n.slurStop),
+      slurStart: startMatched[index],
+      slurStop: stopMatched[index],
       wedgeStart: first.wedgeStart,
       wedgeStop: group.some((n) => n.wedgeStop),
     };
@@ -677,6 +718,7 @@ function buildVoiceEvents(
             text={first.text}
             lyrics={first.lyrics}
             grace={first.grace}
+            slur={slurMarker(index)}
           />
         ),
         ...shared,
@@ -710,6 +752,7 @@ function buildVoiceEvents(
           text={first.text}
           lyrics={first.lyrics}
           grace={first.grace}
+          slur={slurMarker(index)}
         />
       ),
       ...shared,

@@ -98,8 +98,13 @@ afternoon) can handle. Grounded against the
   MusicXML start/stop/discontinue mapped. Still open: **segno/coda**
   navigation marks, and voltas restating their label after a system break
   (a continuation line renders, but unlabeled).
-- **Cross-measure/system slurs and ties** — half-curves at system breaks;
-  requires plumbing system-position knowledge into the curve renderers.
+- ~~**Cross-measure/system slurs and ties**~~ — shipped: `tie="start"`
+  reaches across barlines automatically; `slur={{ start }}`/`{{ end }}`
+  markers span measures. A per-staff `CurveOverlay` measures the DOM
+  after layout and paints pixel-space curves, splitting into half-curves
+  at system breaks and sampling the bezier against every covered
+  stem/beam. Still open: ties on chord members, curves anchored to grace
+  notes.
 - **Voice collision engine** — offsetting unisons/seconds between voices,
   and more generally collision-aware horizontal spacing (accidentals inside
   beams currently shift stems slightly off the beam math).

@@ -10,6 +10,7 @@ import {
 } from "react";
 import "./GrandStaff.css";
 import "../global.css";
+import { CurveOverlay } from "./CurveOverlay";
 import { braceGlyph } from "../helpers/glyphs";
 import { ClefType, KeyRange } from "../helpers/types";
 import { GrandMeasureProps } from "./GrandMeasure";
@@ -205,6 +206,7 @@ export const GrandStaff = ({ children }: GrandStaffProps) => {
         );
       })}
       {passthrough}
+      <CurveOverlay />
     </div>
   );
 };

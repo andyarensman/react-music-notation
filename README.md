@@ -134,7 +134,23 @@ The project is built in phases; each completed phase has a kitchen-sink story un
   the next host note; `<ending>` start/stop/discontinue maps across
   measures onto the `ending` prop
 
-**Still out**: grace-note accidentals and beamed/slurred grace-note runs, D.S./D.C./segno/coda navigation marks, cross-staff beaming, cross-measure slurs and ties (both stop at the barline; no incoming half-curve on the next system), ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), courtesy naturals on key changes, bracketed instrument-family groups in scores, a grand-staff part inside a `Score`, melisma extender lines and elisions, verse numbers, 3+ lyric verses (they overflow toward the next system), `.mxl` unzipping (pass the contained XML string yourself), MusicXML export, MIDI, playback, and print layout. See `ROADMAP.md` for the full coverage audit against Behind Bars and the MusicXML element reference.
+**Phase 13**
+
+- Slurs and ties across barlines and system breaks: `tie="start"` reaches
+  the next note wherever it lives; `slur={{ start }}` / `slur={{ end }}`
+  markers draw slurs between notes in different measures. At a system
+  break the curve splits into outgoing/incoming half-curves (Gould); the
+  drawing happens in a per-staff pixel-space overlay (`CurveOverlay`)
+  that measures the DOM after layout, so it survives resizes and system
+  re-breaking, works inside `GrandStaff`/`Score` (per-staff pairing), and
+  respects voices
+- Curves clear every covered stem and beam: the bezier is sampled against
+  each obstacle and endpoints lift above a beam that runs to the end of
+  the span
+- MusicXML: cross-measure `<slur>` boundaries become marker props (the
+  `number` attribute is the pairing id); `<tie>` start/stop already mapped
+
+**Still out**: grace-note accidentals and beamed/slurred grace-note runs, D.S./D.C./segno/coda navigation marks, cross-staff beaming, ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, voice-collision handling (unisons/seconds between voices overlap), courtesy naturals on key changes, bracketed instrument-family groups in scores, a grand-staff part inside a `Score`, melisma extender lines and elisions, verse numbers, 3+ lyric verses (they overflow toward the next system), `.mxl` unzipping (pass the contained XML string yourself), MusicXML export, MIDI, playback, and print layout. See `ROADMAP.md` for the full coverage audit against Behind Bars and the MusicXML element reference.
 
 **MusicXML coverage roadmap** — auditing the [MusicXML 4.0 element reference](https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/) against what renders today, the notable visual-notation elements still missing are: ornaments (`trill-mark`, `turn`/`inverted-turn`, `mordent`/`inverted-mordent`, `wavy-line`), `cue` notes, `fermata`, `breath-mark`/`caesura`, `tremolo`, `arpeggiate`, `glissando`/`slide`, `octave-shift` (8va), `pedal`, `segno`/`coda`, `rehearsal` marks, `multiple-rest` (multi-measure rests), harmony/chord symbols, tablature, and percussion notation. These are the candidate pool for future phases.
 
@@ -288,6 +304,23 @@ A `Note` can take `pitch={{ step, octave }}` instead of an explicit `position`. 
 ```
 
 `Tuplet`, `Slur`, and `Hairpin` all wrap a contiguous run of events and can nest beam groups. A tuplet's `ratio={[actual, normal]}` scales its children's durations (three-in-the-time-of-two = each note at ⅔ width), so the measure's flex math and the onset grid keep working. Inside a `Voice`, all three inherit the voice's stem direction and outer side.
+
+### Slurs and ties across barlines and system breaks
+
+```tsx
+<Staff>
+  <Measure clef="gClef" time={{ beat: 4, beatType: 4 }}>
+    <Note pitch={{ step: "F", octave: 5 }} noteValue="half" slur={{ start: true }} />
+    <Note pitch={{ step: "D", octave: 5 }} noteValue="half" tie="start" />
+  </Measure>
+  <Measure barline="final">
+    <Note pitch={{ step: "D", octave: 5 }} noteValue="half" tie="stop" />
+    <Note pitch={{ step: "E", octave: 5 }} noteValue="half" slur={{ end: true }} />
+  </Measure>
+</Staff>
+```
+
+The `Slur` wrapper can't cross a barline (its children live in one measure), so cross-measure slurs use marker props instead: `slur={{ start }}` on the first note, `slur={{ end }}` on the last (string ids pair concurrent slurs; `direction` overrides the side). A `tie="start"` whose next note sits in a following measure automatically reaches across. The enclosing `Staff`/`GrandStaff`/`Score` draws these curves in a pixel-space overlay after layout — and when the endpoints land on different systems, the curve splits at the break into an outgoing half-curve (to the system's right edge) and an incoming one leading into the destination note, with a full-width segment across any middle systems. The curves stay clear of every stem and beam they cover (the endpoint lifts above a beam that runs to the end of the span, per Gould), and everything repaints on resize as systems re-break.
 
 ### Lyrics
 

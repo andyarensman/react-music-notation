@@ -83,6 +83,13 @@ export interface MeasureProps {
    * instead of plain flex, so every staff aligns. Not usually set manually.
    */
   grid?: number[];
+  /**
+   * @internal Which staff of a grand measure / score measure this is
+   * (upper = 0, lower = 1, or the part index); set by `GrandMeasure`/
+   * `ScoreMeasure` so the curve overlay can pair cross-measure ties and
+   * slurs within one staff. Not usually set manually.
+   */
+  staffTrack?: number;
   /** The measure's content: `Note`, `NoteStack`, `BeamContainer`, `Voice`, `Tuplet`, `Slur`, and `Hairpin` elements. */
   children?: ReactNode;
 }
@@ -118,6 +125,7 @@ export const Measure = ({
   barline,
   startRepeat,
   grid,
+  staffTrack,
   children,
 }: MeasureProps) => {
   const activeClef = clef ?? inheritedClef ?? "gClef";
@@ -133,7 +141,11 @@ export const Measure = ({
 
   return (
     <ClefContext.Provider value={activeClef}>
-      <div className="measure-container" style={style}>
+      <div
+        className="measure-container"
+        data-staff-track={staffTrack}
+        style={style}
+      >
         <StaffLines />
         {tempo && <Tempo {...tempo} />}
         {ending && (

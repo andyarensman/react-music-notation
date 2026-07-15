@@ -16,6 +16,7 @@ import {
   estimateMeasureWidthSs,
   systemFillRatio,
 } from "./systemLayout";
+import { CurveOverlay } from "./CurveOverlay";
 import "./Staff.css";
 
 interface StaffProps {
@@ -147,6 +148,7 @@ export const Staff = ({ children }: StaffProps) => {
         );
       })}
       {passthrough}
+      <CurveOverlay />
     </div>
   );
 };

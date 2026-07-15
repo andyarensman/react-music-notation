@@ -41,5 +41,6 @@ export type {
   NoteValueProps,
   Pitch,
   PitchPosition,
+  SlurMarker,
   StackedNote,
 } from "./helpers/types";

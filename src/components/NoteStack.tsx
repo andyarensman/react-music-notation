@@ -18,6 +18,7 @@ import {
   assignAccidentalColumns,
   getArticulationIndex,
   getChordStem,
+  getCurveAnchors,
   getLedgerLines,
   getNoteFlex,
   lyricsMinWidthSs,
@@ -33,6 +34,7 @@ import {
   GraceNote,
   LyricInput,
   NoteProps,
+  SlurMarker,
   StackedNote,
 } from "../helpers/types";
 import { ClefContext } from "./ClefContext";
@@ -84,6 +86,11 @@ export interface NoteStackProps {
   lyrics?: LyricInput[];
   /** Grace notes rendered small before the chord, in playing order. */
   grace?: GraceNote[];
+  /**
+   * Slur boundary markers for slurs that cross barlines/system breaks —
+   * same behavior as `Note`'s `slur`.
+   */
+  slur?: SlurMarker;
 }
 
 const STEM_LENGTH = 28; // 3.5 staff-spaces in viewBox units
@@ -243,9 +250,36 @@ export const NoteStack = (props: NoteStackProps) => {
       : articulationLeftSs[props.articulation]
     : 0;
 
+  // Publish curve geometry + slur markers for the CurveOverlay, using the
+  // chord's outer noteheads (same anchor rules as Note)
+  const impliedStemUp = stemLine
+    ? stemUp
+    : getChordStem(notes.map((note) => note.position)) === "upStem";
+  const slurStartId =
+    props.slur?.start === true ? "default" : props.slur?.start || undefined;
+  const slurEndId =
+    props.slur?.end === true ? "default" : props.slur?.end || undefined;
+  const curveAnchors = getCurveAnchors({
+    topPosition,
+    bottomPosition,
+    stemUp: impliedStemUp,
+    hasStem: stemLine !== null,
+    stemEndVb: stemEndValue,
+  });
+
   return (
     <div
       className="note-container"
+      data-note-event=""
+      data-stem-up={impliedStemUp ? "1" : "0"}
+      data-has-stem={stemLine !== null ? "1" : "0"}
+      data-anchor-above={curveAnchors.anchorAboveSs}
+      data-anchor-below={curveAnchors.anchorBelowSs}
+      data-obstacle-above={curveAnchors.obstacleAboveSs}
+      data-obstacle-below={curveAnchors.obstacleBelowSs}
+      data-slur-start={slurStartId}
+      data-slur-end={slurEndId}
+      data-slur-dir={props.slur?.direction}
       style={
         {
           flexGrow: getNoteFlex(props),

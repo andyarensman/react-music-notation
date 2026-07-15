@@ -95,6 +95,7 @@ export const GrandMeasure = ({
         inheritedClef: inheritedUpperClef,
         inheritedFifths: inheritedUpperFifths,
         systemStart,
+        staffTrack: 0,
       })}
       <div className="grand-measure-lower">
         {cloneElement(lower, {
@@ -104,6 +105,7 @@ export const GrandMeasure = ({
           inheritedClef: inheritedLowerClef,
           inheritedFifths: inheritedLowerFifths,
           systemStart,
+          staffTrack: 1,
         })}
       </div>
       {!perStaffBarline && (

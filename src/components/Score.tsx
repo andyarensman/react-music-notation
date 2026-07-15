@@ -10,6 +10,7 @@ import {
 } from "react";
 import "./Score.css";
 import "../global.css";
+import { CurveOverlay } from "./CurveOverlay";
 import { ClefType, KeyRange } from "../helpers/types";
 import { PART_STRIDE_SS, ScoreMeasureProps } from "./ScoreMeasure";
 import {
@@ -201,6 +202,7 @@ export const Score = ({ partNames, children }: ScoreProps) => {
         );
       })}
       {passthrough}
+      <CurveOverlay />
     </div>
   );
 };

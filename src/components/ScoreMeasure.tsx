@@ -100,6 +100,7 @@ export const ScoreMeasure = ({
             inheritedClef: inheritedClefs?.[index],
             inheritedFifths: inheritedFifths?.[index],
             systemStart,
+            staffTrack: index,
           })}
         </div>
       ))}

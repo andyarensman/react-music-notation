@@ -1,0 +1,12 @@
+/* Painted above the staves by CurveOverlay; never part of layout */
+.curve-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.curve-overlay path {
+  fill: black;
+}

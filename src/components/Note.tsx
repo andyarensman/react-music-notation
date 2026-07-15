@@ -16,6 +16,7 @@ import {
   articulationDefaultsAbove,
   articulationLeftSs,
   getArticulationIndex,
+  getCurveAnchors,
   getDefaultStem,
   getLedgerLines,
   getNoteFlex,
@@ -132,9 +133,47 @@ export const Note = (props: NoteProps) => {
 
   const lyrics = !rest ? props.lyrics : undefined;
 
+  /*
+    Publish curve geometry for the CurveOverlay (cross-measure/system slurs
+    and ties): anchors and clearance lines in staff-spaces below the staff
+    top line, plus tie/slur boundary markers. The overlay pairs markers
+    across measures and draws what no in-measure container can.
+  */
+  const slur = !rest ? props.slur : undefined;
+  const slurStartId =
+    slur?.start === true ? "default" : slur?.start || undefined;
+  const slurEndId = slur?.end === true ? "default" : slur?.end || undefined;
+  const curveAnchors = !rest
+    ? getCurveAnchors({
+        topPosition: position,
+        bottomPosition: position,
+        stemUp: effectiveStemUp,
+        hasStem: hasRealStem,
+        stemEndVb: stem === "noStem" ? stemEndValue : undefined,
+      })
+    : undefined;
+  const curveData = curveAnchors
+    ? {
+        "data-note-event": "",
+        "data-stem-up": effectiveStemUp ? "1" : "0",
+        "data-has-stem": hasRealStem ? "1" : "0",
+        "data-anchor-above": curveAnchors.anchorAboveSs,
+        "data-anchor-below": curveAnchors.anchorBelowSs,
+        "data-obstacle-above": curveAnchors.obstacleAboveSs,
+        "data-obstacle-below": curveAnchors.obstacleBelowSs,
+        "data-tie-start": tie === "start" ? (tieAbove ? "above" : "below") : undefined,
+        "data-tie-top": tie === "start" ? tieTopSpaces : undefined,
+        "data-tie-stop": tie === "stop" ? "" : undefined,
+        "data-slur-start": slurStartId,
+        "data-slur-end": slurEndId,
+        "data-slur-dir": slur?.direction,
+      }
+    : undefined;
+
   return (
     <div
       className="note-container"
+      {...curveData}
       style={
         {
           flexGrow: getNoteFlex(props),

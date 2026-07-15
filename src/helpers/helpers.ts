@@ -308,6 +308,62 @@ export const getDefaultStem = (
 ): "upStem" | "downStem" =>
   positionIndex(position) <= MIDDLE_LINE_INDEX ? "downStem" : "upStem";
 
+// y of the staff top line inside the 129-unit stem/beam viewBox
+// (middle line is 64; the top line sits two staff-spaces = 16 units above)
+const VIEWBOX_STAFF_TOP = 48;
+const vbToSs = (yVb: number) => (yVb - VIEWBOX_STAFF_TOP) / 8;
+
+export interface CurveAnchors {
+  /** Where a slur endpoint may anchor above the note, in staff-spaces below the staff top line. */
+  anchorAboveSs: number;
+  /** Where a slur endpoint may anchor below the note. */
+  anchorBelowSs: number;
+  /** The extreme ink line (stem tip or notehead edge) a curve passing above must clear. */
+  obstacleAboveSs: number;
+  /** The extreme ink line a curve passing below must clear. */
+  obstacleBelowSs: number;
+}
+
+/*
+  Geometry the cross-measure curve overlay needs from one note or chord,
+  in staff-spaces relative to the staff top line. Notes publish these as
+  data attributes; CurveOverlay reads them back off the DOM after layout.
+  The anchor/obstacle rules mirror the in-measure Slur component (Gould:
+  slurs anchor at the notehead unless the stem is on the curve's side,
+  and must stay outside every stem and beam they cover).
+*/
+export const getCurveAnchors = ({
+  topPosition,
+  bottomPosition,
+  stemUp,
+  hasStem,
+  stemEndVb,
+}: {
+  topPosition: PitchPosition;
+  bottomPosition: PitchPosition;
+  stemUp: boolean;
+  hasStem: boolean;
+  /** Actual stem end (beamed notes), in viewBox units, when known. */
+  stemEndVb?: number;
+}): CurveAnchors => {
+  const topVb = StemPositions[topPosition];
+  const bottomVb = StemPositions[bottomPosition];
+  const stemAbove = hasStem && stemUp;
+  const stemBelow = hasStem && !stemUp;
+  const tipAbove =
+    stemEndVb !== undefined && stemEndVb < topVb ? stemEndVb : topVb - 28;
+  const tipBelow =
+    stemEndVb !== undefined && stemEndVb > bottomVb
+      ? stemEndVb
+      : bottomVb + 28;
+  return {
+    anchorAboveSs: vbToSs(stemAbove ? topVb - 34 : topVb - 8),
+    anchorBelowSs: vbToSs(stemBelow ? bottomVb + 34 : bottomVb + 8),
+    obstacleAboveSs: vbToSs(stemAbove ? tipAbove : topVb - 8),
+    obstacleBelowSs: vbToSs(stemBelow ? tipBelow : bottomVb + 8),
+  };
+};
+
 export type LedgerLine = `above-${1 | 2 | 3 | 4}` | `below-${1 | 2 | 3 | 4}`;
 
 // Which ledger lines a notehead at this position needs drawn behind it:
