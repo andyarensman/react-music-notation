@@ -1,7 +1,11 @@
 import { useEffect, useMemo } from "react";
 import { parseMusicXML } from "./parse";
+import {
+  InteractionContext,
+  NoteInteractionHandlers,
+} from "../components/InteractionContext";
 
-interface MusicXMLScoreProps {
+interface MusicXMLScoreProps extends NoteInteractionHandlers {
   /** A MusicXML document (score-partwise) as a string. */
   xml: string;
   /**
@@ -24,7 +28,12 @@ interface MusicXMLScoreProps {
  * <MusicXMLScore xml={xmlString} />
  * ```
  */
-export const MusicXMLScore = ({ xml, onWarnings }: MusicXMLScoreProps) => {
+export const MusicXMLScore = ({
+  xml,
+  onWarnings,
+  onNoteClick,
+  onNoteHover,
+}: MusicXMLScoreProps) => {
   const { element, warnings } = useMemo(() => parseMusicXML(xml), [xml]);
 
   useEffect(() => {
@@ -39,5 +48,11 @@ export const MusicXMLScore = ({ xml, onWarnings }: MusicXMLScoreProps) => {
     }
   }, [warnings, onWarnings]);
 
-  return element;
+  return onNoteClick || onNoteHover ? (
+    <InteractionContext.Provider value={{ onNoteClick, onNoteHover }}>
+      {element}
+    </InteractionContext.Provider>
+  ) : (
+    element
+  );
 };

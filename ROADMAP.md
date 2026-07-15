@@ -116,9 +116,13 @@ afternoon) can handle. Grounded against the
   positions beneath it via context; MusicXML `<octave-shift>` maps
   within measures. Still open: octave lines crossing barlines/system
   breaks (would ride the CurveOverlay mechanism).
-- **Interactivity + accessibility pack** — onNoteClick/hover/selection
-  passthrough, ARIA labels per note/measure, keyboard focus. The
-  differentiator versus canvas engraving engines.
+- ~~**Interactivity + accessibility pack**~~ — shipped: score-level
+  `onNoteClick`/`onNoteHover` with `NoteInteractionInfo`, per-note
+  `onClick`/`selected`, keyboard activation, hover/selection recoloring
+  via `currentColor`, spoken aria-labels on every event, labeled measure
+  groups with auto-numbering. Still open: roving-tabindex/arrow-key
+  navigation, built-in selection for `MusicXMLScore`, aria-labels
+  describing articulations/lyrics.
 - **Cross-staff beaming** (piano writing between the hands).
 - **Percussion and tablature** notation families.
 

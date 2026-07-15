@@ -308,6 +308,59 @@ export const getDefaultStem = (
 ): "upStem" | "downStem" =>
   positionIndex(position) <= MIDDLE_LINE_INDEX ? "downStem" : "upStem";
 
+const ALTER_LABELS: Record<NonNullable<Pitch["alter"]>, string> = {
+  sharp: "sharp",
+  flat: "flat",
+  natural: "natural",
+  doubleSharp: "double sharp",
+  doubleFlat: "double flat",
+};
+
+// "C sharp 5" — spoken form of a pitch for aria-labels
+export const pitchLabel = (pitch: Pitch): string =>
+  [
+    pitch.step,
+    pitch.alter ? ALTER_LABELS[pitch.alter] : undefined,
+    pitch.octave,
+  ]
+    .filter((part) => part !== undefined)
+    .join(" ");
+
+/*
+  Spoken description of a note event for its aria-label: "C 5, quarter
+  note", "chord E 4, G 4, dotted half note", "quarter rest". PUA glyph
+  characters are meaningless to screen readers, so every note container
+  carries one of these.
+*/
+export const noteAriaLabel = ({
+  rest,
+  pitches,
+  noteValue,
+  dotted,
+  graceCount,
+}: {
+  rest?: boolean;
+  pitches: Pitch[];
+  noteValue: NoteProps["noteValue"];
+  dotted?: boolean;
+  graceCount?: number;
+}): string => {
+  const value = `${dotted ? "dotted " : ""}${noteValue}`;
+  if (rest) return `${value} rest`;
+  const names = pitches
+    .map(pitchLabel)
+    .filter((name) => name.length > 0);
+  const head =
+    names.length > 1
+      ? `chord ${names.join(", ")}`
+      : (names[0] ?? "note");
+  const grace =
+    graceCount && graceCount > 0
+      ? `, with ${graceCount} grace note${graceCount > 1 ? "s" : ""}`
+      : "";
+  return `${head}, ${value} note${grace}`;
+};
+
 /*
   Octave-line support: shift a pitch-bearing entry's written octave before
   resolving its staff position (an 8va passage renders sounding pitches an

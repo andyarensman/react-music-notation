@@ -11,6 +11,10 @@ import {
 import "./Score.css";
 import "../global.css";
 import { CurveOverlay } from "./CurveOverlay";
+import {
+  InteractionContext,
+  NoteInteractionHandlers,
+} from "./InteractionContext";
 import { ClefType, KeyRange } from "../helpers/types";
 import { PART_STRIDE_SS, ScoreMeasureProps } from "./ScoreMeasure";
 import {
@@ -20,7 +24,7 @@ import {
   systemFillRatio,
 } from "./systemLayout";
 
-interface ScoreProps {
+interface ScoreProps extends NoteInteractionHandlers {
   /**
    * Instrument names shown in a left gutter on the first system, one per
    * part (top staff first). The gutter's width persists on later systems so
@@ -33,6 +37,7 @@ interface ScoreProps {
 
 interface AnnotatedScoreMeasure {
   element: ReactElement<ScoreMeasureProps>;
+  number: number;
   inheritedClefs: ClefType[];
   inheritedFifths: (KeyRange | undefined)[];
   baseWidthSs: number;
@@ -52,7 +57,12 @@ interface AnnotatedScoreMeasure {
  * </Score>
  * ```
  */
-export const Score = ({ partNames, children }: ScoreProps) => {
+export const Score = ({
+  partNames,
+  children,
+  onNoteClick,
+  onNoteHover,
+}: ScoreProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [widthSs, setWidthSs] = useState(0);
   const [staffSpacePx, setStaffSpacePx] = useState(8);
@@ -118,6 +128,7 @@ export const Score = ({ partNames, children }: ScoreProps) => {
 
     annotated.push({
       element: child,
+      number: child.props.measureNumber ?? annotated.length + 1,
       inheritedClefs,
       inheritedFifths,
       baseWidthSs: widthFor(false),
@@ -142,8 +153,15 @@ export const Score = ({ partNames, children }: ScoreProps) => {
     4 + (partCount - 1) * PART_STRIDE_SS
   } + var(--staff-line-thickness))`;
 
-  return (
-    <div className="score-container" ref={containerRef}>
+  const content = (
+    <div
+      className="score-container"
+      role="group"
+      aria-label={
+        partNames?.length ? `Score: ${partNames.join(", ")}` : "Score"
+      }
+      ref={containerRef}
+    >
       {systems.map((system, systemIndex) => {
         const loose =
           systemIndex === systems.length - 1 &&
@@ -187,6 +205,7 @@ export const Score = ({ partNames, children }: ScoreProps) => {
                 : measure.baseWidthSs;
               return cloneElement(measure.element, {
                 key: measureIndex,
+                measureNumber: measure.number,
                 inheritedClefs: measure.inheritedClefs,
                 inheritedFifths: measure.inheritedFifths,
                 systemStart: isSystemStart && systemIndex > 0,
@@ -204,5 +223,13 @@ export const Score = ({ partNames, children }: ScoreProps) => {
       {passthrough}
       <CurveOverlay />
     </div>
+  );
+
+  return onNoteClick || onNoteHover ? (
+    <InteractionContext.Provider value={{ onNoteClick, onNoteHover }}>
+      {content}
+    </InteractionContext.Provider>
+  ) : (
+    content
   );
 };

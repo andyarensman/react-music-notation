@@ -1,4 +1,11 @@
-import { CSSProperties, Fragment, useContext } from "react";
+import {
+  CSSProperties,
+  Fragment,
+  KeyboardEvent,
+  MouseEvent,
+  SyntheticEvent,
+  useContext,
+} from "react";
 import "./Note.css";
 import "../global.css";
 import {
@@ -23,14 +30,17 @@ import {
   getNoteFlex,
   lyricsMinWidthSs,
   normalizeLyric,
+  noteAriaLabel,
   noteTranslations,
   positionIndex,
   resolvePosition,
   StemPositions,
 } from "../helpers/helpers";
-import { NoteProps } from "../helpers/types";
+import { NoteInteractionInfo, NoteProps } from "../helpers/types";
 import { ClefContext } from "./ClefContext";
 import { OttavaContext } from "./OttavaContext";
+import { InteractionContext } from "./InteractionContext";
+import { MeasureNumberContext } from "./MeasureNumberContext";
 
 /**
  * Renders a single note or rest: notehead/rest glyph, optional accidental,
@@ -155,6 +165,64 @@ export const Note = (props: NoteProps) => {
         stemEndVb: stem === "noStem" ? stemEndValue : undefined,
       })
     : undefined;
+  /*
+    Interactivity and accessibility: every event carries a spoken
+    aria-label (the glyphs are PUA characters, meaningless to screen
+    readers) with role="img" hiding the glyph internals. A click handler —
+    per-note or score-level — upgrades it to a keyboard-reachable button;
+    hover and selection recolor via currentColor (noteheads, stem, tie,
+    ledgers, and dots all inherit).
+  */
+  const interaction = useContext(InteractionContext);
+  const measureNumber = useContext(MeasureNumberContext);
+  const clickable = Boolean(props.onClick || interaction.onNoteClick);
+  const info: NoteInteractionInfo = {
+    measureNumber,
+    pitches: pitch ? [pitch] : [],
+    positions: [position],
+    noteValue,
+    dotted: dotted !== undefined,
+    rest: Boolean(rest),
+  };
+  const ariaLabel = noteAriaLabel({
+    rest,
+    pitches: info.pitches,
+    noteValue,
+    dotted: dotted !== undefined,
+    graceCount: graces?.length,
+  });
+  const handleActivate = (event: SyntheticEvent<HTMLDivElement>) => {
+    props.onClick?.(event as MouseEvent<HTMLDivElement>);
+    interaction.onNoteClick?.(info, event);
+  };
+  const interactionAttributes = {
+    role: clickable ? "button" : "img",
+    "aria-label": ariaLabel,
+    "aria-pressed":
+      clickable && props.selected !== undefined ? props.selected : undefined,
+    tabIndex: clickable ? 0 : undefined,
+    onClick: clickable ? handleActivate : undefined,
+    onKeyDown: clickable
+      ? (event: KeyboardEvent<HTMLDivElement>) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            handleActivate(event);
+          }
+        }
+      : undefined,
+    onMouseEnter: interaction.onNoteHover
+      ? (event: MouseEvent<HTMLDivElement>) =>
+          interaction.onNoteHover?.(info, event)
+      : undefined,
+    onMouseLeave: interaction.onNoteHover
+      ? (event: MouseEvent<HTMLDivElement>) =>
+          interaction.onNoteHover?.(null, event)
+      : undefined,
+  };
+  const containerClass = `note-container${clickable ? " note-interactive" : ""}${
+    props.selected ? " note-selected" : ""
+  }`;
+
   const curveData = curveAnchors
     ? {
         "data-note-event": "",
@@ -175,7 +243,8 @@ export const Note = (props: NoteProps) => {
 
   return (
     <div
-      className="note-container"
+      className={containerClass}
+      {...interactionAttributes}
       {...curveData}
       style={
         {
@@ -307,7 +376,7 @@ export const Note = (props: NoteProps) => {
               y1={stemStart}
               x2="0"
               y2={stemEndValue}
-              stroke="black"
+              stroke="currentColor"
               vectorEffect="non-scaling-stroke"
             />
           </svg>

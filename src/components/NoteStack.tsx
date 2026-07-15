@@ -1,4 +1,12 @@
-import { CSSProperties, Fragment, useContext } from "react";
+import {
+  CSSProperties,
+  Fragment,
+  KeyboardEvent,
+  MouseEvent,
+  MouseEventHandler,
+  SyntheticEvent,
+  useContext,
+} from "react";
 import "./Note.css";
 import "../global.css";
 import {
@@ -24,6 +32,7 @@ import {
   getNoteFlex,
   lyricsMinWidthSs,
   normalizeLyric,
+  noteAriaLabel,
   noteTranslations,
   positionIndex,
   resolvePosition,
@@ -34,12 +43,15 @@ import {
   DynamicType,
   GraceNote,
   LyricInput,
+  NoteInteractionInfo,
   NoteProps,
   SlurMarker,
   StackedNote,
 } from "../helpers/types";
 import { ClefContext } from "./ClefContext";
 import { OttavaContext } from "./OttavaContext";
+import { InteractionContext } from "./InteractionContext";
+import { MeasureNumberContext } from "./MeasureNumberContext";
 
 export interface NoteStackProps {
   /**
@@ -93,6 +105,14 @@ export interface NoteStackProps {
    * same behavior as `Note`'s `slur`.
    */
   slur?: SlurMarker;
+  /**
+   * Click handler for the chord. Any click handler — this one or a
+   * score-level `onNoteClick` — makes the chord interactive: pointer
+   * cursor, keyboard focus (Tab), and Enter/Space activation.
+   */
+  onClick?: MouseEventHandler<HTMLDivElement>;
+  /** Draws the chord in the selection color; state lives with the consumer. */
+  selected?: boolean;
 }
 
 const STEM_LENGTH = 28; // 3.5 staff-spaces in viewBox units
@@ -256,6 +276,59 @@ export const NoteStack = (props: NoteStackProps) => {
       : articulationLeftSs[props.articulation]
     : 0;
 
+  // Interactivity/accessibility, mirroring Note: spoken aria-label (chord
+  // tones bottom-to-top), button semantics + keyboard when clickable
+  const interaction = useContext(InteractionContext);
+  const measureNumber = useContext(MeasureNumberContext);
+  const clickable = Boolean(props.onClick || interaction.onNoteClick);
+  const info: NoteInteractionInfo = {
+    measureNumber,
+    pitches: [...notes]
+      .reverse()
+      .flatMap((note) => (note.pitch ? [note.pitch] : [])),
+    positions: notes.map((note) => note.position),
+    noteValue,
+    dotted: dotted !== undefined,
+    rest: false,
+  };
+  const ariaLabel = noteAriaLabel({
+    pitches: info.pitches,
+    noteValue,
+    dotted: dotted !== undefined,
+    graceCount: props.grace?.length,
+  });
+  const handleActivate = (event: SyntheticEvent<HTMLDivElement>) => {
+    props.onClick?.(event as MouseEvent<HTMLDivElement>);
+    interaction.onNoteClick?.(info, event);
+  };
+  const interactionAttributes = {
+    role: clickable ? "button" : "img",
+    "aria-label": ariaLabel,
+    "aria-pressed":
+      clickable && props.selected !== undefined ? props.selected : undefined,
+    tabIndex: clickable ? 0 : undefined,
+    onClick: clickable ? handleActivate : undefined,
+    onKeyDown: clickable
+      ? (event: KeyboardEvent<HTMLDivElement>) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            handleActivate(event);
+          }
+        }
+      : undefined,
+    onMouseEnter: interaction.onNoteHover
+      ? (event: MouseEvent<HTMLDivElement>) =>
+          interaction.onNoteHover?.(info, event)
+      : undefined,
+    onMouseLeave: interaction.onNoteHover
+      ? (event: MouseEvent<HTMLDivElement>) =>
+          interaction.onNoteHover?.(null, event)
+      : undefined,
+  };
+  const containerClass = `note-container${clickable ? " note-interactive" : ""}${
+    props.selected ? " note-selected" : ""
+  }`;
+
   // Publish curve geometry + slur markers for the CurveOverlay, using the
   // chord's outer noteheads (same anchor rules as Note)
   const impliedStemUp = stemLine
@@ -275,7 +348,8 @@ export const NoteStack = (props: NoteStackProps) => {
 
   return (
     <div
-      className="note-container"
+      className={containerClass}
+      {...interactionAttributes}
       data-note-event=""
       data-stem-up={impliedStemUp ? "1" : "0"}
       data-has-stem={stemLine !== null ? "1" : "0"}
@@ -434,7 +508,7 @@ export const NoteStack = (props: NoteStackProps) => {
               y1={stemLine.y1}
               x2="0"
               y2={stemLine.y2}
-              stroke="black"
+              stroke="currentColor"
               vectorEffect="non-scaling-stroke"
             />
           </svg>

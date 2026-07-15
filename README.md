@@ -175,6 +175,22 @@ The project is built in phases; each completed phase has a kitchen-sink story un
   crossing a barline are skipped with a warning — pitches then render
   loco, which is still pitch-accurate
 
+**Phase 16**
+
+- Interactivity: `onNoteClick`/`onNoteHover` on `Staff`/`GrandStaff`/
+  `Score`/`MusicXMLScore` receive a `NoteInteractionInfo` (pitches,
+  positions, value, measure number); per-note `onClick` and `selected`
+  props for consumer-managed selection. Clickable notes get pointer
+  cursor, hover highlight, Tab focus, and Enter/Space activation;
+  hover/selection recolor the whole event (notehead, stem, ledgers, tie,
+  dot) through `currentColor`
+- Accessibility: every note/chord/rest carries a spoken `aria-label`
+  ("C sharp 5, quarter note", "chord C 5, E 5, half note", "quarter
+  rest") with `role="img"` hiding the PUA glyph soup from screen
+  readers — upgraded to `role="button"` (+`aria-pressed` for selection)
+  when clickable. Measures are labeled groups with auto-assigned numbers
+  (`measureNumber` flows through `Staff`/`GrandStaff`/`Score`)
+
 **Still out**: grace-note accidentals and beamed/slurred grace-note runs, D.S./D.C./segno/coda navigation marks, cross-staff beaming, collisions inside beamed groups between voices, octave lines crossing barlines, ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, courtesy naturals on key changes, bracketed instrument-family groups in scores, a grand-staff part inside a `Score`, melisma extender lines and elisions, verse numbers, 3+ lyric verses (they overflow toward the next system), `.mxl` unzipping (pass the contained XML string yourself), MusicXML export, MIDI, playback, and print layout. See `ROADMAP.md` for the full coverage audit against Behind Bars and the MusicXML element reference.
 
 **MusicXML coverage roadmap** — auditing the [MusicXML 4.0 element reference](https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/) against what renders today, the notable visual-notation elements still missing are: ornaments (`trill-mark`, `turn`/`inverted-turn`, `mordent`/`inverted-mordent`, `wavy-line`), `cue` notes, `fermata`, `breath-mark`/`caesura`, `tremolo`, `arpeggiate`, `glissando`/`slide`, `pedal`, `segno`/`coda`, `rehearsal` marks, `multiple-rest` (multi-measure rests), harmony/chord symbols, tablature, and percussion notation. These are the candidate pool for future phases.
@@ -358,6 +374,28 @@ The `Slur` wrapper can't cross a barline (its children live in one measure), so 
 ```
 
 `lyrics` (also on `NoteStack`) takes one entry per verse: a plain string for a whole word, or `{ text, syllabic }` where `syllabic: "begin" | "middle"` draws a hyphen toward the next syllable. Syllables center under the notehead; a long syllable raises its note's minimum slot width so neighboring verses never collide (the same estimate feeds system breaking). Two verses fit comfortably; more will crowd the next system.
+
+### Interactivity and accessibility
+
+```tsx
+<Staff
+  onNoteClick={(info) => select(info)}
+  onNoteHover={(info) => setHovered(info)}
+>
+  <Measure clef="gClef" time={{ beat: 4, beatType: 4 }}>
+    <Note
+      pitch={{ step: "C", octave: 5 }}
+      noteValue="quarter"
+      onClick={() => toggle("m1-0")}
+      selected={selection === "m1-0"}
+    />
+  </Measure>
+</Staff>
+```
+
+Score-level `onNoteClick`/`onNoteHover` (also on `GrandStaff`, `Score`, and `MusicXMLScore`) fire for every note, chord, and rest with a `NoteInteractionInfo`: sounding pitches, resolved staff positions, value, dotting, and the 1-based measure number (auto-assigned in source order; set `measureNumber` on a `Measure` to override). Per-note `onClick` and `selected` cover consumer-managed selection. Any click handler makes the event interactive — pointer cursor, hover highlight, Tab focus, Enter/Space activation — and hover/selection recolor the whole event (notehead, stem, ledger lines, tie, dot) via `currentColor`.
+
+Every event always carries a spoken `aria-label` ("C sharp 5, quarter note"; "chord C 5, E 5, half note"; "quarter rest"; grace notes appended) with `role="img"` so screen readers never meet the raw glyph characters; clickable events become `role="button"` and expose `selected` as `aria-pressed`. Measures are `role="group"` labeled "Measure n". Not yet: roving-tabindex/arrow-key navigation (every note is a Tab stop, which gets long in big scores) and built-in selection state for `MusicXMLScore`.
 
 ### Octave lines (`Ottava`)
 

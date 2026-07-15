@@ -72,7 +72,8 @@
 .ledger-line {
   position: absolute;
   height: var(--staff-line-thickness);
-  background-color: black;
+  /* inherits the note's color so hover/selection recolor the whole event */
+  background-color: currentColor;
   width: calc(var(--staff-space) * 2);
   left: calc(var(--staff-space) * -0.4);
 }
@@ -231,5 +232,28 @@
 }
 
 .tie-svg path {
-  fill: black;
+  fill: currentColor;
+}
+
+/*
+  Interactivity (a per-note onClick or a score-level onNoteClick):
+  pointer + focusability; hover and selection recolor the event through
+  currentColor. Selection wins over hover.
+*/
+.note-interactive {
+  cursor: pointer;
+}
+
+.note-interactive:focus-visible {
+  outline: calc(var(--staff-space) * 0.25) solid #4d90fe;
+  outline-offset: calc(var(--staff-space) * 0.25);
+  border-radius: calc(var(--staff-space) * 0.4);
+}
+
+.note-interactive:hover {
+  color: #1a6ee0;
+}
+
+.note-container.note-selected {
+  color: #c2410c;
 }

@@ -13,6 +13,11 @@ export interface ScoreMeasureProps {
   /** One `Measure` element per instrument part, top staff first. */
   parts: ReactElement<MeasureProps>[];
   /**
+   * 1-based measure number for aria-labels and interaction callbacks;
+   * assigned automatically by `Score` when not set.
+   */
+  measureNumber?: number;
+  /**
    * Barline drawn across all staves at the measure's right edge. Defaults
    * to `"regular"`. `"repeatEnd"` is drawn per staff instead (its repeat
    * dots sit on each staff individually).
@@ -59,6 +64,7 @@ export interface ScoreMeasureProps {
  */
 export const ScoreMeasure = ({
   parts,
+  measureNumber,
   barline,
   startRepeat,
   inheritedClefs,
@@ -101,6 +107,7 @@ export const ScoreMeasure = ({
             inheritedFifths: inheritedFifths?.[index],
             systemStart,
             staffTrack: index,
+            measureNumber: part.props.measureNumber ?? measureNumber,
           })}
         </div>
       ))}

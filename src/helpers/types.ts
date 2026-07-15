@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import { MouseEventHandler, ReactElement } from "react";
 
 /**
  * Number of sharps (positive) or flats (negative) in a key signature,
@@ -119,6 +119,18 @@ interface BaseNoteProps {
   dynamic?: DynamicType;
   /** Expression text ("dolce", "cresc.") in italics below the staff. */
   text?: string;
+  /**
+   * Click handler for this event. Any click handler — this one or a
+   * score-level `onNoteClick` — makes the event interactive: pointer
+   * cursor, keyboard focus (Tab), and Enter/Space activation.
+   */
+  onClick?: MouseEventHandler<HTMLDivElement>;
+  /**
+   * Draws the event in the selection color and, when interactive, exposes
+   * the state via `aria-pressed`. Selection state lives with the consumer;
+   * this is just the visual.
+   */
+  selected?: boolean;
 }
 
 interface RestProps extends BaseNoteProps {
@@ -150,6 +162,28 @@ interface RestProps extends BaseNoteProps {
   lyrics?: never;
   /** Rests cannot carry grace notes. */
   grace?: never;
+}
+
+/**
+ * What the score-level `onNoteClick`/`onNoteHover` callbacks receive:
+ * enough to identify the note musically and locate it in the score.
+ */
+export interface NoteInteractionInfo {
+  /**
+   * 1-based measure number. Auto-assigned by `Staff`/`GrandStaff`/`Score`
+   * in source order when the `Measure` doesn't set `measureNumber` itself.
+   */
+  measureNumber?: number;
+  /** Sounding pitches — one for a note, several for a chord, none for a rest. */
+  pitches: Pitch[];
+  /** Resolved staff positions (after clef and any octave line). */
+  positions: PitchPosition[];
+  /** The event's duration value. */
+  noteValue: "whole" | "half" | "quarter" | "eighth" | "16th" | "32nd";
+  /** Whether the event is dotted. */
+  dotted: boolean;
+  /** Whether the event is a rest. */
+  rest: boolean;
 }
 
 /**

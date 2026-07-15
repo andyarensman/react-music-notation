@@ -17,6 +17,7 @@ import { Volta, EndingProps } from "./MeasureMeta/Volta";
 import { Barline, BarlineType } from "./MeasureMeta/Barline";
 import { ClefContext } from "./ClefContext";
 import { GridContext } from "./GridContext";
+import { MeasureNumberContext } from "./MeasureNumberContext";
 import {
   getOnsetBoundaries,
   getVoiceCollisionShifts,
@@ -28,9 +29,10 @@ import {
 
 export interface MeasureProps {
   /**
-   * Optional identifier for this measure. Currently not rendered by the
-   * library (no measure-number glyph is drawn) — reserved for consumers
-   * that want to track/display numbering externally.
+   * 1-based measure number, used for the measure's aria-label and passed
+   * to interaction callbacks (`onNoteClick`/`onNoteHover`). Assigned
+   * automatically in source order by `Staff`/`GrandStaff`/`Score` when not
+   * set; no visual measure-number glyph is drawn yet.
    */
   measureNumber?: number;
   /**
@@ -122,6 +124,7 @@ export interface MeasureProps {
  * ```
  */
 export const Measure = ({
+  measureNumber,
   clef,
   inheritedClef,
   fifths,
@@ -172,8 +175,13 @@ export const Measure = ({
 
   return (
     <ClefContext.Provider value={activeClef}>
+      <MeasureNumberContext.Provider value={measureNumber}>
       <div
         className="measure-container"
+        role="group"
+        aria-label={
+          measureNumber !== undefined ? `Measure ${measureNumber}` : "Measure"
+        }
         data-staff-track={staffTrack}
         style={style}
       >
@@ -219,6 +227,7 @@ export const Measure = ({
           </div>
         </div>
       </div>
+      </MeasureNumberContext.Provider>
     </ClefContext.Provider>
   );
 };

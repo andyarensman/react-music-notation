@@ -11,6 +11,11 @@ export interface GrandMeasureProps {
   /** The bass/lower staff's `Measure` element. */
   lower: ReactElement<MeasureProps>;
   /**
+   * 1-based measure number for aria-labels and interaction callbacks;
+   * assigned automatically by `GrandStaff` when not set.
+   */
+  measureNumber?: number;
+  /**
    * Barline drawn across both staves at the measure's right edge. Defaults
    * to `"regular"`. `"repeatEnd"` is drawn per staff instead (its repeat
    * dots sit on each staff individually); every other type spans both
@@ -68,6 +73,7 @@ export interface GrandMeasureProps {
 export const GrandMeasure = ({
   upper,
   lower,
+  measureNumber,
   barline,
   startRepeat,
   inheritedUpperClef,
@@ -96,6 +102,7 @@ export const GrandMeasure = ({
         inheritedFifths: inheritedUpperFifths,
         systemStart,
         staffTrack: 0,
+        measureNumber: upper.props.measureNumber ?? measureNumber,
       })}
       <div className="grand-measure-lower">
         {cloneElement(lower, {
@@ -106,6 +113,7 @@ export const GrandMeasure = ({
           inheritedFifths: inheritedLowerFifths,
           systemStart,
           staffTrack: 1,
+          measureNumber: lower.props.measureNumber ?? measureNumber,
         })}
       </div>
       {!perStaffBarline && (

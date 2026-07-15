@@ -11,6 +11,10 @@ import {
 import "./GrandStaff.css";
 import "../global.css";
 import { CurveOverlay } from "./CurveOverlay";
+import {
+  InteractionContext,
+  NoteInteractionHandlers,
+} from "./InteractionContext";
 import { braceGlyph } from "../helpers/glyphs";
 import { ClefType, KeyRange } from "../helpers/types";
 import { GrandMeasureProps } from "./GrandMeasure";
@@ -21,12 +25,13 @@ import {
   systemFillRatio,
 } from "./systemLayout";
 
-interface GrandStaffProps {
+interface GrandStaffProps extends NoteInteractionHandlers {
   children?: ReactNode;
 }
 
 interface AnnotatedGrandMeasure {
   element: ReactElement<GrandMeasureProps>;
+  number: number;
   inheritedUpperClef: ClefType;
   inheritedLowerClef: ClefType;
   inheritedUpperFifths: KeyRange | undefined;
@@ -58,7 +63,11 @@ const BRACE_WIDTH_SS = 2;
  * </GrandStaff>
  * ```
  */
-export const GrandStaff = ({ children }: GrandStaffProps) => {
+export const GrandStaff = ({
+  children,
+  onNoteClick,
+  onNoteHover,
+}: GrandStaffProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [widthSs, setWidthSs] = useState(0);
   const [staffSpacePx, setStaffSpacePx] = useState(8);
@@ -159,6 +168,7 @@ export const GrandStaff = ({ children }: GrandStaffProps) => {
 
     annotated.push({
       element: child,
+      number: child.props.measureNumber ?? annotated.length + 1,
       ...inherited,
       baseWidthSs: base,
       startWidthSs: start,
@@ -169,8 +179,13 @@ export const GrandStaff = ({ children }: GrandStaffProps) => {
   const systems =
     availableSs > 0 ? breakIntoSystems(annotated, availableSs) : [annotated];
 
-  return (
-    <div className="grand-staff-container" ref={containerRef}>
+  const content = (
+    <div
+      className="grand-staff-container"
+      role="group"
+      aria-label="Grand staff"
+      ref={containerRef}
+    >
       {systems.map((system, systemIndex) => {
         const loose =
           systemIndex === systems.length - 1 &&
@@ -189,6 +204,7 @@ export const GrandStaff = ({ children }: GrandStaffProps) => {
                 : measure.baseWidthSs;
               return cloneElement(measure.element, {
                 key: measureIndex,
+                measureNumber: measure.number,
                 inheritedUpperClef: measure.inheritedUpperClef,
                 inheritedLowerClef: measure.inheritedLowerClef,
                 inheritedUpperFifths: measure.inheritedUpperFifths,
@@ -208,5 +224,13 @@ export const GrandStaff = ({ children }: GrandStaffProps) => {
       {passthrough}
       <CurveOverlay />
     </div>
+  );
+
+  return onNoteClick || onNoteHover ? (
+    <InteractionContext.Provider value={{ onNoteClick, onNoteHover }}>
+      {content}
+    </InteractionContext.Provider>
+  ) : (
+    content
   );
 };

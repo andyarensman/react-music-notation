@@ -31,6 +31,8 @@ export { Volta } from "./components/MeasureMeta/Volta";
 export type { EndingProps } from "./components/MeasureMeta/Volta";
 export { StaffLines } from "./components/StaffLines";
 
+export type { NoteInteractionHandlers } from "./components/InteractionContext";
+
 export type {
   ArticulationType,
   ClefType,
@@ -39,6 +41,7 @@ export type {
   KeyRange,
   Lyric,
   LyricInput,
+  NoteInteractionInfo,
   NoteProps,
   NoteValueProps,
   Pitch,

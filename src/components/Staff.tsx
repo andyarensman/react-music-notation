@@ -17,14 +17,19 @@ import {
   systemFillRatio,
 } from "./systemLayout";
 import { CurveOverlay } from "./CurveOverlay";
+import {
+  InteractionContext,
+  NoteInteractionHandlers,
+} from "./InteractionContext";
 import "./Staff.css";
 
-interface StaffProps {
+interface StaffProps extends NoteInteractionHandlers {
   children?: ReactNode;
 }
 
 interface AnnotatedMeasure {
   element: ReactElement<MeasureProps>;
+  number: number;
   inheritedClef: ClefType;
   inheritedFifths: KeyRange | undefined;
   baseWidthSs: number;
@@ -54,7 +59,7 @@ interface AnnotatedMeasure {
  * </Staff>
  * ```
  */
-export const Staff = ({ children }: StaffProps) => {
+export const Staff = ({ children, onNoteClick, onNoteHover }: StaffProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [widthSs, setWidthSs] = useState(0);
   const [staffSpacePx, setStaffSpacePx] = useState(8);
@@ -95,6 +100,7 @@ export const Staff = ({ children }: StaffProps) => {
     const activeFifths = child.props.fifths ?? inheritedFifths;
     annotated.push({
       element: child,
+      number: child.props.measureNumber ?? annotated.length + 1,
       inheritedClef,
       inheritedFifths,
       baseWidthSs: estimateMeasureWidthSs(child.props.children, {
@@ -116,8 +122,13 @@ export const Staff = ({ children }: StaffProps) => {
   const systems =
     widthSs > 0 ? breakIntoSystems(annotated, widthSs) : [annotated];
 
-  return (
-    <div className="staff-container" ref={containerRef}>
+  const content = (
+    <div
+      className="staff-container"
+      role="group"
+      aria-label="Music staff"
+      ref={containerRef}
+    >
       {systems.map((system, systemIndex) => {
         const loose =
           systemIndex === systems.length - 1 &&
@@ -133,6 +144,7 @@ export const Staff = ({ children }: StaffProps) => {
                 : measure.baseWidthSs;
               return cloneElement(measure.element, {
                 key: measureIndex,
+                measureNumber: measure.number,
                 inheritedClef: measure.inheritedClef,
                 inheritedFifths: measure.inheritedFifths,
                 systemStart: isSystemStart && systemIndex > 0,
@@ -150,5 +162,15 @@ export const Staff = ({ children }: StaffProps) => {
       {passthrough}
       <CurveOverlay />
     </div>
+  );
+
+  // Only provide the interaction context when handlers exist, so a Staff
+  // nested under a providing root (MusicXMLScore) doesn't mask it
+  return onNoteClick || onNoteHover ? (
+    <InteractionContext.Provider value={{ onNoteClick, onNoteHover }}>
+      {content}
+    </InteractionContext.Provider>
+  ) : (
+    content
   );
 };
