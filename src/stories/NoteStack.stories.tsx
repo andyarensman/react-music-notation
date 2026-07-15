@@ -101,6 +101,33 @@ export const Accidentals: Story = {
   ),
 };
 
+// Graces sit ahead of the chord — and ahead of its accidental column
+export const GraceNotes: Story = {
+  render: () => (
+    <Measure clef="gClef">
+      <NoteStack
+        noteValue="half"
+        grace={[{ pitch: { step: "B", octave: 4 }, slash: true }]}
+        pitches={[
+          { pitch: { step: "C", octave: 5 } },
+          { pitch: { step: "E", octave: 5 } },
+        ]}
+      />
+      <NoteStack
+        noteValue="half"
+        grace={[
+          { pitch: { step: "F", octave: 4 } },
+          { pitch: { step: "G", octave: 4 } },
+        ]}
+        pitches={[
+          { pitch: { step: "A", octave: 4 } },
+          { pitch: { step: "C", octave: 5, alter: "sharp" } },
+        ]}
+      />
+    </Measure>
+  ),
+};
+
 // Unbeamed eighth/16th chords draw their own flag glyph
 export const Flagged: Story = {
   render: () => (

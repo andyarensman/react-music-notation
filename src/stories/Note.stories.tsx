@@ -105,6 +105,56 @@ export const Primary: TypeWithDeepControls<Story> = {
   },
 };
 
+// Grace notes: slashed acciaccaturas and plain appoggiaturas, spaced like
+// accidentals ahead of the host note (and ahead of its accidental)
+export const GraceNotes: Story = {
+  render: () => (
+    <Measure clef="gClef" time={{ beat: 4, beatType: 4 }}>
+      <Note
+        pitch={{ step: "E", octave: 5 }}
+        noteValue="quarter"
+        grace={[{ pitch: { step: "D", octave: 5 }, slash: true }]}
+      />
+      <Note
+        pitch={{ step: "G", octave: 4 }}
+        noteValue="quarter"
+        grace={[
+          { pitch: { step: "A", octave: 4 } },
+          { pitch: { step: "B", octave: 4 } },
+        ]}
+      />
+      <Note
+        pitch={{ step: "F", octave: 5, alter: "sharp" }}
+        noteValue="half"
+        grace={[{ pitch: { step: "E", octave: 5 }, slash: true }]}
+      />
+    </Measure>
+  ),
+};
+
+// Lyrics: one entry per verse; syllabic "begin"/"middle" draws the hyphen
+export const Lyrics: Story = {
+  render: () => (
+    <Measure clef="gClef" time={{ beat: 4, beatType: 4 }}>
+      <Note
+        pitch={{ step: "C", octave: 5 }}
+        noteValue="quarter"
+        lyrics={[{ text: "Glo", syllabic: "begin" }, "Sing"]}
+      />
+      <Note
+        pitch={{ step: "D", octave: 5 }}
+        noteValue="quarter"
+        lyrics={[{ text: "ri", syllabic: "middle" }, "with"]}
+      />
+      <Note
+        pitch={{ step: "E", octave: 5 }}
+        noteValue="half"
+        lyrics={[{ text: "a", syllabic: "end" }, "joy"]}
+      />
+    </Measure>
+  ),
+};
+
 // The full renderable range: four ledger lines above and below the staff
 export const LedgerRange: Story = {
   render: () => (

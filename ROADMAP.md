@@ -115,6 +115,14 @@ afternoon) can handle. Grounded against the
 
 - **TSDoc/JSDoc prop documentation** — doc comments on all exported
   components/props/types so IDE hover tooltips explain the API (in progress).
+- **Storybook-as-wiki reorganization** — component stories currently
+  auto-title under a "stories/" folder; retitle into deliberate sidebar
+  categories (e.g. Notes / Measure Meta / Wrappers / Layout / MusicXML /
+  Demos), add MDX doc pages per feature, and enable autodocs so the
+  published Storybook (GitHub Pages) reads as the project wiki. Every
+  feature/symbol should have its own story: Note, NoteStack, graces,
+  lyrics, Voice, Slur, Tuplet, Hairpin, Barline, Clef, Key/TimeSignature,
+  Tempo, Volta, Staff, GrandStaff, Score, MusicXMLScore.
 - **Simple glyph placements** in the established articulation pattern:
   fermata, breath mark, caesura, `strong-accent`/`soft-accent`/
   `detached-legato` variants.
