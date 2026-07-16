@@ -155,6 +155,19 @@ export const BeamContainer = ({ stem = "upStem", children }: BeamContainerProps)
     });
   });
 
+  // x offset (in staff-spaces) of a note's stem from its slot's left edge:
+  // up/right stems sit one notehead width in, down/left stems at the edge
+  const stemSideSs = (index: number): number => {
+    const rightSide = isCross
+      ? crossContext!.directionSign > 0
+        ? crossFlags[index]
+        : !crossFlags[index]
+      : stem === "upStem";
+    return rightSide ? 1.25 : 0;
+  };
+  const firstStemSideSs = stemSideSs(0);
+  const lastStemSideSs = stemSideSs(beamedNotesArray.length - 1);
+
   // Beam thickness extends from the stem tips toward the noteheads; a
   // cross-staff beam has stems on both sides, so it centers on the line
   const thickness = isCross
@@ -224,22 +237,19 @@ export const BeamContainer = ({ stem = "upStem", children }: BeamContainerProps)
     >
       {updatedBeamedNotesArray}
       <div
-        className={
-          "beam-new " +
-          ((
-            isCross
-              ? // align the beam's end with the last note's stem side:
-                // cross notes stem from the far staff (right side when the
-                // beam lies below, i.e. hosted on the upper staff)
-                crossContext!.directionSign > 0
-                ? crossFlags[crossFlags.length - 1]
-                : !crossFlags[crossFlags.length - 1]
-              : stem === "upStem"
-          )
-            ? "beam-above"
-            : "")
-        }
-        style={{ width: `${beamWidthPercentage}%` }}
+        className="beam-new"
+        style={{
+          // The beam runs from the first stem to the last stem. Up/right
+          // stems sit one notehead width inside their slot, so each end
+          // shifts by its own note's stem side — cross-staff groups mix
+          // sides, so a single group-wide shift would overhang an end.
+          marginLeft: firstStemSideSs
+            ? `calc(var(--staff-space) * ${firstStemSideSs})`
+            : undefined,
+          width: `calc(${beamWidthPercentage}% + var(--staff-space) * ${
+            lastStemSideSs - firstStemSideSs
+          })`,
+        }}
       >
         <svg viewBox="0 0 100 129" preserveAspectRatio="none" className="beam">
           <polygon points={polygonPoints(0, 100, 0)} />
