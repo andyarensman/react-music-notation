@@ -12,6 +12,7 @@ import {
   accidentalGlyphs,
   altNoteheadGlyphs,
   articulationGlyphs,
+  clefGlyphs,
   dottedGlyph,
   dynamicGlyphs,
   flagGlyphs,
@@ -185,7 +186,9 @@ export const Note = (props: NoteProps) => {
   // Each grace glyph's ink is ~1.6ss wide (notehead + stem + flag), so a
   // 1.7ss slot per grace plus a 0.5ss gap before the host (and 0.3ss lead-in)
   const graceMargin = graces?.length ? graces.length * 1.7 + 0.8 : 0;
-  const leadingMargin = accidentalMargin + graceMargin;
+  // A mid-measure clef change draws a small clef ahead of everything
+  const clefChangeMargin = props.clefChange ? 3.4 : 0;
+  const leadingMargin = clefChangeMargin + accidentalMargin + graceMargin;
 
   const lyrics = !rest ? props.lyrics : undefined;
 
@@ -310,6 +313,16 @@ export const Note = (props: NoteProps) => {
           className={`ledger-line ledger-${ledger}${isWide ? " ledger-wide" : ""}`}
         ></div>
       ))}
+      {props.clefChange && (
+        <div
+          className={`leland note clef-change clef-change-${props.clefChange}`}
+          style={{
+            left: `calc(var(--staff-space) * ${-(accidentalMargin + graceMargin + 3.1)})`,
+          }}
+        >
+          {clefGlyphs[props.clefChange]}
+        </div>
+      )}
       {graces?.map((graceNote, index) => {
         const gracePosition = resolvePosition(
           applyOttavaShift(graceNote, ottava),

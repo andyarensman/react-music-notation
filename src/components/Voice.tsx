@@ -6,11 +6,14 @@ import {
   useContext,
 } from "react";
 import "./Measure.css";
+import { ClefContext } from "./ClefContext";
 import { GridContext } from "./GridContext";
 import {
+  clefSequence,
   getMusicRole,
   gridTemplateFromBoundaries,
   placeEventsOnGrid,
+  wrapWithClefs,
 } from "./layout";
 
 // Wrappers the voice's defaults recurse into, so notes inside a slurred or
@@ -45,6 +48,7 @@ interface StemmableProps {
 
 const VoiceComponent = ({ stem, collisionShifts, children }: VoiceProps) => {
   const boundaries = useContext(GridContext);
+  const clef = useContext(ClefContext);
 
   const applyVoiceDefaults = (nodes: ReactNode): ReactNode =>
     Children.map(nodes, (child) => {
@@ -85,11 +89,14 @@ const VoiceComponent = ({ stem, collisionShifts, children }: VoiceProps) => {
 
   const stemmedChildren = applyVoiceDefaults(children);
 
+  // mid-measure clef changes within this voice's events
+  const clefs = clefSequence(stemmedChildren, clef);
+
   if (!boundaries) {
     // Not inside a voice-aware measure: behave like a plain flex row
     return (
       <div className="voice-layer" style={{ display: "flex", flexGrow: 1 }}>
-        {stemmedChildren}
+        {wrapWithClefs(stemmedChildren, clef)}
       </div>
     );
   }
@@ -102,7 +109,15 @@ const VoiceComponent = ({ stem, collisionShifts, children }: VoiceProps) => {
         gridTemplateColumns: gridTemplateFromBoundaries(boundaries),
       }}
     >
-      {placeEventsOnGrid(stemmedChildren, boundaries, collisionShifts)}
+      {placeEventsOnGrid(stemmedChildren, boundaries, collisionShifts, (child, index) =>
+        clefs[index] === clef ? (
+          child
+        ) : (
+          <ClefContext.Provider value={clefs[index]}>
+            {child}
+          </ClefContext.Provider>
+        )
+      )}
     </div>
   );
 };

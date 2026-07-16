@@ -15,6 +15,7 @@ import {
   InteractionContext,
   NoteInteractionHandlers,
 } from "./InteractionContext";
+import { lastClefChange } from "./layout";
 import { ClefType, KeyRange } from "../helpers/types";
 import { PART_STRIDE_SS, ScoreMeasureProps } from "./ScoreMeasure";
 import {
@@ -105,6 +106,8 @@ export const Score = ({
     const inheritedFifths = [...runningFifths];
     parts.forEach((part, index) => {
       if (part.props.clef) runningClefs[index] = part.props.clef;
+      runningClefs[index] =
+        lastClefChange(part.props.children) ?? runningClefs[index];
       if (part.props.fifths !== undefined) {
         runningFifths[index] = part.props.fifths;
       }

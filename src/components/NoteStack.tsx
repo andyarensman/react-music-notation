@@ -13,6 +13,7 @@ import {
   accidentalGlyphs,
   altNoteheadGlyphs,
   articulationGlyphs,
+  clefGlyphs,
   dottedGlyph,
   dynamicGlyphs,
   flagGlyphs,
@@ -41,6 +42,7 @@ import {
 } from "../helpers/helpers";
 import {
   ArticulationType,
+  ClefType,
   DynamicType,
   GraceNote,
   LyricInput,
@@ -106,6 +108,8 @@ export interface NoteStackProps {
    * same behavior as `Note`'s `slur`.
    */
   slur?: SlurMarker;
+  /** A mid-measure clef change taking effect at this chord — see `Note`'s `clefChange`. */
+  clefChange?: ClefType;
   /**
    * Click handler for the chord. Any click handler — this one or a
    * score-level `onNoteClick` — makes the chord interactive: pointer
@@ -231,7 +235,8 @@ export const NoteStack = (props: NoteStackProps) => {
   const graceMargin = props.grace?.length
     ? props.grace.length * 1.7 + 0.8
     : 0;
-  const leadingMargin = accidentalMargin + graceMargin;
+  const clefChangeMargin = props.clefChange ? 3.4 : 0;
+  const leadingMargin = clefChangeMargin + accidentalMargin + graceMargin;
 
   const ledgerLines = Array.from(
     new Set(notes.flatMap((note) => getLedgerLines(note.position)))
@@ -381,6 +386,16 @@ export const NoteStack = (props: NoteStackProps) => {
           className={`ledger-line ledger-${ledger}${isWide || anyRightFlip ? " ledger-wide" : ""}`}
         ></div>
       ))}
+      {props.clefChange && (
+        <div
+          className={`leland note clef-change clef-change-${props.clefChange}`}
+          style={{
+            left: `calc(var(--staff-space) * ${-(accidentalMargin + graceMargin + 3.1)})`,
+          }}
+        >
+          {clefGlyphs[props.clefChange]}
+        </div>
+      )}
       {props.grace?.map((graceNote, index) => {
         const gracePosition = resolvePosition(
           applyOttavaShift(graceNote, ottava),

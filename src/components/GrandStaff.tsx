@@ -15,6 +15,7 @@ import {
   InteractionContext,
   NoteInteractionHandlers,
 } from "./InteractionContext";
+import { lastClefChange } from "./layout";
 import { braceGlyph } from "../helpers/glyphs";
 import { ClefType, KeyRange } from "../helpers/types";
 import { GrandMeasureProps } from "./GrandMeasure";
@@ -110,6 +111,8 @@ export const GrandStaff = ({
     };
     if (upper?.props.clef) upperClef = upper.props.clef;
     if (lower?.props.clef) lowerClef = lower.props.clef;
+    upperClef = lastClefChange(upper?.props.children) ?? upperClef;
+    lowerClef = lastClefChange(lower?.props.children) ?? lowerClef;
     if (upper?.props.fifths !== undefined) upperFifths = upper.props.fifths;
     if (lower?.props.fifths !== undefined) lowerFifths = lower.props.fifths;
 

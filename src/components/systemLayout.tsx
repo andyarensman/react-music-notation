@@ -19,6 +19,7 @@ interface CountableProps {
   pitches?: StackedNote[];
   lyrics?: LyricInput[];
   grace?: GraceNote[];
+  clefChange?: unknown;
   children?: ReactNode;
 }
 
@@ -61,6 +62,9 @@ export const estimateNotesWidthSs = (children: ReactNode): number => {
     width += lyricsMinWidthSs(child.props.lyrics);
     if (child.props.grace?.length) {
       width += child.props.grace.length * 1.7 + 0.8;
+    }
+    if (child.props.clefChange) {
+      width += 3.4;
     }
     if (child.props.pitch?.alter) {
       width += 1.5;

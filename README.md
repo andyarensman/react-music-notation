@@ -248,6 +248,17 @@ The project is built in phases; each completed phase has a kitchen-sink story un
   `Instrument` interface), reporting each event as it sounds so a
   cursor can ride the `selected` prop
 
+**Phase 22**
+
+- Mid-measure clef changes: `clefChange` on a `Note`/`NoteStack` draws a
+  reduced clef before the event (ahead of graces and accidentals) and
+  re-resolves it and everything after against the new clef — through the
+  measure and into following measures until the next clef. Implemented as
+  render-time `ClefContext` providers (no DOM, so flex/grid math is
+  untouched); inside a `Voice` the change applies to that voice's
+  remaining events. MusicXML mid-measure `<attributes><clef>` maps
+  (mid-measure key/time changes still warn)
+
 **Still out**: grace-note accidentals and beamed/slurred grace-note runs, D.S./D.C./segno/coda navigation marks, cross-staff beams for chords and MusicXML per-note `<staff>` changes (manual `crossStaff` only), collisions inside beamed groups between voices, octave lines crossing barlines, ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, courtesy naturals on key changes, bracketed instrument-family groups in scores, a grand-staff part inside a `Score`, melisma extender lines and elisions, verse numbers, 3+ lyric verses (they overflow toward the next system), `.mxl` unzipping (pass the contained XML string yourself), MusicXML export, MIDI file export (the playback extraction is the groundwork), playback pause/seek and velocity-from-dynamics, and print layout. See `ROADMAP.md` for the full coverage audit against Behind Bars and the MusicXML element reference.
 
 **MusicXML coverage roadmap** — auditing the [MusicXML 4.0 element reference](https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/) against what renders today, the notable visual-notation elements still missing are: ornaments (`trill-mark`, `turn`/`inverted-turn`, `mordent`/`inverted-mordent`, `wavy-line`), `cue` notes, `fermata`, `breath-mark`/`caesura`, `tremolo`, `arpeggiate`, `glissando`/`slide`, `pedal`, `segno`/`coda`, `rehearsal` marks, `multiple-rest` (multi-measure rests), and harmony/chord symbols. These are the candidate pool for future phases.
@@ -551,6 +562,8 @@ All four are props on `Measure`, plus `startRepeat` for a left-side repeat barli
 ```
 
 `barline` is a `BarlineType`: `"regular" | "double" | "final" | "repeatStart" | "repeatEnd"` (default `"regular"`), rendered at the measure's right edge. `startRepeat` renders a `repeatStart` barline at the left edge instead of taking a `BarlineType` value itself.
+
+For a clef change *inside* a measure, set `clefChange` on the note where it takes effect: a reduced clef is drawn before that note, and it plus everything after (through following measures, until the next clef) resolves against the new clef. Inside a `Voice`, the change applies to that voice's remaining events.
 
 ### Volta (first/second) endings
 

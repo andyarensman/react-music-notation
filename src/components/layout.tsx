@@ -6,6 +6,7 @@ import {
 } from "../helpers/helpers";
 import { ClefType, NoteProps, StackedNote } from "../helpers/types";
 import { BeamContainer } from "./BeamContainer";
+import { ClefContext } from "./ClefContext";
 
 /*
   Onset-grid layout: when two staves share a measure (GrandStaff), notes that
@@ -114,6 +115,75 @@ export const getOnsetBoundaries = (children: ReactNode): number[] => {
   return boundaries;
 };
 
+/* -------------------------- mid-measure clefs -------------------------- */
+
+// The first clefChange in a node's subtree (a change inside a wrapper
+// takes effect from that wrapper's start)
+export const findClefChange = (node: ReactNode): ClefType | undefined => {
+  if (!isValidElement(node)) return undefined;
+  const props = node.props as { clefChange?: ClefType; children?: ReactNode };
+  if (props.clefChange) return props.clefChange;
+  for (const child of Children.toArray(props.children)) {
+    const found = findClefChange(child);
+    if (found) return found;
+  }
+  return undefined;
+};
+
+// The clef in effect AFTER these children (for running-clef tracking
+// across measures)
+export const lastClefChange = (children: ReactNode): ClefType | undefined => {
+  let last: ClefType | undefined;
+  const walk = (nodes: ReactNode) => {
+    Children.toArray(nodes).forEach((child) => {
+      if (!isValidElement(child)) return;
+      const props = child.props as {
+        clefChange?: ClefType;
+        children?: ReactNode;
+      };
+      if (props.clefChange) last = props.clefChange;
+      walk(props.children);
+    });
+  };
+  walk(children);
+  return last;
+};
+
+// The clef governing each direct child, given the measure's starting clef
+export const clefSequence = (
+  children: ReactNode,
+  baseClef: ClefType
+): ClefType[] => {
+  let cursor = baseClef;
+  return Children.toArray(children).map((child) => {
+    const change = findClefChange(child);
+    if (change) cursor = change;
+    return cursor;
+  });
+};
+
+/*
+  Wrap children whose governing clef differs from the measure's in a
+  ClefContext provider — at RENDER time only. Providers add no DOM, so
+  flex/grid layout is untouched; the layout walkers all run on the raw
+  children before this step.
+*/
+export const wrapWithClefs = (
+  children: ReactNode,
+  baseClef: ClefType
+): ReactNode[] => {
+  const clefs = clefSequence(children, baseClef);
+  return Children.toArray(children).map((child, index) =>
+    clefs[index] === baseClef ? (
+      child
+    ) : (
+      <ClefContext.Provider key={`clef-${index}`} value={clefs[index]}>
+        {child}
+      </ClefContext.Provider>
+    )
+  );
+};
+
 export const unionBoundaries = (a: number[], b: number[]): number[] =>
   Array.from(new Set([...a, ...b].map(round3))).sort((x, y) => x - y);
 
@@ -151,7 +221,10 @@ export const getLastLeafFlex = (nodes: ReactNode): number => {
 export const placeEventsOnGrid = (
   children: ReactNode,
   boundaries: number[],
-  collisionShifts?: Map<number, number>
+  collisionShifts?: Map<number, number>,
+  // render-time decoration (e.g. mid-measure clef providers); applied
+  // inside the grid wrapper so flex math still sees the raw child
+  decorate?: (child: ReactNode, index: number) => ReactNode
 ): ReactNode[] => {
   const columnOf = new Map(
     boundaries.map((boundary, index) => [round3(boundary), index + 1])
@@ -171,10 +244,11 @@ export const placeEventsOnGrid = (
     const start = columnOf.get(round3(onset));
     const end = columnOf.get(round3(onset + flex));
     onset = round3(onset + flex);
+    const rendered = decorate ? decorate(child, index) : child;
     if (start === undefined || end === undefined) {
       // event doesn't land on the shared grid (staves with mismatched
       // totals); let it flow and keep rendering
-      return child;
+      return rendered;
     }
     return (
       <div
@@ -187,7 +261,7 @@ export const placeEventsOnGrid = (
             : undefined,
         }}
       >
-        {child}
+        {rendered}
       </div>
     );
   });

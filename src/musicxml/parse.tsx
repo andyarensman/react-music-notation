@@ -56,6 +56,19 @@ const NOTE_TYPES: Record<string, NoteValue> = {
   "32nd": "32nd",
 };
 
+const clefFromSign = (sign: string | undefined): ClefType | undefined =>
+  sign === "G"
+    ? "gClef"
+    : sign === "F"
+      ? "fClef"
+      : sign === "C"
+        ? "cClef"
+        : sign === "percussion"
+          ? "percussion"
+          : sign === "TAB"
+            ? "tab"
+            : undefined;
+
 const ACCIDENTAL_NAMES: Record<string, Pitch["alter"]> = {
   sharp: "sharp",
   flat: "flat",
@@ -132,6 +145,8 @@ interface ParsedNote {
   // (the stop is exclusive: the marked note itself is back at pitch)
   ottavaStart?: OttavaType;
   ottavaStop?: boolean;
+  // a mid-measure clef change takes effect at this note
+  clefChange?: ClefType;
 }
 
 interface MeasureAttributes {
@@ -209,6 +224,14 @@ export function parseMusicXML(xml: string): MusicXMLResult {
         runningClefs.set(staff, clef)
       );
       measure.activeClefs = new Map(runningClefs);
+      // mid-measure clef changes carry into the following measures
+      measure.staves.forEach((voices, staff) => {
+        voices.forEach((notes) => {
+          for (const note of notes) {
+            if (note.clefChange) runningClefs.set(staff, note.clefChange);
+          }
+        });
+      });
     }
     return { id: part.getAttribute("id") ?? "", measures };
   });
@@ -295,6 +318,7 @@ function parseMeasure(
       wedgeStop?: boolean;
       ottavaStart?: OttavaType;
       ottavaStop?: boolean;
+      clefChange?: ClefType;
     }
   >();
   const pendingFor = (staff: number) => {
@@ -307,12 +331,31 @@ function parseMeasure(
   for (const child of Array.from(measureElement.children)) {
     switch (child.tagName) {
       case "attributes":
-        parseAttributes(child, measure.attributes, warn);
-        if (measure.attributes.fifths !== undefined) {
-          reader.fifths = measure.attributes.fifths;
-          reader.contexts.forEach((context) =>
-            context.setKey(reader.fifths)
-          );
+        if (!sawNote) {
+          parseAttributes(child, measure.attributes, warn);
+          if (measure.attributes.fifths !== undefined) {
+            reader.fifths = measure.attributes.fifths;
+            reader.contexts.forEach((context) =>
+              context.setKey(reader.fifths)
+            );
+          }
+          break;
+        }
+        // mid-measure attributes: clefs become clef changes carried by
+        // the next note on their staff; other changes aren't supported
+        for (const clefElement of Array.from(
+          child.getElementsByTagName("clef")
+        )) {
+          const staff = Number(clefElement.getAttribute("number") ?? 1);
+          const mapped = clefFromSign(childText(clefElement, "sign"));
+          if (mapped) pendingFor(staff).clefChange = mapped;
+          else warn("Unsupported mid-measure clef; skipped");
+        }
+        if (
+          child.getElementsByTagName("key").length > 0 ||
+          child.getElementsByTagName("time").length > 0
+        ) {
+          warn("Skipped mid-measure key/time change");
         }
         break;
       case "direction": {
@@ -361,6 +404,7 @@ function parseMeasure(
         note.wedgeStop = claim.wedgeStop ?? false;
         note.ottavaStart = claim.ottavaStart;
         note.ottavaStop = claim.ottavaStop ?? false;
+        note.clefChange = claim.clefChange;
         pending.set(note.staff, {});
 
         if (!measure.staves.has(note.staff)) {
@@ -451,11 +495,8 @@ function parseAttributes(
   )) {
     const staff = Number(clef.getAttribute("number") ?? 1);
     const sign = childText(clef, "sign");
-    if (sign === "G") attributes.clefs.set(staff, "gClef");
-    else if (sign === "F") attributes.clefs.set(staff, "fClef");
-    else if (sign === "C") attributes.clefs.set(staff, "cClef");
-    else if (sign === "percussion") attributes.clefs.set(staff, "percussion");
-    else if (sign === "TAB") attributes.clefs.set(staff, "tab");
+    const mapped = clefFromSign(sign);
+    if (mapped) attributes.clefs.set(staff, mapped);
     else if (sign) {
       warn(`Unsupported clef sign "${sign}"; using treble`);
       attributes.clefs.set(staff, "gClef");
@@ -918,6 +959,7 @@ function buildVoiceEvents(
             lyrics={first.lyrics}
             grace={first.grace}
             slur={slurMarker(index)}
+            clefChange={first.clefChange}
           />
         ),
         ...shared,
@@ -933,6 +975,7 @@ function buildVoiceEvents(
             dotted={first.dotted ? 1 : undefined}
             dynamic={first.dynamic}
             text={first.text}
+            clefChange={first.clefChange}
           />
         ),
         ...shared,
@@ -953,6 +996,7 @@ function buildVoiceEvents(
           lyrics={first.lyrics}
           grace={first.grace}
           slur={slurMarker(index)}
+          clefChange={first.clefChange}
         />
       ),
       ...shared,

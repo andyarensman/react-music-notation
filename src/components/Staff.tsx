@@ -21,6 +21,7 @@ import {
   InteractionContext,
   NoteInteractionHandlers,
 } from "./InteractionContext";
+import { lastClefChange } from "./layout";
 import "./Staff.css";
 
 interface StaffProps extends NoteInteractionHandlers {
@@ -95,6 +96,8 @@ export const Staff = ({ children, onNoteClick, onNoteHover }: StaffProps) => {
     const inheritedClef = runningClef;
     const inheritedFifths = runningFifths;
     if (child.props.clef) runningClef = child.props.clef;
+    // a mid-measure clef change carries into the following measures
+    runningClef = lastClefChange(child.props.children) ?? runningClef;
     if (child.props.fifths !== undefined) runningFifths = child.props.fifths;
 
     const activeFifths = child.props.fifths ?? inheritedFifths;

@@ -135,6 +135,14 @@ interface BaseNoteProps {
   /** Expression text ("dolce", "cresc.") in italics below the staff. */
   text?: string;
   /**
+   * A mid-measure clef change taking effect AT this event: draws a small
+   * clef before it (before any grace notes and accidentals) and resolves
+   * this event and everything after it — in this measure and following
+   * measures until the next clef — against the new clef. Inside a
+   * `Voice` it applies to that voice's remaining events only.
+   */
+  clefChange?: ClefType;
+  /**
    * Click handler for this event. Any click handler — this one or a
    * score-level `onNoteClick` — makes the event interactive: pointer
    * cursor, keyboard focus (Tab), and Enter/Space activation.

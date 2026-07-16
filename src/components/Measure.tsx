@@ -19,12 +19,14 @@ import { ClefContext } from "./ClefContext";
 import { GridContext } from "./GridContext";
 import { MeasureNumberContext } from "./MeasureNumberContext";
 import {
+  clefSequence,
   getOnsetBoundaries,
   getVoiceCollisionShifts,
   gridTemplateFromBoundaries,
   hasVoices,
   isVoiceElement,
   placeEventsOnGrid,
+  wrapWithClefs,
 } from "./layout";
 
 export interface MeasureProps {
@@ -150,6 +152,8 @@ export const Measure = ({
     ? grid ?? getOnsetBoundaries(children)
     : null;
   const gridMode = !voiceMode && grid !== undefined && grid.length > 1;
+  // governing clef per direct child (mid-measure clef changes)
+  const clefs = clefSequence(children, activeClef);
 
   // Unisons/seconds between the voices: the down-stem voice's colliding
   // notes get paint-only sideways shifts (Gould's two-voice offsets); the
@@ -222,9 +226,17 @@ export const Measure = ({
                 {voiceChildren}
               </GridContext.Provider>
             ) : gridMode ? (
-              placeEventsOnGrid(children, grid)
+              placeEventsOnGrid(children, grid, undefined, (child, index) =>
+                clefs[index] === activeClef ? (
+                  child
+                ) : (
+                  <ClefContext.Provider value={clefs[index]}>
+                    {child}
+                  </ClefContext.Provider>
+                )
+              )
             ) : (
-              children
+              wrapWithClefs(children, activeClef)
             )}
           </div>
         </div>
