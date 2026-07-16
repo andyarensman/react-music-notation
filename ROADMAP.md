@@ -145,6 +145,16 @@ afternoon) can handle. Grounded against the
 
 ## Post-Fable friendly (well-scoped, follow existing patterns)
 
+- **Richer default instrument** — the built-in synth is confirmed
+  accurate (pitch/tempo) but plinky. Better envelope + a couple of
+  detuned oscillators + a gentle lowpass gets to "soft piano-ish";
+  document the `Instrument` interface recipe for soundfont users.
+  All contained in `src/playback/instrument.ts`.
+- **Instrument-name polish** — `Score` already renders `partNames` in a
+  first-system gutter; still missing: abbreviated names on later
+  systems (Vln., Vc.), a name/label for `GrandStaff`, and
+  instrument-family brackets.
+
 - **TSDoc/JSDoc prop documentation** — doc comments on all exported
   components/props/types so IDE hover tooltips explain the API (in progress).
 - **Storybook-as-wiki reorganization** — component stories currently
