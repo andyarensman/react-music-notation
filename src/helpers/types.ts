@@ -246,8 +246,22 @@ export type LyricInput = string | Lyric;
 export interface Pitch {
   /** Diatonic letter name of the pitch. */
   step?: "A" | "B" | "C" | "D" | "E" | "F" | "G";
-  /** Accidental drawn beside the notehead. */
+  /**
+   * Accidental **drawn** beside the notehead (display, like MusicXML's
+   * `<accidental>`). Under a key signature, altered notes usually draw
+   * nothing — set `soundingAlter` (or rely on the key signature) for how
+   * the note sounds.
+   */
   alter?: "sharp" | "flat" | "natural" | "doubleSharp" | "doubleFlat";
+  /**
+   * **Sounding** chromatic alteration in semitones (like MusicXML's
+   * `<alter>`): 1 = sharp, -1 = flat, 0 = natural, ±2 = double. Purely
+   * semantic — it draws nothing and never moves the notehead; playback
+   * and MIDI use it. When omitted, the sounding pitch is inferred from
+   * the drawn accidental, earlier accidentals in the measure, and the
+   * key signature (`AccidentalContext` in `helpers/soundingPitch.ts`).
+   */
+  soundingAlter?: -2 | -1 | 0 | 1 | 2;
   /** Octave number, scientific pitch notation (middle C = octave 4). */
   octave?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 }

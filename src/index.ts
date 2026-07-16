@@ -35,6 +35,12 @@ export { StaffLines } from "./components/StaffLines";
 
 export type { NoteInteractionHandlers } from "./components/InteractionContext";
 
+export {
+  AccidentalContext,
+  keySignatureAlterations,
+  midiOf,
+} from "./helpers/soundingPitch";
+
 export type {
   ArticulationType,
   ClefType,

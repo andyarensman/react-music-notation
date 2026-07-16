@@ -17,6 +17,7 @@ import { TempoProps } from "../components/MeasureMeta/Tempo";
 import { EndingProps } from "../components/MeasureMeta/Volta";
 import { Ottava, OttavaType } from "../components/Ottava";
 import { TabFret, TabNote } from "../components/TabNote";
+import { AccidentalContext } from "../helpers/soundingPitch";
 import {
   ArticulationType,
   ClefType,
@@ -53,13 +54,6 @@ const NOTE_TYPES: Record<string, NoteValue> = {
   eighth: "eighth",
   "16th": "16th",
   "32nd": "32nd",
-};
-
-const ALTER_TO_ACCIDENTAL: Record<string, Pitch["alter"]> = {
-  "1": "sharp",
-  "-1": "flat",
-  "2": "doubleSharp",
-  "-2": "doubleFlat",
 };
 
 const ACCIDENTAL_NAMES: Record<string, Pitch["alter"]> = {
@@ -203,8 +197,9 @@ export function parseMusicXML(xml: string): MusicXMLResult {
   }
 
   const parsedParts = parts.map((part) => {
+    const reader = createPartReaderState();
     const measures = directChildren(part, "measure").map((measure) =>
-      parseMeasure(measure, warn)
+      parseMeasure(measure, reader, warn)
     );
     attachEndings(measures);
     // resolve the running clef per staff so assembly knows TAB staves
@@ -256,14 +251,38 @@ function attachEndings(measures: ParsedMeasure[]) {
   }
 }
 
+// Per-part reader state carried across measures: the running key
+// signature and one AccidentalContext per staff (accidentals apply
+// within one staff until the barline)
+export interface PartReaderState {
+  fifths: KeyRange;
+  contexts: Map<number, AccidentalContext>;
+}
+
+export const createPartReaderState = (): PartReaderState => ({
+  fifths: 0,
+  contexts: new Map(),
+});
+
 function parseMeasure(
   measureElement: Element,
+  reader: PartReaderState,
   warn: (message: string) => void
 ): ParsedMeasure {
   const measure: ParsedMeasure = {
     attributes: { clefs: new Map(), staves: 1 },
     startRepeat: false,
     staves: new Map(),
+  };
+
+  reader.contexts.forEach((context) => context.startMeasure());
+  const contextFor = (staff: number): AccidentalContext => {
+    let context = reader.contexts.get(staff);
+    if (!context) {
+      context = new AccidentalContext(reader.fifths);
+      reader.contexts.set(staff, context);
+    }
+    return context;
   };
 
   // Directions accumulate here until the next note on their staff claims them
@@ -289,6 +308,12 @@ function parseMeasure(
     switch (child.tagName) {
       case "attributes":
         parseAttributes(child, measure.attributes, warn);
+        if (measure.attributes.fifths !== undefined) {
+          reader.fifths = measure.attributes.fifths;
+          reader.contexts.forEach((context) =>
+            context.setKey(reader.fifths)
+          );
+        }
         break;
       case "direction": {
         const staff = Number(childText(child, "staff") ?? 1);
@@ -298,6 +323,21 @@ function parseMeasure(
       case "note": {
         const note = parseNote(child, warn);
         if (!note) break;
+        // Reconcile drawn vs sounding accidental against the reader's
+        // context (key signature + this measure's earlier accidentals)
+        if (note.pitch?.step !== undefined && note.pitch.octave !== undefined) {
+          const reconciled = contextFor(note.staff).reconcile(
+            note.pitch.step,
+            note.pitch.octave,
+            {
+              glyph: note.pitch.alter,
+              soundingAlter: note.pitch.soundingAlter,
+            }
+          );
+          note.pitch.alter = reconciled.glyph;
+          note.pitch.soundingAlter =
+            reconciled.soundingAlter as Pitch["soundingAlter"];
+        }
         if (note.isGrace) {
           if (!note.rest && note.pitch) {
             if (note.pitch.alter) {
@@ -611,21 +651,41 @@ function parseNote(
     }
   }
 
+  /*
+    MusicXML separates the sounding alteration (<alter>, present on every
+    altered note even under a key signature) from the drawn glyph
+    (<accidental>, present only when engraving needs one). Keep them
+    separate here; parseMeasure reconciles them against the key signature
+    and the measure's earlier accidentals, so files that omit either side
+    still render and sound right.
+  */
   const pitchElement = noteElement.getElementsByTagName("pitch")[0];
   if (pitchElement) {
     const step = childText(pitchElement, "step") as Pitch["step"];
     const octave = Number(childText(pitchElement, "octave"));
     const accidentalName = childText(noteElement, "accidental");
-    const alterValue = childText(pitchElement, "alter");
-    const alter = accidentalName
+    const drawn = accidentalName
       ? ACCIDENTAL_NAMES[accidentalName]
-      : alterValue
-        ? ALTER_TO_ACCIDENTAL[alterValue]
-        : undefined;
-    if (alterValue && !accidentalName && !alter && alterValue !== "0") {
-      warn(`Unsupported <alter>${alterValue}</alter> (microtones?)`);
+      : undefined;
+    if (accidentalName && !drawn) {
+      warn(`Unsupported accidental "${accidentalName}"`);
     }
-    note.pitch = { step, octave: octave as Pitch["octave"], alter };
+    const alterValue = childText(pitchElement, "alter");
+    let soundingAlter =
+      alterValue !== undefined ? Number(alterValue) : undefined;
+    if (
+      soundingAlter !== undefined &&
+      (!Number.isInteger(soundingAlter) || Math.abs(soundingAlter) > 2)
+    ) {
+      warn(`Unsupported <alter>${alterValue}</alter> (microtones?)`);
+      soundingAlter = Math.max(-2, Math.min(2, Math.round(soundingAlter)));
+    }
+    note.pitch = {
+      step,
+      octave: octave as Pitch["octave"],
+      alter: drawn,
+      soundingAlter: soundingAlter as Pitch["soundingAlter"],
+    };
   }
 
   for (const beam of Array.from(noteElement.getElementsByTagName("beam"))) {
