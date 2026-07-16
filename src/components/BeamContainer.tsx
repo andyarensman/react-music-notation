@@ -135,6 +135,22 @@ export const BeamContainer = ({ stem = "upStem", children }: BeamContainerProps)
         stem
       );
 
+  /*
+    A cross-staff beam stack (primary at the shared line, secondaries
+    stacked below it) is met by stems from both sides, so each stem must
+    span the WHOLE stack: stems arriving from above run to the stack's
+    bottom edge, stems from below to its top edge — otherwise a stem
+    connects only the near beam and the far one floats.
+  */
+  const crossMaxLevel = Math.max(
+    ...beamedNotesArray.map((note) => getBeamCount(note.props.noteValue))
+  );
+  const crossStackTop = crossBeamY - BEAM_THICKNESS / 2;
+  const crossStackBottom =
+    crossBeamY +
+    BEAM_THICKNESS / 2 +
+    (crossMaxLevel - 1) * (BEAM_THICKNESS + SECOND_BEAM_GAP);
+
   // Each stem ends on the beam line: interpolate between the beam ends by
   // the note's horizontal position within the beam span. stemXs are the
   // stem positions in the beam svg's 0-100 x space
@@ -143,8 +159,14 @@ export const BeamContainer = ({ stem = "upStem", children }: BeamContainerProps)
   const updatedBeamedNotesArray = beamedNotesArray.map((noteElement, index) => {
     const x = (flexCounter / beamFlexSpan) * 100;
     stemXs.push(x);
-    const stemEndValue =
-      Math.round((topLeftY + ((topRightY - topLeftY) * x) / 100) * 100) / 100;
+    const fromAbove =
+      isCross &&
+      (crossContext!.directionSign > 0 ? !crossFlags[index] : crossFlags[index]);
+    const stemEndValue = isCross
+      ? fromAbove
+        ? crossStackBottom
+        : crossStackTop
+      : Math.round((topLeftY + ((topRightY - topLeftY) * x) / 100) * 100) / 100;
     flexCounter += getNoteFlex(noteElement.props);
 
     return cloneElement(noteElement, {
@@ -188,7 +210,9 @@ export const BeamContainer = ({ stem = "upStem", children }: BeamContainerProps)
     partial stub half its own width, pointing back toward the previous note
     (or forward when it starts the group).
   */
-  const levelSign = stem === "upStem" ? 1 : -1;
+  // cross-staff stacks always grow downward (the stem-span math above
+  // assumes it); normal groups stack toward their noteheads
+  const levelSign = isCross ? 1 : stem === "upStem" ? 1 : -1;
   const levelOffset = BEAM_THICKNESS + SECOND_BEAM_GAP;
   const maxBeamLevel = Math.max(
     ...beamedNotesArray.map((note) => getBeamCount(note.props.noteValue))
