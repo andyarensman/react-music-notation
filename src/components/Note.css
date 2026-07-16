@@ -32,26 +32,34 @@
 }
 
 /*
-  Mid-measure clef changes: a smaller clef drawn ahead of the note's
+  Mid-measure clef changes: a clef at 3/4 size drawn ahead of the note's
   grace notes and accidentals (Gould: mid-measure clefs are reduced).
-  Vertical offsets re-anchor each scaled glyph on its staff line.
+
+  Placement model (validated against the full-size clef offsets): Leland's
+  ascent = descent = 2.012em, so a glyph's baseline sits 2.012 x font-size
+  below its line-box top, and SMuFL clefs register their reference line ON
+  the baseline (G clef -> G line, F clef -> F line, C clef -> middle). At
+  font-size 3ss the baseline is 6.036ss down, so
+    top = staffTop(6.0625ss) + refLineOffset - 6.036ss.
+  The .leland.clef-change specificity keeps .leland's 4ss font-size from
+  overriding the reduction (global.css loads after component css).
 */
-.clef-change {
-  font-size: calc(var(--staff-space) * 3.2);
+.leland.clef-change {
+  font-size: calc(var(--staff-space) * 3);
 }
 
-.clef-change-gClef {
-  top: calc(var(--staff-space) * 2.4);
+.leland.clef-change-gClef {
+  top: calc(var(--staff-space) * 3.03); /* baseline on the G line (line 2) */
 }
 
-.clef-change-fClef {
-  top: calc(var(--staff-space) * 0.8);
+.leland.clef-change-fClef {
+  top: calc(var(--staff-space) * 1.03); /* baseline on the F line (line 4) */
 }
 
-.clef-change-cClef,
-.clef-change-percussion,
-.clef-change-tab {
-  top: calc(var(--staff-space) * 1.6);
+.leland.clef-change-cClef,
+.leland.clef-change-percussion,
+.leland.clef-change-tab {
+  top: calc(var(--staff-space) * 2.03); /* baseline on the middle line */
 }
 
 /*
