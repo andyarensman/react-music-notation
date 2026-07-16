@@ -11,6 +11,7 @@ import "./Note.css";
 import "../global.css";
 import {
   accidentalGlyphs,
+  altNoteheadGlyphs,
   articulationGlyphs,
   dottedGlyph,
   dynamicGlyphs,
@@ -428,7 +429,15 @@ export const NoteStack = (props: NoteStackProps) => {
               : ""
           }`}
         >
-          {noteGlyphs[noteTranslations[noteValue]]["noStem"]}
+          {note.notehead
+            ? altNoteheadGlyphs[note.notehead][
+                noteValue === "whole"
+                  ? "whole"
+                  : noteValue === "half"
+                    ? "half"
+                    : "black"
+              ]
+            : noteGlyphs[noteTranslations[noteValue]]["noStem"]}
         </div>
       ))}
       {dotted &&

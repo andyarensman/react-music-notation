@@ -18,3 +18,8 @@
 .cClef {
   top: 0px;
 }
+
+/* centered on the staff like the C clef */
+.percussion {
+  top: 0px;
+}

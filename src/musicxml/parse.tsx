@@ -24,6 +24,7 @@ import {
   KeyRange,
   Lyric,
   NoteProps,
+  NoteheadType,
   Pitch,
   SlurMarker,
   StackedNote,
@@ -105,6 +106,7 @@ interface ParsedNote {
   chordWithPrevious: boolean;
   rest: boolean;
   pitch?: Pitch;
+  notehead?: NoteheadType;
   noteValue: NoteValue;
   dotted: boolean;
   tieStart: boolean;
@@ -397,6 +399,7 @@ function parseAttributes(
     if (sign === "G") attributes.clefs.set(staff, "gClef");
     else if (sign === "F") attributes.clefs.set(staff, "fClef");
     else if (sign === "C") attributes.clefs.set(staff, "cClef");
+    else if (sign === "percussion") attributes.clefs.set(staff, "percussion");
     else if (sign) {
       warn(`Unsupported clef sign "${sign}"; using treble`);
       attributes.clefs.set(staff, "gClef");
@@ -562,6 +565,34 @@ function parseNote(
   };
   if (noteElement.getElementsByTagName("dot").length > 1) {
     warn("Double dots reduced to a single dot");
+  }
+
+  // Unpitched (percussion) notes position via display-step/display-octave,
+  // which use the treble mapping — same convention the percussion clef uses
+  const unpitchedElement = noteElement.getElementsByTagName("unpitched")[0];
+  if (unpitchedElement) {
+    const step = childText(unpitchedElement, "display-step") as Pitch["step"];
+    const octave = Number(childText(unpitchedElement, "display-octave"));
+    if (step && !Number.isNaN(octave)) {
+      note.pitch = { step, octave: octave as Pitch["octave"] };
+    }
+  }
+
+  const noteheadElement = noteElement.getElementsByTagName("notehead")[0];
+  if (noteheadElement) {
+    const name = noteheadElement.textContent?.trim();
+    const mapped: Record<string, NoteheadType> = {
+      x: "x",
+      "circle-x": "circleX",
+      diamond: "diamond",
+      triangle: "triangle",
+      "inverted triangle": "triangle",
+    };
+    if (name && mapped[name]) {
+      note.notehead = mapped[name];
+    } else if (name && name !== "normal") {
+      warn(`Unsupported notehead "${name}"`);
+    }
   }
 
   const pitchElement = noteElement.getElementsByTagName("pitch")[0];
@@ -733,7 +764,10 @@ function buildVoiceEvents(
       ottavaStop: group.some((n) => n.ottavaStop),
     };
     if (group.length > 1) {
-      const pitches: StackedNote[] = group.map((n) => ({ pitch: n.pitch }));
+      const pitches: StackedNote[] = group.map((n) => ({
+        pitch: n.pitch,
+        notehead: n.notehead,
+      }));
       if (group.some((n) => n.tieStart || n.tieStop)) {
         warn("Skipped ties on chord noteheads");
       }
@@ -777,6 +811,7 @@ function buildVoiceEvents(
           noteValue={first.noteValue}
           dotted={first.dotted ? 1 : undefined}
           pitch={first.pitch}
+          notehead={first.notehead}
           tie={first.tieStart ? "start" : first.tieStop ? "stop" : undefined}
           articulation={first.articulation}
           dynamic={first.dynamic}

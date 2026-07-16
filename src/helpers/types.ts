@@ -23,8 +23,22 @@ export type KeyRange =
   | 6
   | 7;
 
-/** Supported clef shapes: `"gClef"` (treble), `"fClef"` (bass), or `"cClef"` (alto/tenor). */
-export type ClefType = "gClef" | "fClef" | "cClef";
+/**
+ * Supported clef shapes: `"gClef"` (treble), `"fClef"` (bass), `"cClef"`
+ * (alto/tenor), or `"percussion"` (unpitched). Under the percussion clef,
+ * pitches map to positions with the treble convention (MusicXML's
+ * display-step/display-octave rule) — most percussion writing sets
+ * `position` directly instead.
+ */
+export type ClefType = "gClef" | "fClef" | "cClef" | "percussion";
+
+/**
+ * Alternative notehead shapes (percussion and effects): `"x"` (hi-hat,
+ * cymbals), `"circleX"` (open hi-hat), `"diamond"` (harmonics, ride bell),
+ * `"triangle"`. Drawn with a separate stem; the half/whole variants fall
+ * back to the black form where Leland lacks them (all but diamond).
+ */
+export type NoteheadType = "x" | "circleX" | "diamond" | "triangle";
 
 /**
  * One of the 25 staff positions this library can place a notehead, rest, or
@@ -154,6 +168,8 @@ interface RestProps extends BaseNoteProps {
   tieDirection?: never;
   /** Rests cannot carry slur markers. */
   slur?: never;
+  /** Rests have no notehead. */
+  notehead?: never;
   /** Rests cannot carry an articulation mark. */
   articulation?: never;
   /** Rests cannot carry an articulation mark. */
@@ -257,6 +273,11 @@ export interface NoteValueProps extends BaseNoteProps {
   /** Discriminates this variant from `RestProps`; omit or leave `false` for a pitched note. */
   rest?: false;
   /**
+   * Alternative notehead shape (x, circle-x, diamond, triangle) for
+   * percussion and effects. Drawn as a bare head with a separate stem.
+   */
+  notehead?: NoteheadType;
+  /**
    * @internal Set by `BeamContainer` to draw a custom-length stem that
    * meets the beam line; not usually set manually.
    */
@@ -336,6 +357,8 @@ export interface StackedNote {
   pitch?: Pitch;
   /** Explicit staff position for this notehead; wins over `pitch` when both are given. */
   position?: PitchPosition;
+  /** Alternative notehead shape for this chord tone (x, diamond, ...). */
+  notehead?: NoteheadType;
 }
 
 /**

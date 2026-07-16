@@ -10,9 +10,11 @@ import "./Note.css";
 import "../global.css";
 import {
   accidentalGlyphs,
+  altNoteheadGlyphs,
   articulationGlyphs,
   dottedGlyph,
   dynamicGlyphs,
+  flagGlyphs,
   graceNoteGlyphs,
   noteGlyphs,
 } from "../helpers/glyphs";
@@ -66,6 +68,32 @@ export const Note = (props: NoteProps) => {
   const ledgerLines = rest ? [] : getLedgerLines(position);
   const isWide = noteValue === "whole";
   const dotOnLine = position.startsWith("line");
+
+  /*
+    Alternative noteheads (x, diamond, ...) render as a bare head plus a
+    drawn stem — the combined note glyphs only exist for standard heads.
+    Beamed notes already draw their stem to the beam via stemEndValue;
+    unbeamed alternative heads get a standard-length stem and, for
+    eighths and shorter, a standalone flag (the NoteStack pattern).
+  */
+  const notehead = !rest ? props.notehead : undefined;
+  const altHeadGlyph = notehead
+    ? altNoteheadGlyphs[notehead][
+        noteValue === "whole"
+          ? "whole"
+          : noteValue === "half"
+            ? "half"
+            : "black"
+      ]
+    : undefined;
+  const drawnStemEnd =
+    stem === "noStem" && stemEndValue !== undefined
+      ? stemEndValue
+      : altHeadGlyph &&
+          (stem === "upStem" || stem === "downStem") &&
+          noteValue !== "whole"
+        ? stemStart + (stem === "upStem" ? -28 : 28)
+        : undefined;
 
   // Ties curve on the side opposite the stem (real or implied) unless a
   // Voice dictates the side
@@ -292,7 +320,7 @@ export const Note = (props: NoteProps) => {
       <div className={"leland note " + position}>
         {rest
           ? noteGlyphs[noteTranslations[noteValue]]["rest"]
-          : noteGlyphs[noteTranslations[noteValue]][stem!]}
+          : (altHeadGlyph ?? noteGlyphs[noteTranslations[noteValue]][stem!])}
       </div>
       {dotted && (
         <div
@@ -360,10 +388,10 @@ export const Note = (props: NoteProps) => {
           </svg>
         </div>
       )}
-      {stem === "noStem" && stemEndValue && (
+      {drawnStemEnd !== undefined && (
         <div
           className={
-            "stem-container " + (stemEndValue < stemStart ? "stem-above" : "")
+            "stem-container " + (drawnStemEnd < stemStart ? "stem-above" : "")
           }
         >
           <svg
@@ -375,13 +403,31 @@ export const Note = (props: NoteProps) => {
               x1="0"
               y1={stemStart}
               x2="0"
-              y2={stemEndValue}
+              y2={drawnStemEnd}
               stroke="currentColor"
               vectorEffect="non-scaling-stroke"
             />
           </svg>
         </div>
       )}
+      {altHeadGlyph &&
+        drawnStemEnd !== undefined &&
+        stemEndValue === undefined &&
+        (noteValue === "eighth" ||
+          noteValue === "16th" ||
+          noteValue === "32nd") && (
+          <div
+            className="leland note"
+            style={{
+              top: `calc(var(--staff-space) * ${(drawnStemEnd - 64) / 8})`,
+              left: effectiveStemUp
+                ? "calc(var(--staff-space) * 1.25)"
+                : undefined,
+            }}
+          >
+            {flagGlyphs[noteValue][effectiveStemUp ? "upStem" : "downStem"]}
+          </div>
+        )}
     </div>
   );
 };

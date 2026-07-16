@@ -44,6 +44,7 @@ export type {
   NoteInteractionInfo,
   NoteProps,
   NoteValueProps,
+  NoteheadType,
   Pitch,
   PitchPosition,
   SlurMarker,

@@ -139,6 +139,23 @@ export const clefGlyphs = {
   gClef: "\uE050",
   fClef: "\uE062",
   cClef: "\uE05C",
+  percussion: "\uE069",
+};
+
+/*
+  Alternative noteheads for percussion and effects, drawn with a separate
+  stem (the combined note glyphs only exist for standard heads). Leland
+  lacks the X/circle-X/triangle half and whole variants, so those fall
+  back to the black form \u2014 half/whole X heads are rare in kit writing.
+*/
+export const altNoteheadGlyphs: Record<
+  "x" | "circleX" | "diamond" | "triangle",
+  { black: string; half: string; whole: string }
+> = {
+  x: { black: "\uE0A9", half: "\uE0A9", whole: "\uE0A9" },
+  circleX: { black: "\uE0B3", half: "\uE0B3", whole: "\uE0B3" },
+  diamond: { black: "\uE0DB", half: "\uE0D9", whole: "\uE0D8" },
+  triangle: { black: "\uE0BE", half: "\uE0BE", whole: "\uE0BE" },
 };
 
 interface TimeSignatureNumberGlyphs {

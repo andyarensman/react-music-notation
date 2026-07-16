@@ -124,7 +124,11 @@ afternoon) can handle. Grounded against the
   navigation, built-in selection for `MusicXMLScore`, aria-labels
   describing articulations/lyrics.
 - **Cross-staff beaming** (piano writing between the hands).
-- **Percussion and tablature** notation families.
+- **Percussion and tablature** notation families. Percussion basics
+  shipped (percussion clef, x/circle-x/diamond/triangle noteheads with
+  separate stems, `<unpitched>`/`<notehead>` import); still open:
+  single-line staves, slash notation, rolls/tremolos, and the whole
+  tablature side (TAB clef, 6-line staff, fret numbers).
 
 ## Post-Fable friendly (well-scoped, follow existing patterns)
 
