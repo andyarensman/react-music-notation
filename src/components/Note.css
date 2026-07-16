@@ -75,6 +75,12 @@
   stroke-width: calc(var(--staff-space) * 0.15);
 }
 
+.beam-segment {
+  position: absolute;
+  top: 0;
+  height: calc(var(--staff-space) * 16.125);
+}
+
 .beam-new,
 .stem-container {
   position: absolute;

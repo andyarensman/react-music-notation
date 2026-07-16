@@ -108,9 +108,13 @@ afternoon) can handle. Grounded against the
 - ~~**Voice collision engine**~~ — shipped: unisons/seconds between the
   two voices offset the down-stem note per Gould (paint-only transforms
   on the onset grid; same-value unisons merge visually). Still open:
-  collisions inside beamed groups, cross-voice accidental collisions,
-  and the more general collision-aware horizontal spacing (accidentals
-  inside beams shift stems slightly off the beam math).
+  collisions inside beamed groups, cross-voice accidental collisions.
+- ~~**Collision-aware beam spacing**~~ — shipped: beams render as
+  per-interval segments positioned with calc(% + staff-spaces) using the
+  exact leading margins (accidentals/graces/clef changes) each note
+  gets, so stems meet beams precisely. Still open: the same margin skew
+  on onset-grid columns (cross-staff x alignment when one staff carries
+  accidentals at a shared onset).
 - ~~**Octave shift / 8va**~~ — shipped: the `Ottava` wrapper (8va/8vb/
   15ma/15mb) draws the dashed line + label and re-octaves the staff
   positions beneath it via context; MusicXML `<octave-shift>` maps

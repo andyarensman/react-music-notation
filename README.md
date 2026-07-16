@@ -259,6 +259,18 @@ The project is built in phases; each completed phase has a kitchen-sink story un
   remaining events. MusicXML mid-measure `<attributes><clef>` maps
   (mid-measure key/time changes still warn)
 
+**Phase 23**
+
+- Margin-exact beam geometry: anything that pushes a note sideways
+  inside a beamed group (accidentals, grace notes, chord accidental
+  columns, mid-measure clefs) used to nudge that stem off the beam's
+  flex-proportional math. Beams now render as per-interval segments
+  positioned with `calc(% + staff-spaces)` — the exact margins each note
+  will get, computed from the same shared helpers `NoteStack` itself
+  uses — so every stem meets the beam precisely, secondary beams and
+  stubs included. Margin-free groups reduce algebraically to the old
+  geometry, and cross-staff beams ride the same segments
+
 **Still out**: grace-note accidentals and beamed/slurred grace-note runs, D.S./D.C./segno/coda navigation marks, cross-staff beams for chords and MusicXML per-note `<staff>` changes (manual `crossStaff` only), collisions inside beamed groups between voices, octave lines crossing barlines, ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, courtesy naturals on key changes, bracketed instrument-family groups in scores, a grand-staff part inside a `Score`, melisma extender lines and elisions, verse numbers, 3+ lyric verses (they overflow toward the next system), `.mxl` unzipping (pass the contained XML string yourself), MusicXML export, MIDI file export (the playback extraction is the groundwork), playback pause/seek and velocity-from-dynamics, and print layout. See `ROADMAP.md` for the full coverage audit against Behind Bars and the MusicXML element reference.
 
 **MusicXML coverage roadmap** — auditing the [MusicXML 4.0 element reference](https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/) against what renders today, the notable visual-notation elements still missing are: ornaments (`trill-mark`, `turn`/`inverted-turn`, `mordent`/`inverted-mordent`, `wavy-line`), `cue` notes, `fermata`, `breath-mark`/`caesura`, `tremolo`, `arpeggiate`, `glissando`/`slide`, `pedal`, `segno`/`coda`, `rehearsal` marks, `multiple-rest` (multi-measure rests), and harmony/chord symbols. These are the candidate pool for future phases.

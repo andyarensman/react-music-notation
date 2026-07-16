@@ -7,6 +7,7 @@ import {
   NoteProps,
   Pitch,
   PitchPosition,
+  StackedNote,
 } from "./types";
 
 export const noteFlexValue: Record<NoteProps["noteValue"], number> = {
@@ -394,6 +395,113 @@ export const applyOttavaShift = <
       octave: (entry.pitch.octave + octaves) as Pitch["octave"],
     },
   };
+};
+
+/*
+  Chord (NoteStack) layout math, shared with BeamContainer so beam
+  geometry can compensate for leading margins with EXACTLY the numbers
+  the chord itself uses. Three pure steps: resolve+sort the noteheads,
+  walk the seconds-flipping rule, stack accidentals into columns.
+*/
+
+export interface ResolvedStackNote extends StackedNote {
+  position: PitchPosition;
+  index: number;
+}
+
+export const resolveStack = (
+  pitches: StackedNote[],
+  resolve: (note: StackedNote) => PitchPosition
+): ResolvedStackNote[] =>
+  pitches
+    .map((stackedNote) => {
+      const position = resolve(stackedNote);
+      return { ...stackedNote, position, index: positionIndex(position) };
+    })
+    .sort((a, b) => a.index - b.index);
+
+/*
+  Seconds flip to the far side of the stem: walk away from the stem's
+  attachment end (bottom-up for up-stems and stemless chords, top-down
+  for down-stems); a note one step from an unflipped neighbor flips.
+*/
+export const stackFlips = (
+  notes: ResolvedStackNote[],
+  walkUp: boolean
+): { flipped: boolean[]; anyLeftFlip: boolean; anyRightFlip: boolean } => {
+  const flipped = new Array<boolean>(notes.length).fill(false);
+  const walkOrder = [...notes.keys()];
+  if (walkUp) walkOrder.reverse();
+  for (let i = 1; i < walkOrder.length; i++) {
+    const current = walkOrder[i];
+    const previous = walkOrder[i - 1];
+    const isSecond =
+      Math.abs(notes[current].index - notes[previous].index) === 1;
+    if (isSecond && !flipped[previous]) {
+      flipped[current] = true;
+    }
+  }
+  return {
+    flipped,
+    anyLeftFlip: !walkUp && flipped.some(Boolean),
+    anyRightFlip: walkUp && flipped.some(Boolean),
+  };
+};
+
+// Accidentals stack into columns leftward so they never overlap; when
+// noteheads flip left of the stem the whole block shifts further left
+export const stackAccidentalMargin = (
+  notes: ResolvedStackNote[],
+  anyLeftFlip: boolean
+): { columns: number[]; margin: number } => {
+  const withAccidentals = notes.filter((note) => note.pitch?.alter);
+  const columns = assignAccidentalColumns(
+    withAccidentals.map((note) => note.index)
+  );
+  const flipClearance = anyLeftFlip ? 1.15 : 0;
+  const maxColumn = columns.length ? Math.max(...columns) : 0;
+  return {
+    columns,
+    margin: withAccidentals.length
+      ? 1.5 + flipClearance + maxColumn * 1.1
+      : 0,
+  };
+};
+
+/*
+  The full leading margin (clef change + grace notes + accidentals) of a
+  Note-like or NoteStack-like event, in staff-spaces — the margin-left
+  its container will get. BeamContainer uses this to place stems and
+  beam segments exactly, margins included.
+*/
+export const leadingMarginSs = (
+  props: {
+    pitch?: Pitch;
+    pitches?: StackedNote[];
+    grace?: unknown[];
+    clefChange?: unknown;
+    rest?: boolean;
+  },
+  resolve: (note: StackedNote) => PitchPosition,
+  walkUp: boolean
+): number => {
+  const clefMargin = props.clefChange ? 3.4 : 0;
+  const graceMargin =
+    !props.rest && props.grace?.length ? props.grace.length * 1.7 + 0.8 : 0;
+  if (props.rest) return clefMargin;
+  if (props.pitches && props.pitches.length > 0) {
+    const notes = resolveStack(props.pitches, resolve);
+    const { anyLeftFlip } = stackFlips(notes, walkUp);
+    const { margin } = stackAccidentalMargin(notes, anyLeftFlip);
+    return clefMargin + graceMargin + margin;
+  }
+  const alter = props.pitch?.alter;
+  const accidentalMargin = alter
+    ? alter.startsWith("double")
+      ? 1.75
+      : 1.5
+    : 0;
+  return clefMargin + graceMargin + accidentalMargin;
 };
 
 // y of the staff top line inside the 129-unit stem/beam viewBox

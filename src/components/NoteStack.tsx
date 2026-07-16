@@ -26,7 +26,6 @@ import {
   articulationCentersOnStem,
   articulationDefaultsAbove,
   articulationLeftSs,
-  assignAccidentalColumns,
   getArticulationIndex,
   getChordStem,
   getCurveAnchors,
@@ -36,8 +35,10 @@ import {
   normalizeLyric,
   noteAriaLabel,
   noteTranslations,
-  positionIndex,
   resolvePosition,
+  resolveStack,
+  stackAccidentalMargin,
+  stackFlips,
   StemPositions,
 } from "../helpers/helpers";
 import {
@@ -146,15 +147,9 @@ export const NoteStack = (props: NoteStackProps) => {
   const { pitches, noteValue, dotted, stemEndValue } = props;
 
   // Resolve every notehead's position and sort top-of-staff first
-  const notes = pitches
-    .map((stackedNote) => {
-      const position = resolvePosition(
-        applyOttavaShift(stackedNote, ottava),
-        clef
-      );
-      return { ...stackedNote, position, index: positionIndex(position) };
-    })
-    .sort((a, b) => a.index - b.index);
+  const notes = resolveStack(pitches, (stackedNote) =>
+    resolvePosition(applyOttavaShift(stackedNote, ottava), clef)
+  );
 
   if (notes.length === 0) {
     return null;
@@ -192,43 +187,17 @@ export const NoteStack = (props: NoteStackProps) => {
     };
   }
 
-  /*
-    Seconds flip to the far side of the stem. Walk away from the stem's
-    attachment end (bottom-up for up-stems and stemless chords, top-down for
-    down-stems); a note one step from an unflipped neighbor flips.
-  */
+  // Seconds flipping and accidental columns come from the shared stack
+  // layout helpers — BeamContainer uses the same math to compensate beam
+  // geometry for the resulting margins
   const walkUp = stemUp || stemLine === null;
-  const flipped = new Array<boolean>(notes.length).fill(false);
-  const walkOrder = [...notes.keys()];
-  if (walkUp) walkOrder.reverse();
-  for (let i = 1; i < walkOrder.length; i++) {
-    const current = walkOrder[i];
-    const previous = walkOrder[i - 1];
-    const isSecond =
-      Math.abs(notes[current].index - notes[previous].index) === 1;
-    if (isSecond && !flipped[previous]) {
-      flipped[current] = true;
-    }
-  }
-  const anyRightFlip = walkUp && flipped.some(Boolean);
-  const anyLeftFlip = !walkUp && flipped.some(Boolean);
-
-  // Accidentals stack into columns leftward so they never overlap; when
-  // noteheads flip left of the stem, the whole accidental block shifts
-  // further left to clear them
+  const { flipped, anyLeftFlip, anyRightFlip } = stackFlips(notes, walkUp);
   const notesWithAccidentals = notes
     .map((note, arrayIdx) => ({ ...note, arrayIdx }))
     .filter((note) => note.pitch && note.pitch.alter);
-  const accidentalColumns = assignAccidentalColumns(
-    notesWithAccidentals.map((note) => note.index)
-  );
+  const { columns: accidentalColumns, margin: accidentalMargin } =
+    stackAccidentalMargin(notes, anyLeftFlip);
   const flipClearance = anyLeftFlip ? 1.15 : 0;
-  const maxColumn = accidentalColumns.length
-    ? Math.max(...accidentalColumns)
-    : 0;
-  const accidentalMargin = notesWithAccidentals.length
-    ? 1.5 + flipClearance + maxColumn * 1.1
-    : 0;
 
   // Grace notes sit before the accidental block, ~1.6 staff-spaces each
   // Same slot math as Note: 1.7ss per grace + 0.5ss host gap + 0.3ss lead-in
