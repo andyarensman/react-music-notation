@@ -7,6 +7,8 @@ export { Note } from "./components/Note";
 export { NoteStack } from "./components/NoteStack";
 export type { NoteStackProps } from "./components/NoteStack";
 export { BeamContainer } from "./components/BeamContainer";
+export { TabNote } from "./components/TabNote";
+export type { TabFret } from "./components/TabNote";
 export { Voice } from "./components/Voice";
 export { Tuplet } from "./components/Tuplet";
 export { Slur } from "./components/Slur";

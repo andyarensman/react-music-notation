@@ -204,9 +204,21 @@ The project is built in phases; each completed phase has a kitchen-sink story un
   display-step/display-octave positioning, and `<notehead>` mapping
   (x, circle-x, diamond, triangle)
 
+**Phase 18**
+
+- Guitar tablature: `clef="tab"` draws the TAB lettering on a six-line
+  staff (staff lines and barlines both span the six strings; the measure
+  keeps its normal height so mixed systems stay aligned), and `TabNote`
+  prints fret numbers on their string lines — single notes or chords —
+  participating in the same duration-proportional spacing as ordinary
+  notes. Rhythm-less (no stems yet)
+- MusicXML: `<clef><sign>TAB</sign>`, and `<technical><string>/<fret>`
+  under a TAB staff become `TabNote` events (notes without fret info are
+  spaced as rests with a warning)
+
 **Still out**: grace-note accidentals and beamed/slurred grace-note runs, D.S./D.C./segno/coda navigation marks, cross-staff beaming, collisions inside beamed groups between voices, octave lines crossing barlines, ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, courtesy naturals on key changes, bracketed instrument-family groups in scores, a grand-staff part inside a `Score`, melisma extender lines and elisions, verse numbers, 3+ lyric verses (they overflow toward the next system), `.mxl` unzipping (pass the contained XML string yourself), MusicXML export, MIDI, playback, and print layout. See `ROADMAP.md` for the full coverage audit against Behind Bars and the MusicXML element reference.
 
-**MusicXML coverage roadmap** — auditing the [MusicXML 4.0 element reference](https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/) against what renders today, the notable visual-notation elements still missing are: ornaments (`trill-mark`, `turn`/`inverted-turn`, `mordent`/`inverted-mordent`, `wavy-line`), `cue` notes, `fermata`, `breath-mark`/`caesura`, `tremolo`, `arpeggiate`, `glissando`/`slide`, `pedal`, `segno`/`coda`, `rehearsal` marks, `multiple-rest` (multi-measure rests), harmony/chord symbols, and tablature. These are the candidate pool for future phases.
+**MusicXML coverage roadmap** — auditing the [MusicXML 4.0 element reference](https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/) against what renders today, the notable visual-notation elements still missing are: ornaments (`trill-mark`, `turn`/`inverted-turn`, `mordent`/`inverted-mordent`, `wavy-line`), `cue` notes, `fermata`, `breath-mark`/`caesura`, `tremolo`, `arpeggiate`, `glissando`/`slide`, `pedal`, `segno`/`coda`, `rehearsal` marks, `multiple-rest` (multi-measure rests), and harmony/chord symbols. These are the candidate pool for future phases.
 
 ## Installing
 
@@ -427,6 +439,23 @@ Every event always carries a spoken `aria-label` ("C sharp 5, quarter note"; "ch
 ```
 
 The `"percussion"` clef marks a staff unpitched; place notes with `position` (hi-hat above the top line, snare in space 3, kick in space 1, by kit convention), or with `pitch` using the treble mapping (MusicXML's display-step/display-octave rule). `notehead` on a `Note` — or per chord tone on a `StackedNote` — swaps the head for `"x"`, `"circleX"`, `"diamond"`, or `"triangle"`, drawn as a bare head with its own stem and flag so beaming and voices work unchanged. Not yet: slash noteheads (Leland lacks the glyphs), single-line percussion staves, stem tremolos/rolls.
+
+### Tablature
+
+```tsx
+<Measure clef="tab" time={{ beat: 4, beatType: 4 }}>
+  <TabNote noteValue="quarter" frets={[{ string: 6, fret: 0 }]} />
+  <TabNote
+    noteValue="half"
+    frets={[
+      { string: 5, fret: 2 },
+      { string: 4, fret: 2 },
+    ]}
+  />
+</Measure>
+```
+
+`clef="tab"` turns a measure into a six-line tablature staff (string 1 = top line = high E) with the TAB clef lettering; fill it with `TabNote` events, whose `frets` array prints one number per sounded string. `noteValue` drives horizontal spacing only — tab is rhythm-less for now (no stems/flags), so pair it with a notation staff when rhythms matter. Fret numbers mask the string line behind them and stay under a staff-space tall so chord stacks don't collide. Not yet: rhythm stems below the staff, hammer-on/pull-off/bend marks, and mixing a tab staff into `GrandStaff`/`Score` (heights align, but ties/collisions between staff types are untested).
 
 ### Octave lines (`Ottava`)
 

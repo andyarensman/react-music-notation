@@ -7,6 +7,15 @@
   gap: calc(var(--staff-space) * 0.3);
 }
 
+/* tablature: span the six string lines instead */
+.measure-tab .barline {
+  top: calc(
+    (var(--staff-space) * 12.125 - var(--staff-line-thickness)) / 2 -
+      var(--staff-space) * 0.5
+  );
+  height: calc(var(--staff-space) * 5 + var(--staff-line-thickness));
+}
+
 .barline-end {
   position: absolute;
   right: 0;

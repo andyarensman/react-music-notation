@@ -16,6 +16,7 @@ import { BarlineType } from "../components/MeasureMeta/Barline";
 import { TempoProps } from "../components/MeasureMeta/Tempo";
 import { EndingProps } from "../components/MeasureMeta/Volta";
 import { Ottava, OttavaType } from "../components/Ottava";
+import { TabFret, TabNote } from "../components/TabNote";
 import {
   ArticulationType,
   ClefType,
@@ -107,6 +108,9 @@ interface ParsedNote {
   rest: boolean;
   pitch?: Pitch;
   notehead?: NoteheadType;
+  // tablature (<technical><string>/<fret>), used when the staff is TAB
+  tabString?: 1 | 2 | 3 | 4 | 5 | 6;
+  tabFret?: number;
   noteValue: NoteValue;
   dotted: boolean;
   tieStart: boolean;
@@ -153,6 +157,9 @@ interface ParsedMeasure {
   ending?: EndingProps;
   // staff number -> voice id -> notes in order
   staves: Map<number, Map<string, ParsedNote[]>>;
+  // staff number -> the clef in effect during this measure (running clefs
+  // resolved after parsing), so assembly knows which staves are TAB
+  activeClefs?: Map<number, ClefType>;
 }
 
 const childText = (parent: Element, tag: string): string | undefined =>
@@ -200,6 +207,14 @@ export function parseMusicXML(xml: string): MusicXMLResult {
       parseMeasure(measure, warn)
     );
     attachEndings(measures);
+    // resolve the running clef per staff so assembly knows TAB staves
+    const runningClefs = new Map<number, ClefType>();
+    for (const measure of measures) {
+      measure.attributes.clefs.forEach((clef, staff) =>
+        runningClefs.set(staff, clef)
+      );
+      measure.activeClefs = new Map(runningClefs);
+    }
     return { id: part.getAttribute("id") ?? "", measures };
   });
 
@@ -400,6 +415,7 @@ function parseAttributes(
     else if (sign === "F") attributes.clefs.set(staff, "fClef");
     else if (sign === "C") attributes.clefs.set(staff, "cClef");
     else if (sign === "percussion") attributes.clefs.set(staff, "percussion");
+    else if (sign === "TAB") attributes.clefs.set(staff, "tab");
     else if (sign) {
       warn(`Unsupported clef sign "${sign}"; using treble`);
       attributes.clefs.set(staff, "gClef");
@@ -657,7 +673,30 @@ function parseNote(
       }
       note.articulation = combineArticulations(found, warn);
     }
-    for (const skipped of ["ornaments", "technical", "arpeggiate", "fermata"]) {
+    const technical = notations.getElementsByTagName("technical")[0];
+    if (technical) {
+      const stringNumber = Number(childText(technical, "string"));
+      const fretNumber = Number(childText(technical, "fret"));
+      if (
+        stringNumber >= 1 &&
+        stringNumber <= 6 &&
+        !Number.isNaN(fretNumber)
+      ) {
+        note.tabString = stringNumber as 1 | 2 | 3 | 4 | 5 | 6;
+        note.tabFret = fretNumber;
+      }
+      const extras = Array.from(technical.children).filter(
+        (child) => child.tagName !== "string" && child.tagName !== "fret"
+      );
+      if (extras.length > 0) {
+        warn(
+          `Skipped technical marks (${extras
+            .map((extra) => extra.tagName)
+            .join(", ")})`
+        );
+      }
+    }
+    for (const skipped of ["ornaments", "arpeggiate", "fermata"]) {
       if (notations.getElementsByTagName(skipped).length > 0) {
         warn(`Skipped <${skipped}> notations`);
       }
@@ -698,7 +737,8 @@ interface EventDesc {
 
 function buildVoiceEvents(
   notes: ParsedNote[],
-  warn: (message: string) => void
+  warn: (message: string) => void,
+  tab = false
 ): ReactNode[] {
   // 1) merge chorded notes into NoteStacks
   const groups: ParsedNote[][] = [];
@@ -708,6 +748,40 @@ function buildVoiceEvents(
     } else {
       groups.push([note]);
     }
+  }
+
+  // On a TAB staff, events with string/fret info become fret numbers;
+  // everything else keeps a rest for spacing
+  if (tab) {
+    return groups.map((group, index) => {
+      const first = group[0];
+      const frets: TabFret[] = group.flatMap((note) =>
+        note.tabString !== undefined && note.tabFret !== undefined
+          ? [{ string: note.tabString, fret: note.tabFret }]
+          : []
+      );
+      if (frets.length === 0) {
+        if (!first.rest) {
+          warn("A note on a TAB staff has no <string>/<fret>; spaced as a rest");
+        }
+        return (
+          <Note
+            key={index}
+            rest
+            noteValue={first.noteValue}
+            dotted={first.dotted ? 1 : undefined}
+          />
+        );
+      }
+      return (
+        <TabNote
+          key={index}
+          noteValue={first.noteValue}
+          dotted={first.dotted ? 1 : undefined}
+          frets={frets}
+        />
+      );
+    });
   }
 
   /*
@@ -1000,14 +1074,15 @@ function wrapRange(
 
 function buildStaffChildren(
   voices: Map<string, ParsedNote[]> | undefined,
-  warn: (message: string) => void
+  warn: (message: string) => void,
+  tab = false
 ): ReactNode {
   if (!voices || voices.size === 0) {
     return <Note rest noteValue="whole" />;
   }
   const voiceIds = Array.from(voices.keys()).sort();
   if (voiceIds.length === 1) {
-    return buildVoiceEvents(voices.get(voiceIds[0])!, warn);
+    return buildVoiceEvents(voices.get(voiceIds[0])!, warn, tab);
   }
   if (voiceIds.length > 2) {
     warn(
@@ -1016,7 +1091,7 @@ function buildStaffChildren(
   }
   return voiceIds.slice(0, 2).map((voiceId, index) => (
     <Voice key={voiceId} stem={index === 0 ? "upStem" : "downStem"}>
-      {buildVoiceEvents(voices.get(voiceId)!, warn)}
+      {buildVoiceEvents(voices.get(voiceId)!, warn, tab)}
     </Voice>
   ));
 }
@@ -1028,6 +1103,7 @@ function buildMeasureElement(
   warn: (message: string) => void
 ): ReactElement {
   const attributes = measure.attributes;
+  const tab = measure.activeClefs?.get(staff) === "tab";
   return (
     <Measure
       key={clefKey}
@@ -1039,7 +1115,7 @@ function buildMeasureElement(
       barline={measure.barline}
       startRepeat={measure.startRepeat || undefined}
     >
-      {buildStaffChildren(measure.staves.get(staff), warn)}
+      {buildStaffChildren(measure.staves.get(staff), warn, tab)}
     </Measure>
   );
 }

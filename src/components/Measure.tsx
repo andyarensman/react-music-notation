@@ -173,11 +173,13 @@ export const Measure = ({
     }
   }
 
+  const isTab = activeClef === "tab";
+
   return (
     <ClefContext.Provider value={activeClef}>
       <MeasureNumberContext.Provider value={measureNumber}>
       <div
-        className="measure-container"
+        className={`measure-container${isTab ? " measure-tab" : ""}`}
         role="group"
         aria-label={
           measureNumber !== undefined ? `Measure ${measureNumber}` : "Measure"
@@ -185,7 +187,7 @@ export const Measure = ({
         data-staff-track={staffTrack}
         style={style}
       >
-        <StaffLines />
+        <StaffLines lines={isTab ? 6 : 5} />
         {tempo && <Tempo {...tempo} />}
         {ending && (
           <Volta {...(typeof ending === "string" ? { text: ending } : ending)} />

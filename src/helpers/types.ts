@@ -25,12 +25,13 @@ export type KeyRange =
 
 /**
  * Supported clef shapes: `"gClef"` (treble), `"fClef"` (bass), `"cClef"`
- * (alto/tenor), or `"percussion"` (unpitched). Under the percussion clef,
- * pitches map to positions with the treble convention (MusicXML's
- * display-step/display-octave rule) — most percussion writing sets
- * `position` directly instead.
+ * (alto/tenor), `"percussion"` (unpitched), or `"tab"` (six-line guitar
+ * tablature — fill the measure with `TabNote` events). Under the
+ * percussion clef, pitches map to positions with the treble convention
+ * (MusicXML's display-step/display-octave rule) — most percussion writing
+ * sets `position` directly instead.
  */
-export type ClefType = "gClef" | "fClef" | "cClef" | "percussion";
+export type ClefType = "gClef" | "fClef" | "cClef" | "percussion" | "tab";
 
 /**
  * Alternative notehead shapes (percussion and effects): `"x"` (hi-hat,

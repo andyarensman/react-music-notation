@@ -1,0 +1,12 @@
+/* Fret numbers sit ON their string line, masking it behind the digits.
+   The box must stay under one staff-space tall so stacked chord digits
+   don't erase each other's ink with their masks. */
+.tab-fret {
+  position: absolute;
+  transform: translateY(-50%);
+  font-family: Verdana, Arial, sans-serif;
+  font-size: calc(var(--staff-space) * 1.25);
+  line-height: calc(var(--staff-space) * 0.95);
+  background-color: white;
+  padding: 0 calc(var(--staff-space) * 0.15);
+}

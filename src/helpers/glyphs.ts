@@ -140,6 +140,7 @@ export const clefGlyphs = {
   fClef: "\uE062",
   cClef: "\uE05C",
   percussion: "\uE069",
+  tab: "\uE06E",
 };
 
 /*

@@ -128,6 +128,9 @@ const clefMiddleLinePitch: Record<ClefType, number> = {
   // unpitched: MusicXML's display-step/display-octave use the treble
   // mapping, so a percussion clef positions pitches like a G clef
   percussion: 34,
+  // tablature carries fret numbers, not pitches; treble keeps the lookup
+  // total if a pitch is forced onto a tab staff
+  tab: 34,
 };
 
 // Derive a staff position from a pitch and clef. Returns undefined when the
@@ -538,8 +541,28 @@ export const keySignaturePositions: Record<
       "space-below-1",
     ],
   },
-  // Percussion staves don't carry key signatures; treble placement keeps
-  // the lookup total in case one is forced anyway
+  // Percussion and tab staves don't carry key signatures; treble placement
+  // keeps the lookup total in case one is forced anyway
+  tab: {
+    sharp: [
+      "line-5",
+      "space-3",
+      "space-above-1",
+      "line-4",
+      "space-2",
+      "space-4",
+      "line-3",
+    ],
+    flat: [
+      "line-3",
+      "space-4",
+      "space-2",
+      "line-4",
+      "line-2",
+      "space-3",
+      "space-1",
+    ],
+  },
   percussion: {
     sharp: [
       "line-5",

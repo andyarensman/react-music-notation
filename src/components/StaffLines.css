@@ -18,6 +18,16 @@
   gap: calc(var(--staff-space) - var(--staff-line-thickness));
 }
 
+/* six lines (tablature) center on the same box: trim half a staff-space
+   of cushion per side so the measure height stays 16.125 staff-spaces */
+.staff-6 {
+  margin: calc(
+      (var(--staff-space) * 12.125 - var(--staff-line-thickness)) / 2 -
+        var(--staff-space) * 0.5
+    )
+    0;
+}
+
 .line {
   width: 100%;
   border-bottom: var(--staff-line-thickness) solid black;
