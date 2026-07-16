@@ -21,6 +21,7 @@ import {
 import "./Note.css";
 import { beamCreator } from "../helpers/beamCreator";
 import { ClefContext } from "./ClefContext";
+import { CrossStaffContext } from "./CrossStaffContext";
 
 interface BeamContainerProps {
   /** Two or more `Note`/`NoteStack` elements to beam together. */
@@ -41,6 +42,7 @@ interface BeamableProps {
   pitches?: StackedNote[];
   stem?: "upStem" | "downStem" | "noStem";
   stemEndValue?: number;
+  crossStaff?: boolean;
 }
 
 const isBeamable = (child: ReactNode): child is ReactElement<BeamableProps> => {
@@ -71,11 +73,29 @@ const SECOND_BEAM_GAP = 2; // quarter staff-space between beams
  */
 export const BeamContainer = ({ stem = "upStem", children }: BeamContainerProps) => {
   const clef = useContext(ClefContext);
+  const crossContext = useContext(CrossStaffContext);
   const beamedNotesArray = Children.toArray(children).filter(isBeamable);
 
   if (beamedNotesArray.length < 2) {
     return <>{children}</>;
   }
+
+  /*
+    Cross-staff groups (some notes marked crossStaff inside a grand
+    measure) share one horizontal beam between the staves — a standard
+    stem-length beyond this staff's outer line, which is the same spot in
+    both staves' coordinates. Stems reach it from both sides; each note's
+    stem side falls out of its own head-vs-beam comparison.
+  */
+  const crossFlags = beamedNotesArray.map((note) =>
+    Boolean(note.props.crossStaff)
+  );
+  const isCross = crossContext !== null && crossFlags.some(Boolean);
+  const crossBeamY = crossContext
+    ? crossContext.directionSign > 0
+      ? 108 // 3.5 staff-spaces below the bottom line, toward the lower staff
+      : 20 // 3.5 staff-spaces above the top line, toward the upper staff
+    : 0;
 
   // The effective position of a chord is its notehead nearest the beam
   const effectivePosition = (props: BeamableProps): PitchPosition => {
@@ -108,10 +128,12 @@ export const BeamContainer = ({ stem = "upStem", children }: BeamContainerProps)
   const beamFlexSpan = totalFlexGrowth - finalChildFlex;
   const beamWidthPercentage = (beamFlexSpan / totalFlexGrowth) * 100;
 
-  const { topLeftY, topRightY } = beamCreator(
-    beamedNotesArray.map((note) => effectivePosition(note.props)),
-    stem
-  );
+  const { topLeftY, topRightY } = isCross
+    ? { topLeftY: crossBeamY, topRightY: crossBeamY }
+    : beamCreator(
+        beamedNotesArray.map((note) => effectivePosition(note.props)),
+        stem
+      );
 
   // Each stem ends on the beam line: interpolate between the beam ends by
   // the note's horizontal position within the beam span. stemXs are the
@@ -133,13 +155,19 @@ export const BeamContainer = ({ stem = "upStem", children }: BeamContainerProps)
     });
   });
 
-  // Beam thickness extends from the stem tips toward the noteheads
-  const thickness = stem === "upStem" ? BEAM_THICKNESS : -BEAM_THICKNESS;
+  // Beam thickness extends from the stem tips toward the noteheads; a
+  // cross-staff beam has stems on both sides, so it centers on the line
+  const thickness = isCross
+    ? BEAM_THICKNESS
+    : stem === "upStem"
+      ? BEAM_THICKNESS
+      : -BEAM_THICKNESS;
+  const crossCenter = isCross ? -BEAM_THICKNESS / 2 : 0;
   const yAt = (x: number) => topLeftY + ((topRightY - topLeftY) * x) / 100;
   const polygonPoints = (x1: number, x2: number, offset: number) =>
-    `${x1},${yAt(x1) + offset} ${x2},${yAt(x2) + offset} ${x2},${
-      yAt(x2) + offset + thickness
-    } ${x1},${yAt(x1) + offset + thickness}`;
+    `${x1},${yAt(x1) + offset + crossCenter} ${x2},${yAt(x2) + offset + crossCenter} ${x2},${
+      yAt(x2) + offset + crossCenter + thickness
+    } ${x1},${yAt(x1) + offset + crossCenter + thickness}`;
 
   /*
     Secondary beams (16ths get a second, 32nds a third): consecutive runs of
@@ -196,7 +224,21 @@ export const BeamContainer = ({ stem = "upStem", children }: BeamContainerProps)
     >
       {updatedBeamedNotesArray}
       <div
-        className={"beam-new " + (stem === "upStem" ? "beam-above" : "")}
+        className={
+          "beam-new " +
+          ((
+            isCross
+              ? // align the beam's end with the last note's stem side:
+                // cross notes stem from the far staff (right side when the
+                // beam lies below, i.e. hosted on the upper staff)
+                crossContext!.directionSign > 0
+                ? crossFlags[crossFlags.length - 1]
+                : !crossFlags[crossFlags.length - 1]
+              : stem === "upStem"
+          )
+            ? "beam-above"
+            : "")
+        }
         style={{ width: `${beamWidthPercentage}%` }}
       >
         <svg viewBox="0 0 100 129" preserveAspectRatio="none" className="beam">

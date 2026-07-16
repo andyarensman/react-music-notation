@@ -43,6 +43,7 @@ import { ClefContext } from "./ClefContext";
 import { OttavaContext } from "./OttavaContext";
 import { InteractionContext } from "./InteractionContext";
 import { MeasureNumberContext } from "./MeasureNumberContext";
+import { CrossStaffContext, STAFF_STRIDE_VB } from "./CrossStaffContext";
 
 /**
  * Renders a single note or rest: notehead/rest glyph, optional accidental,
@@ -59,12 +60,26 @@ import { MeasureNumberContext } from "./MeasureNumberContext";
 export const Note = (props: NoteProps) => {
   const clef = useContext(ClefContext);
   const ottava = useContext(OttavaContext);
+  const crossContext = useContext(CrossStaffContext);
   const { noteValue, rest, dotted, stemEndValue } = props;
-  const position = resolvePosition(applyOttavaShift(props, ottava), clef);
+
+  /*
+    Cross-staff notes (piano writing): the note keeps its rhythmic slot
+    here, but its pitch resolves on the OTHER staff's clef and every glyph
+    draws a staff-stride away (a CSS transform on the glyph divs). The
+    stem svg stays in this staff's coordinate space with a shifted start,
+    so a beamed stem simply grows across the gap to the shared beam.
+  */
+  const cross = !rest && props.crossStaff ? crossContext : null;
+  const crossShiftVb = cross ? cross.directionSign * STAFF_STRIDE_VB : 0;
+  const position = resolvePosition(
+    applyOttavaShift(props, ottava),
+    cross ? cross.otherClef : clef
+  );
   const stem = !rest ? props.stem || getDefaultStem(position) : undefined;
   const pitch = !rest ? props.pitch : null;
 
-  const stemStart = StemPositions[position];
+  const stemStart = StemPositions[position] + crossShiftVb;
   const ledgerLines = rest ? [] : getLedgerLines(position);
   const isWide = noteValue === "whole";
   const dotOnLine = position.startsWith("line");
@@ -249,19 +264,20 @@ export const Note = (props: NoteProps) => {
   };
   const containerClass = `note-container${clickable ? " note-interactive" : ""}${
     props.selected ? " note-selected" : ""
-  }`;
+  }${cross ? (cross.directionSign > 0 ? " note-cross-down" : " note-cross-up") : ""}`;
 
+  const crossShiftSs = crossShiftVb / 8;
   const curveData = curveAnchors
     ? {
         "data-note-event": "",
         "data-stem-up": effectiveStemUp ? "1" : "0",
         "data-has-stem": hasRealStem ? "1" : "0",
-        "data-anchor-above": curveAnchors.anchorAboveSs,
-        "data-anchor-below": curveAnchors.anchorBelowSs,
-        "data-obstacle-above": curveAnchors.obstacleAboveSs,
-        "data-obstacle-below": curveAnchors.obstacleBelowSs,
+        "data-anchor-above": curveAnchors.anchorAboveSs + crossShiftSs,
+        "data-anchor-below": curveAnchors.anchorBelowSs + crossShiftSs,
+        "data-obstacle-above": curveAnchors.obstacleAboveSs + crossShiftSs,
+        "data-obstacle-below": curveAnchors.obstacleBelowSs + crossShiftSs,
         "data-tie-start": tie === "start" ? (tieAbove ? "above" : "below") : undefined,
-        "data-tie-top": tie === "start" ? tieTopSpaces : undefined,
+        "data-tie-top": tie === "start" ? tieTopSpaces + crossShiftSs : undefined,
         "data-tie-stop": tie === "stop" ? "" : undefined,
         "data-slur-start": slurStartId,
         "data-slur-end": slurEndId,

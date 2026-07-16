@@ -216,7 +216,17 @@ The project is built in phases; each completed phase has a kitchen-sink story un
   under a TAB staff become `TabNote` events (notes without fret info are
   spaced as rests with a warning)
 
-**Still out**: grace-note accidentals and beamed/slurred grace-note runs, D.S./D.C./segno/coda navigation marks, cross-staff beaming, collisions inside beamed groups between voices, octave lines crossing barlines, ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, courtesy naturals on key changes, bracketed instrument-family groups in scores, a grand-staff part inside a `Score`, melisma extender lines and elisions, verse numbers, 3+ lyric verses (they overflow toward the next system), `.mxl` unzipping (pass the contained XML string yourself), MusicXML export, MIDI, playback, and print layout. See `ROADMAP.md` for the full coverage audit against Behind Bars and the MusicXML element reference.
+**Phase 19**
+
+- Cross-staff beaming (piano writing between the hands): `crossStaff` on
+  a `Note` inside a `GrandMeasure` displays it on the other staff — the
+  pitch resolves against the other staff's clef and the head/ledgers draw
+  a staff-stride away, while the note keeps its rhythmic slot in its host
+  measure. Inside a `BeamContainer`, mixed groups share one horizontal
+  beam between the staves; each stem reaches it from its own side (the
+  head-vs-beam comparison picks the side automatically)
+
+**Still out**: grace-note accidentals and beamed/slurred grace-note runs, D.S./D.C./segno/coda navigation marks, cross-staff beams for chords and MusicXML per-note `<staff>` changes (manual `crossStaff` only), collisions inside beamed groups between voices, octave lines crossing barlines, ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, courtesy naturals on key changes, bracketed instrument-family groups in scores, a grand-staff part inside a `Score`, melisma extender lines and elisions, verse numbers, 3+ lyric verses (they overflow toward the next system), `.mxl` unzipping (pass the contained XML string yourself), MusicXML export, MIDI, playback, and print layout. See `ROADMAP.md` for the full coverage audit against Behind Bars and the MusicXML element reference.
 
 **MusicXML coverage roadmap** — auditing the [MusicXML 4.0 element reference](https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/) against what renders today, the notable visual-notation elements still missing are: ornaments (`trill-mark`, `turn`/`inverted-turn`, `mordent`/`inverted-mordent`, `wavy-line`), `cue` notes, `fermata`, `breath-mark`/`caesura`, `tremolo`, `arpeggiate`, `glissando`/`slide`, `pedal`, `segno`/`coda`, `rehearsal` marks, `multiple-rest` (multi-measure rests), and harmony/chord symbols. These are the candidate pool for future phases.
 
@@ -553,6 +563,19 @@ All four are props on `Measure`, plus `startRepeat` for a left-side repeat barli
 ```
 
 `GrandMeasure` takes `upper`/`lower` (each a `<Measure>` element), plus `barline` and `startRepeat` applied across both staves. `GrandStaff` draws the brace and tracks a running clef per staff, the same way `Staff` does for one. See [Grand staff](#grand-staff) for the layout and known limitations.
+
+**Cross-staff beaming**: mark a `Note` with `crossStaff` to display it on the *other* staff while it keeps its rhythmic slot in its host measure — the pitch resolves against the other staff's clef, and the head/ledger lines draw a staff-stride away. Inside a `BeamContainer`, a mixed group shares one horizontal beam between the staves with stems reaching it from both sides:
+
+```tsx
+<BeamContainer>
+  <Note pitch={{ step: "C", octave: 3 }} noteValue="16th" />
+  <Note pitch={{ step: "G", octave: 3 }} noteValue="16th" />
+  <Note pitch={{ step: "E", octave: 4 }} noteValue="16th" crossStaff />
+  <Note pitch={{ step: "C", octave: 5 }} noteValue="16th" crossStaff />
+</BeamContainer>
+```
+
+Chords (`NoteStack`) can't cross staves yet, and the MusicXML importer doesn't map per-note `<staff>` changes onto `crossStaff` (such voices import split across the staves with duration warnings).
 
 ### `Score` / `ScoreMeasure`: multi-instrument systems
 

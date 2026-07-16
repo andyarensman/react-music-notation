@@ -123,7 +123,11 @@ afternoon) can handle. Grounded against the
   groups with auto-numbering. Still open: roving-tabindex/arrow-key
   navigation, built-in selection for `MusicXMLScore`, aria-labels
   describing articulations/lyrics.
-- **Cross-staff beaming** (piano writing between the hands).
+- ~~**Cross-staff beaming**~~ — shipped: `crossStaff` on notes inside a
+  `GrandMeasure` (pitch resolves on the other staff's clef, glyphs shift
+  a staff-stride, mixed beam groups share a horizontal beam between the
+  staves). Still open: cross-staff chords, MusicXML per-note `<staff>`
+  mapping, sloped cross-staff beams.
 - ~~**Percussion and tablature** notation families~~ — shipped:
   percussion clef + x/circle-x/diamond/triangle noteheads with separate
   stems (`<unpitched>`/`<notehead>` import), and six-line TAB staves

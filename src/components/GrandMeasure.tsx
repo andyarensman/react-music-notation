@@ -4,6 +4,7 @@ import { MeasureProps } from "./Measure";
 import { Barline, BarlineType } from "./MeasureMeta/Barline";
 import { ClefType, KeyRange } from "../helpers/types";
 import { getOnsetBoundaries, unionBoundaries } from "./layout";
+import { CrossStaffContext } from "./CrossStaffContext";
 
 export interface GrandMeasureProps {
   /** The treble/upper staff's `Measure` element. */
@@ -92,29 +93,41 @@ export const GrandMeasure = ({
   // drawn once across both staves
   const perStaffBarline = barline === "repeatEnd";
 
+  // crossStaff notes resolve their pitch on the other staff's clef
+  const upperActiveClef = upper.props.clef ?? inheritedUpperClef ?? "gClef";
+  const lowerActiveClef = lower.props.clef ?? inheritedLowerClef ?? "fClef";
+
   return (
     <div className="grand-measure" style={style}>
-      {cloneElement(upper, {
-        grid: boundaries,
-        barline: perStaffBarline ? "repeatEnd" : "none",
-        startRepeat,
-        inheritedClef: inheritedUpperClef,
-        inheritedFifths: inheritedUpperFifths,
-        systemStart,
-        staffTrack: 0,
-        measureNumber: upper.props.measureNumber ?? measureNumber,
-      })}
-      <div className="grand-measure-lower">
-        {cloneElement(lower, {
+      <CrossStaffContext.Provider
+        value={{ directionSign: 1, otherClef: lowerActiveClef }}
+      >
+        {cloneElement(upper, {
           grid: boundaries,
           barline: perStaffBarline ? "repeatEnd" : "none",
           startRepeat,
-          inheritedClef: inheritedLowerClef,
-          inheritedFifths: inheritedLowerFifths,
+          inheritedClef: inheritedUpperClef,
+          inheritedFifths: inheritedUpperFifths,
           systemStart,
-          staffTrack: 1,
-          measureNumber: lower.props.measureNumber ?? measureNumber,
+          staffTrack: 0,
+          measureNumber: upper.props.measureNumber ?? measureNumber,
         })}
+      </CrossStaffContext.Provider>
+      <div className="grand-measure-lower">
+        <CrossStaffContext.Provider
+          value={{ directionSign: -1, otherClef: upperActiveClef }}
+        >
+          {cloneElement(lower, {
+            grid: boundaries,
+            barline: perStaffBarline ? "repeatEnd" : "none",
+            startRepeat,
+            inheritedClef: inheritedLowerClef,
+            inheritedFifths: inheritedLowerFifths,
+            systemStart,
+            staffTrack: 1,
+            measureNumber: lower.props.measureNumber ?? measureNumber,
+          })}
+        </CrossStaffContext.Provider>
       </div>
       {!perStaffBarline && (
         <Barline type={barline ?? "regular"} placement="end" />

@@ -171,6 +171,8 @@ interface RestProps extends BaseNoteProps {
   slur?: never;
   /** Rests have no notehead. */
   notehead?: never;
+  /** Rests stay on their own staff. */
+  crossStaff?: never;
   /** Rests cannot carry an articulation mark. */
   articulation?: never;
   /** Rests cannot carry an articulation mark. */
@@ -278,6 +280,15 @@ export interface NoteValueProps extends BaseNoteProps {
    * percussion and effects. Drawn as a bare head with a separate stem.
    */
   notehead?: NoteheadType;
+  /**
+   * Inside a `GrandMeasure`: displays this note on the *other* staff
+   * (piano cross-staff writing). The note keeps its rhythmic slot in its
+   * host measure; its pitch resolves against the other staff's clef and
+   * the head/ledgers draw a staff-stride away. Within a `BeamContainer`,
+   * mixed groups share one beam between the staves with stems reaching
+   * from both sides. Ignored outside grand measures.
+   */
+  crossStaff?: boolean;
   /**
    * @internal Set by `BeamContainer` to draw a custom-length stem that
    * meets the beam line; not usually set manually.

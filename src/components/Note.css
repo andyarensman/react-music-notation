@@ -27,6 +27,23 @@
   height: calc(var(--staff-space) * 16.125);
   width: 100%;
   display: flex;
+  /* cross-staff stems reach beyond the viewBox to the other staff */
+  overflow: visible;
+}
+
+/*
+  Cross-staff notes: the glyph content (head, accidental, dot, ledgers,
+  marks) shifts one staff-stride onto the other staff; the stem svg stays
+  in host coordinates and simply grows across the gap to the beam.
+*/
+.note-cross-down > .note,
+.note-cross-down > .ledger-line {
+  transform: translateY(calc(var(--staff-space) * 12.125));
+}
+
+.note-cross-up > .note,
+.note-cross-up > .ledger-line {
+  transform: translateY(calc(var(--staff-space) * -12.125));
 }
 
 /* The svg is stretched non-uniformly, so without non-scaling-stroke the stem
