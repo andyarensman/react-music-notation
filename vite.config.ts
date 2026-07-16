@@ -13,6 +13,7 @@ export default defineConfig({
         "src/components",
         "src/helpers",
         "src/musicxml",
+        "src/playback",
       ],
     }),
   ],
@@ -22,6 +23,7 @@ export default defineConfig({
       entry: {
         index: resolve(__dirname, "src/index.ts"),
         musicxml: resolve(__dirname, "src/musicxml/index.ts"),
+        playback: resolve(__dirname, "src/playback/index.ts"),
       },
       name: "ReactMusicNotation",
       formats: ["es", "cjs"],

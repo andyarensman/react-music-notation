@@ -33,6 +33,11 @@
       "import": "./dist/musicxml.js",
       "require": "./dist/musicxml.cjs"
     },
+    "./playback": {
+      "types": "./dist/playback/index.d.ts",
+      "import": "./dist/playback.js",
+      "require": "./dist/playback.cjs"
+    },
     "./styles.css": "./dist/style.css"
   },
   "files": [

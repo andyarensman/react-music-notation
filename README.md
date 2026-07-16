@@ -226,7 +226,29 @@ The project is built in phases; each completed phase has a kitchen-sink story un
   beam between the staves; each stem reaches it from its own side (the
   head-vs-beam comparison picks the side automatically)
 
-**Still out**: grace-note accidentals and beamed/slurred grace-note runs, D.S./D.C./segno/coda navigation marks, cross-staff beams for chords and MusicXML per-note `<staff>` changes (manual `crossStaff` only), collisions inside beamed groups between voices, octave lines crossing barlines, ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, courtesy naturals on key changes, bracketed instrument-family groups in scores, a grand-staff part inside a `Score`, melisma extender lines and elisions, verse numbers, 3+ lyric verses (they overflow toward the next system), `.mxl` unzipping (pass the contained XML string yourself), MusicXML export, MIDI, playback, and print layout. See `ROADMAP.md` for the full coverage audit against Behind Bars and the MusicXML element reference.
+**Phase 20**
+
+- Sounding pitch model: `Pitch.soundingAlter` (semitones, MusicXML's
+  `<alter>`) joins the drawn `alter` glyph, with `AccidentalContext`
+  reconciling whichever side is missing from the key signature and the
+  measure's earlier accidentals. Fixes the importer drawing redundant
+  accidentals on every key-signature note; sloppy files missing either
+  element now render and sound right, and an explicit natural against
+  the key earns an inferred glyph
+
+**Phase 21**
+
+- Playback as a subpath (`react-music-notation/playback`, zero cost to
+  non-users, zero dependencies): `extractPlaybackScore` walks the same
+  element tree you render into a timed event list — tempo marks,
+  repeats with first/second endings, ties merged across barlines,
+  tuplet scaling, grace notes stealing time, key-signature/accidental
+  inference, tablature tuning, unpitched percussion — and `usePlayback`
+  schedules it on a built-in Web Audio synth (swappable via the
+  `Instrument` interface), reporting each event as it sounds so a
+  cursor can ride the `selected` prop
+
+**Still out**: grace-note accidentals and beamed/slurred grace-note runs, D.S./D.C./segno/coda navigation marks, cross-staff beams for chords and MusicXML per-note `<staff>` changes (manual `crossStaff` only), collisions inside beamed groups between voices, octave lines crossing barlines, ties on chord members, nested tuplets, 64th+ notes, automatic beam grouping from the time signature, courtesy naturals on key changes, bracketed instrument-family groups in scores, a grand-staff part inside a `Score`, melisma extender lines and elisions, verse numbers, 3+ lyric verses (they overflow toward the next system), `.mxl` unzipping (pass the contained XML string yourself), MusicXML export, MIDI file export (the playback extraction is the groundwork), playback pause/seek and velocity-from-dynamics, and print layout. See `ROADMAP.md` for the full coverage audit against Behind Bars and the MusicXML element reference.
 
 **MusicXML coverage roadmap** — auditing the [MusicXML 4.0 element reference](https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/) against what renders today, the notable visual-notation elements still missing are: ornaments (`trill-mark`, `turn`/`inverted-turn`, `mordent`/`inverted-mordent`, `wavy-line`), `cue` notes, `fermata`, `breath-mark`/`caesura`, `tremolo`, `arpeggiate`, `glissando`/`slide`, `pedal`, `segno`/`coda`, `rehearsal` marks, `multiple-rest` (multi-measure rests), and harmony/chord symbols. These are the candidate pool for future phases.
 
@@ -449,6 +471,20 @@ Every event always carries a spoken `aria-label` ("C sharp 5, quarter note"; "ch
 ```
 
 The `"percussion"` clef marks a staff unpitched; place notes with `position` (hi-hat above the top line, snare in space 3, kick in space 1, by kit convention), or with `pitch` using the treble mapping (MusicXML's display-step/display-octave rule). `notehead` on a `Note` — or per chord tone on a `StackedNote` — swaps the head for `"x"`, `"circleX"`, `"diamond"`, or `"triangle"`, drawn as a bare head with its own stem and flag so beaming and voices work unchanged. Not yet: slash noteheads (Leland lacks the glyphs), single-line percussion staves, stem tremolos/rolls.
+
+### Playback
+
+```tsx
+import { extractPlaybackScore, usePlayback } from "react-music-notation/playback";
+
+const element = <Staff>{measures}</Staff>; // the same element you render
+const score = useMemo(() => extractPlaybackScore(element), [element]);
+const { play, stop, isPlaying } = usePlayback(score, {
+  onEvent: (e) => setActiveNotes(e?.noteIndices ?? []),
+});
+```
+
+`extractPlaybackScore` turns the element tree into `{ events, durationSec }`: onsets/durations from the flex model, tempo from tempo marks, repeats and voltas expanded, ties merged (across barlines too), tuplets scaled, grace notes stealing time before their hosts, sounding pitches resolved through the key signature and accidental carry (`soundingAlter` wins when set), TAB frets through standard tuning, and percussion-clef staves as unpitched clicks. For MusicXML, pass `parseMusicXML(xml).element`. `usePlayback` schedules everything on the audio clock — the default instrument is a tiny dependency-free Web Audio synth; implement the `Instrument` interface to swap in a soundfont or Tone.js. `onEvent` fires as each event starts sounding (and with `null` at the end), carrying `measureNumber`, `midi`, and per-voice `noteIndices` for cursor highlighting via `selected`. Browser-only (Web Audio); `play()` must be called from a user gesture. Not yet: pause/seek, velocity from dynamics, D.S./coda navigation, nested repeats.
 
 ### Tablature
 

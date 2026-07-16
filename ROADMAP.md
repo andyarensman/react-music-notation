@@ -135,6 +135,14 @@ afternoon) can handle. Grounded against the
   single-line percussion staves, slash notation, rolls/tremolos, rhythm
   stems on tab, hammer-on/bend marks.
 
+- ~~**Playback**~~ — shipped as `react-music-notation/playback`:
+  `extractPlaybackScore` (tempo/repeats/voltas/ties/tuplets/graces/keys/
+  tab/percussion → timed events) + `usePlayback` on a dependency-free
+  Web Audio synth with an `Instrument` swap point and `onEvent` cursor
+  callbacks. Built on Phase 20's sounding-pitch model. Still open:
+  pause/seek, velocity from dynamics, MIDI file export on top of the
+  same extraction, richer default instrument.
+
 ## Post-Fable friendly (well-scoped, follow existing patterns)
 
 - **TSDoc/JSDoc prop documentation** — doc comments on all exported
