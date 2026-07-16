@@ -9,6 +9,24 @@ Engraving bugs (overlapping glyphs, wrong stem directions, misplaced
 brackets) are invisible to the type checker and unit tests. Every
 rendering change must be screenshot-verified before commit.
 
+Two layers exist:
+
+1. **The permanent harness** — `npm run test:visual` screenshots every
+   story in Chromium/Firefox/WebKit against committed baselines
+   (`tests/visual/`). Run it before every commit that touches
+   rendering; use `npm run test:visual:update` for new/intentionally
+   changed stories and REVIEW the new baselines before committing.
+2. **The exploratory loop below** — for iterating on a change before it
+   has a baseline, and for zooming into details the full-page diff
+   can't judge.
+
+Hard-won rules: zoom-verify every NEW glyph against its reference
+geometry (a mid-measure clef once shipped misregistered because only
+the notes were zoomed); and when a new CSS class styles a glyph, check
+it actually wins the cascade — global.css loads after component css,
+so `.leland`'s font-size beats a single-class override (use
+`.leland.your-class`).
+
 ## Procedure
 
 1. **Typecheck first** (cheap): `npx tsc --noEmit`

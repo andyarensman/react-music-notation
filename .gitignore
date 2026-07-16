@@ -25,3 +25,8 @@ dist-ssr
 /references
 storybook-static
 *.tgz
+
+# visual regression working dirs
+.storybook-visual
+test-results
+playwright-report

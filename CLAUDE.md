@@ -18,11 +18,18 @@ branch:
 3. **Verify visually before committing** — use the `visual-verify` skill
    (`.claude/skills/visual-verify/`). `tsc` passing is not verification;
    engraving bugs are only visible in screenshots.
-4. Update `README.md`: add a phase block under Status, update the
+4. Run the test suites: `npm test` (unit tests for the pure cores) and
+   `npm run test:visual` (Playwright screenshots of every story in
+   Chromium/Firefox/WebKit against committed baselines). New or
+   intentionally changed stories need `npm run test:visual:update` —
+   review the new baselines before committing them. Add unit tests when
+   touching the pure logic (helpers, soundingPitch, extraction, layout).
+5. Update `README.md`: add a phase block under Status, update the
    "Still out" list and the MusicXML coverage paragraph; add a usage
    section if there's new public API. Update `ROADMAP.md` (strike shipped
-   items, note what's still open).
-5. `npm run build` sanity check, then commit with a descriptive message.
+   items, note what's still open) and `QUALITY.md` if a quality gap
+   opened or closed.
+6. `npm run build` sanity check, then commit with a descriptive message.
 
 Documentation-only tasks (README restructures, TSDoc) can be delegated to
 a smaller model via the Agent tool — verify its output before committing.
