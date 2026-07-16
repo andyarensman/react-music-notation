@@ -15,6 +15,11 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      # unit tests (pure cores: position math, accidental inference,
+      # playback extraction, layout walkers)
+      - run: npm test
       # typechecks (tsc) then builds the library bundle
       - run: npm run build
       - run: npm run build-storybook
+      # visual regression runs locally only for now: baselines are
+      # OS-specific (see QUALITY.md, Testing)

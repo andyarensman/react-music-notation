@@ -15,6 +15,7 @@ export default defineConfig({
         "src/musicxml",
         "src/playback",
       ],
+      exclude: ["**/*.test.*"],
     }),
   ],
   build: {
