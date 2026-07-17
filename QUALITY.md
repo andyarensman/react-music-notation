@@ -13,7 +13,8 @@ about **quality and product scope**.
 - Full TSDoc on the public API (IDE hover docs). ✅ have
 - A README that teaches the mental model, not just the props. ✅ have
 - Semver discipline: a CHANGELOG, release notes, versioning policy
-  (changesets or similar). ❌ **missing — adopt before first publish**
+  (changesets or similar). ⚠️ CHANGELOG.md exists (full 0.1.0 history);
+  changesets/release automation still to adopt before first publish
 - CI that actually protects: typecheck + build ✅, automated tests ❌
   (see Testing below)
 - Documented bundle cost and SSR behavior. ✅ README documents sizes

@@ -55,6 +55,37 @@ a smaller model via the Agent tool — verify its output before committing.
   in `layout.tsx`.
 - Engraving decisions follow Gould, *Behind Bars* (see References below),
   not intuition. When placement looks wrong, check the book first.
+- Beamed groups use margin-exact geometry (Phase 23): every source of
+  leading margin on a beamed event (accidental columns, graces,
+  mid-measure clefs) must go through the shared helpers in `layout.tsx`
+  (`leadingMarginSs`/`stackAccidentalMargin`) so stems and beam segments
+  compute identical x positions. A new margin source added anywhere else
+  detaches stems from beams.
+- Ties/slurs are drawn by `CurveOverlay` from `data-*` attributes that
+  notes publish (anchors/obstacles in staff-spaces below staff top,
+  measured at the container). A new component with noteheads only
+  participates in curves if it publishes the same attributes; anything
+  that moves noteheads must keep them truthful.
+- Mid-measure clefs are render-time `ClefContext` providers created by
+  the `decorate` hook of `placeEventsOnGrid` — the layout walkers must
+  stay unaware of them. New walkers must not special-case clef changes.
+- Colors: every mark paints `currentColor`; roots read
+  `var(--rmn-ink, #000)`; masking backgrounds use `var(--rmn-paper, white)`.
+  Never hard-code a color in component CSS — it breaks dark mode.
+  `.measure-container` has `isolation: isolate` because the staff lines
+  sit at `z-index: -1`; without it any ancestor background hides them.
+- Every visual component forwards a ref and merges `className`/`style`
+  onto its container, with layout-critical inline values spread AFTER
+  the user's style. Keep that contract for new components (use
+  `mergeRefs` when the component also measures itself).
+- The importer never draws accidentals from `<alter>` alone —
+  `AccidentalContext` (key signature + measure carry) decides what's
+  drawn vs what's sounding. Playback timing derives from the same flex
+  units as layout (flex/4 = quarter notes): changing `getNoteFlex`
+  semantics changes playback.
+- Corpus warnings (`tests/corpus/__snapshots__/`) may only change when
+  the importer deliberately learns or loses an element — a surprise
+  diff there is a regression.
 
 ## Environment gotchas (Windows / PowerShell 5.1 / OneDrive)
 
