@@ -298,6 +298,12 @@ const Melody = () => (
 
 React 18 is a peer dependency. Until it's published, `npm pack` in this repo produces an installable tarball.
 
+### Bundle cost and SSR
+
+The core `.` entry is tiny (component code is tree-shaken per import); `musicxml` and `playback` are separate subpath entries you only pay for when imported. The one real cost is `style.css` (~60 kB, ~38 kB gzipped) because the Leland font is inlined into it as a data URI — the tradeoff that makes install zero-config with no asset-path issues.
+
+The components render server-side in pure Node (no `window`/`document` needed until hydration — guarded by `tests/corpus/ssr.test.tsx`). Two caveats: `parseMusicXML`/`MusicXMLScore` use `DOMParser`, which servers must polyfill (e.g. jsdom) or avoid by parsing client-side; and the `playback` subpath is browser-only (WebAudio). System breaking happens client-side after a `ResizeObserver` measurement, so an SSR'd score first paints as a single system, then re-breaks on hydration.
+
 ## Getting started (development)
 
 ```

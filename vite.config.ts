@@ -8,7 +8,7 @@ import dts from "vite-plugin-dts";
 export default defineConfig({
   test: {
     // *.test.* only — tests/visual/*.spec.ts belongs to Playwright
-    include: ["src/**/*.test.*", "tests/**/*.test.*"],
+    include: ["src/**/*.test.{ts,tsx}", "tests/**/*.test.{ts,tsx}"],
     exclude: ["tests/visual/**", "node_modules/**"],
   },
   plugins: [

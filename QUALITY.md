@@ -16,8 +16,10 @@ about **quality and product scope**.
   (changesets or similar). ❌ **missing — adopt before first publish**
 - CI that actually protects: typecheck + build ✅, automated tests ❌
   (see Testing below)
-- Documented bundle cost and SSR behavior. ⚠️ partially (playback's
-  browser-only nature is documented; no size/SSR notes)
+- Documented bundle cost and SSR behavior. ✅ README documents sizes
+  and the SSR contract (components render in pure Node — guarded by
+  tests/corpus/ssr.test.tsx; parseMusicXML needs a DOMParser polyfill
+  server-side; playback is browser-only)
 
 ## What makes a great component library
 
@@ -58,10 +60,13 @@ Our moat — protect these:
 Where incumbents beat us today:
 
 - **Robustness on wild MusicXML.** OSMD chews through arbitrary
-  MuseScore/Finale exports; our importer has only ever eaten files we
-  wrote for it. The Phase-20 accidental bug survived eight phases
-  because our corpus was too polite. ❌ **need a real-world corpus
-  test** (feed genuine exports, snapshot warnings + renders)
+  MuseScore/Finale exports; our importer had only ever eaten files we
+  wrote for it. ✅ now guarded: `tests/corpus/` feeds 12 real-world
+  files (Bach, Beethoven, Schumann, Joplin, OSMD's feature-soup tests)
+  through parse + renderToStaticMarkup on every `npm test` — no throws,
+  plausible note counts, skip-warnings snapshotted so importer behavior
+  can't drift silently. OSMD still renders more of what's *in* those
+  files (pedals, fermatas, ornaments, 3rd voice, multi-staff parts)
 - Print/page layout, `.mxl` unzipping, transposition. ❌ (ROADMAP)
 
 ## Testing & verification (the big gap)

@@ -1,0 +1,85 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`MusicXML corpus > Beethoven_AnDieFerneGeliebte.xml > keeps its warnings stable 1`] = `
+"6 warnings
+Multi-staff parts inside a multi-part score render their first staff only
+Skipped <print> elements
+Skipped direction <pedal>
+Skipped lyric <extend> (melisma extender lines)
+Skipped ties on chord noteheads
+Unclosed slur marker; left ungrouped"
+`;
+
+exports[`MusicXML corpus > Dichterliebe01.xml > keeps its warnings stable 1`] = `
+"9 warnings
+3 voices on one staff; only the first two are rendered
+Multi-staff parts inside a multi-part score render their first staff only
+Skipped <fermata> notations
+Skipped <print> elements
+Skipped direction <dashes>
+Skipped direction <pedal>
+Skipped ties on chord noteheads
+Unclosed slur marker; left ungrouped
+Unclosed wedge marker; left ungrouped"
+`;
+
+exports[`MusicXML corpus > JohannSebastianBach_Air.xml > keeps its warnings stable 1`] = `"0 warnings"`;
+
+exports[`MusicXML corpus > Mozart_AnChloe.xml > keeps its warnings stable 1`] = `
+"5 warnings
+Multi-staff parts inside a multi-part score render their first staff only
+Skipped <ornaments> notations
+Skipped <print> elements
+Skipped lyric <extend> (melisma extender lines)
+Skipped ties on chord noteheads"
+`;
+
+exports[`MusicXML corpus > MuzioClementi_SonatinaOpus36No1_Part1.xml > keeps its warnings stable 1`] = `
+"1 warnings
+Skipped <print> elements"
+`;
+
+exports[`MusicXML corpus > OSMD_function_test_GraceNotes.xml > keeps its warnings stable 1`] = `
+"2 warnings
+Accidentals on grace notes are not drawn
+Skipped <print> elements"
+`;
+
+exports[`MusicXML corpus > OSMD_function_test_all.xml > keeps its warnings stable 1`] = `
+"10 warnings
+Accidentals on grace notes are not drawn
+Skipped <arpeggiate> notations
+Skipped <fermata> notations
+Skipped <ornaments> notations
+Skipped <print> elements
+Skipped technical marks (down-bow)
+Skipped technical marks (fingering)
+Skipped technical marks (snap-pizzicato)
+Skipped technical marks (stopped)
+Skipped technical marks (up-bow)"
+`;
+
+exports[`MusicXML corpus > OSMD_function_test_in-measure-clefs.xml > keeps its warnings stable 1`] = `
+"1 warnings
+Skipped <print> elements"
+`;
+
+exports[`MusicXML corpus > Saltarello.xml > keeps its warnings stable 1`] = `
+"2 warnings
+Skipped <print> elements
+Skipped <sound> elements"
+`;
+
+exports[`MusicXML corpus > ScottJoplin_The_Entertainer.xml > keeps its warnings stable 1`] = `
+"3 warnings
+Skipped ties on chord noteheads
+Unclosed wedge marker; left ungrouped
+Unsupported dynamic "fz""
+`;
+
+exports[`MusicXML corpus > test_pickup_measure_double_rhythm.xml > keeps its warnings stable 1`] = `"0 warnings"`;
+
+exports[`MusicXML corpus > test_tuplet_placement.xml > keeps its warnings stable 1`] = `
+"1 warnings
+Skipped <print> elements"
+`;
