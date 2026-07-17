@@ -1,5 +1,8 @@
 .measure-container {
   position: relative;
+  /* stacking context: the staff lines' z-index -1 must stay inside the
+     measure, or an ancestor's background paints over them */
+  isolation: isolate;
   display: flex;
   flex-direction: row;
   justify-content: space-between;

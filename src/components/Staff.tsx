@@ -1,13 +1,16 @@
 import {
+  CSSProperties,
   Children,
   ReactElement,
   ReactNode,
   cloneElement,
+  forwardRef,
   isValidElement,
   useEffect,
   useRef,
   useState,
 } from "react";
+import { mergeRefs } from "./mergeRefs";
 import { ClefType, KeyRange } from "../helpers/types";
 import { MeasureProps } from "./Measure";
 import {
@@ -26,6 +29,10 @@ import "./Staff.css";
 
 interface StaffProps extends NoteInteractionHandlers {
   children?: ReactNode;
+  /** Extra class name(s) appended to the staff container. */
+  className?: string;
+  /** Extra styles applied to the staff container. */
+  style?: CSSProperties;
 }
 
 interface AnnotatedMeasure {
@@ -60,7 +67,10 @@ interface AnnotatedMeasure {
  * </Staff>
  * ```
  */
-export const Staff = ({ children, onNoteClick, onNoteHover }: StaffProps) => {
+export const Staff = forwardRef<HTMLDivElement, StaffProps>(function Staff(
+  { children, onNoteClick, onNoteHover, className, style },
+  ref
+) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [widthSs, setWidthSs] = useState(0);
   const [staffSpacePx, setStaffSpacePx] = useState(8);
@@ -127,10 +137,11 @@ export const Staff = ({ children, onNoteClick, onNoteHover }: StaffProps) => {
 
   const content = (
     <div
-      className="staff-container"
+      className={"staff-container" + (className ? ` ${className}` : "")}
       role="group"
       aria-label="Music staff"
-      ref={containerRef}
+      ref={mergeRefs(containerRef, ref)}
+      style={style}
     >
       {systems.map((system, systemIndex) => {
         const loose =
@@ -176,4 +187,4 @@ export const Staff = ({ children, onNoteClick, onNoteHover }: StaffProps) => {
   ) : (
     content
   );
-};
+});

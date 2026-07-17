@@ -30,5 +30,5 @@
 
 .line {
   width: 100%;
-  border-bottom: var(--staff-line-thickness) solid black;
+  border-bottom: var(--staff-line-thickness) solid currentColor;
 }

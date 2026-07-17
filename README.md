@@ -685,6 +685,37 @@ The importer accepts score-partwise MusicXML as a string (unzip `.mxl` files you
 
 Colliding simultaneous notes are offset automatically per Gould's two-voice rules: when the voices sound a second apart or in unison, the down-stem voice's note shifts right of the up-stem note (a paint-only transform, so the onset grid and cross-staff alignment are untouched). A unison of two single notes with the same value and dotting is left superimposed — the merged heads with both stems read as the shared notehead engravers use. Wholes and mixed-value unisons always separate; a dotted up-voice note widens the shift to clear its dot. Not yet handled: colliding notes *inside a beamed group* of the down-stem voice (shifting one head would detach it from the beam's geometry), and accidental collisions between voices.
 
+### Theming
+
+Every mark the library draws — noteheads, stems, beams, staff lines, barlines, slurs, hairpins, tuplet brackets, tab digits — is painted with `currentColor`, and the root containers (`Staff`, `GrandStaff`, `Score`, standalone `Measure`) read their color from `var(--rmn-ink, #000)`. Theme a score by setting CSS variables on any ancestor:
+
+```css
+.dark-page {
+  --rmn-ink: #e8e6e3;   /* every notation mark            (default #000)    */
+  --rmn-paper: #1b1b1f; /* background masks, e.g. the boxes tab fret digits
+                           punch out of their string lines (default white)   */
+  --rmn-hover: #7ab8ff; /* hover color of interactive notes (default #1a6ee0) */
+  --rmn-selected: #ffb454; /* notes with `selected`         (default #c2410c) */
+  --rmn-focus: #7ab8ff; /* keyboard focus ring              (default #4d90fe) */
+  background: #1b1b1f;  /* the page background itself stays yours to set;
+                           --rmn-paper just tells the notation what it is    */
+}
+```
+
+Because color inherits, one-off recoloring needs no variables at all: `<Note style={{ color: "crimson" }} />` paints that note (head, stem, dot, accidental) crimson. See the **Theming** stories in Storybook for a dark theme, a brand-ink theme, and per-note styling.
+
+### Escape hatches: `className`, `style`, `ref`
+
+Every visual component (`Note`, `NoteStack`, `TabNote`, `Measure`, `Staff`, `GrandStaff`, `Score`) accepts `className` and `style` on its container element and forwards a `ref` to it (`React.forwardRef`), so anything the props don't cover — badges, tooltips anchored to a note, scroll-into-view, drag handles — can be built without forking:
+
+```tsx
+const measureRef = useRef<HTMLDivElement>(null);
+<Measure ref={measureRef} className="current-measure">…</Measure>
+// later: measureRef.current?.scrollIntoView({ behavior: "smooth" })
+```
+
+Layout-critical inline values (a note's `flex-grow`, accidental margins) are merged *after* your `style`, so spacing can't be corrupted accidentally — recolor and decorate freely, but move notes horizontally at your own peril. For advanced composition, `ClefContext` and `OttavaContext` are exported: a custom component rendered inside a `Measure` can read the governing clef (including mid-measure changes) and the active ottava displacement the same way `Note` does.
+
 ## Sizing system
 
 All sizing is driven by two CSS custom properties declared in `src/global.css`:

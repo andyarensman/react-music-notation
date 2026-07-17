@@ -8,5 +8,5 @@
 }
 
 .curve-overlay path {
-  fill: black;
+  fill: currentColor;
 }

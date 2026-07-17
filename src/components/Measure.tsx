@@ -4,6 +4,7 @@ import {
   ReactElement,
   ReactNode,
   cloneElement,
+  forwardRef,
   isValidElement,
 } from "react";
 import "./Measure.css";
@@ -71,10 +72,12 @@ export interface MeasureProps {
    */
   systemStart?: boolean;
   /**
-   * @internal Set by `Staff`/`GrandStaff`/`Score` for non-justified (loose)
-   * final systems; not usually set manually.
+   * Extra styles merged onto the measure container (also used internally
+   * by `Staff`/`GrandStaff`/`Score` for loose final systems).
    */
   style?: CSSProperties;
+  /** Extra class name(s) appended to the measure container. */
+  className?: string;
   /**
    * Time signature for this measure. Unlike `clef`/`fifths`, time signatures
    * are not restated automatically on later measures or systems — set it
@@ -125,23 +128,28 @@ export interface MeasureProps {
  * </Staff>
  * ```
  */
-export const Measure = ({
-  measureNumber,
-  clef,
-  inheritedClef,
-  fifths,
-  inheritedFifths,
-  tempo,
-  ending,
-  systemStart,
-  style,
-  time,
-  barline,
-  startRepeat,
-  grid,
-  staffTrack,
-  children,
-}: MeasureProps) => {
+export const Measure = forwardRef<HTMLDivElement, MeasureProps>(
+  function Measure(
+    {
+      measureNumber,
+      clef,
+      inheritedClef,
+      fifths,
+      inheritedFifths,
+      tempo,
+      ending,
+      systemStart,
+      style,
+      className,
+      time,
+      barline,
+      startRepeat,
+      grid,
+      staffTrack,
+      children,
+    },
+    ref
+  ) {
   const activeClef = clef ?? inheritedClef ?? "gClef";
   const displayClef = clef ?? (systemStart ? activeClef : undefined);
   const displayFifths = fifths ?? (systemStart ? inheritedFifths : undefined);
@@ -183,7 +191,10 @@ export const Measure = ({
     <ClefContext.Provider value={activeClef}>
       <MeasureNumberContext.Provider value={measureNumber}>
       <div
-        className={`measure-container${isTab ? " measure-tab" : ""}`}
+        ref={ref}
+        className={`measure-container${isTab ? " measure-tab" : ""}${
+          className ? ` ${className}` : ""
+        }`}
         role="group"
         aria-label={
           measureNumber !== undefined ? `Measure ${measureNumber}` : "Measure"
@@ -244,4 +255,4 @@ export const Measure = ({
       </MeasureNumberContext.Provider>
     </ClefContext.Provider>
   );
-};
+});

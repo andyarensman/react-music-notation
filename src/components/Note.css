@@ -83,6 +83,10 @@
   stroke-width: calc(var(--staff-space) * 0.15);
 }
 
+.beam polygon {
+  fill: currentColor;
+}
+
 .beam-segment {
   position: absolute;
   top: 0;
@@ -299,15 +303,15 @@
 }
 
 .note-interactive:focus-visible {
-  outline: calc(var(--staff-space) * 0.25) solid #4d90fe;
+  outline: calc(var(--staff-space) * 0.25) solid var(--rmn-focus, #4d90fe);
   outline-offset: calc(var(--staff-space) * 0.25);
   border-radius: calc(var(--staff-space) * 0.4);
 }
 
 .note-interactive:hover {
-  color: #1a6ee0;
+  color: var(--rmn-hover, #1a6ee0);
 }
 
 .note-container.note-selected {
-  color: #c2410c;
+  color: var(--rmn-selected, #c2410c);
 }

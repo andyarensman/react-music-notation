@@ -28,6 +28,20 @@
 }
 
 /*
+  Theming: all notation ink flows from `color` (everything draws with
+  currentColor), so setting --rmn-ink on any ancestor recolors the whole
+  engraving. Companions: --rmn-paper (backgrounds that mask staff lines,
+  e.g. tab fret numbers), --rmn-hover, --rmn-selected, --rmn-focus
+  (interaction states).
+*/
+.staff-container,
+.grand-staff-container,
+.score-container,
+.measure-container {
+  color: var(--rmn-ink, #000);
+}
+
+/*
   Vertical pitch positions, shared by notes, rests, and key signature
   accidentals. Each step is half a staff-space. line-3 (middle line) is the
   reference at 0.

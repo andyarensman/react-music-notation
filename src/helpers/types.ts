@@ -1,4 +1,4 @@
-import { MouseEventHandler, ReactElement } from "react";
+import { CSSProperties, MouseEventHandler, ReactElement } from "react";
 
 /**
  * Number of sharps (positive) or flats (negative) in a key signature,
@@ -142,6 +142,14 @@ interface BaseNoteProps {
    * `Voice` it applies to that voice's remaining events only.
    */
   clefChange?: ClefType;
+  /** Extra class name(s) appended to the event's container element. */
+  className?: string;
+  /**
+   * Extra styles merged onto the event's container. Layout-critical
+   * properties the library computes (flex-grow, leading margins) win
+   * over conflicting user values.
+   */
+  style?: CSSProperties;
   /**
    * Click handler for this event. Any click handler — this one or a
    * score-level `onNoteClick` — makes the event interactive: pointer

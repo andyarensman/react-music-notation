@@ -1,4 +1,6 @@
 import { defineConfig } from "@playwright/test";
+import { tmpdir } from "os";
+import { join } from "path";
 
 /*
   Cross-engine visual regression: every Storybook story is screenshotted
@@ -13,6 +15,8 @@ import { defineConfig } from "@playwright/test";
 */
 export default defineConfig({
   testDir: "tests/visual",
+  // out of the repo: OneDrive file locks make in-place rmdir EPERM-flaky
+  outputDir: join(tmpdir(), "rmn-playwright-results"),
   fullyParallel: true,
   timeout: 600_000,
   expect: {

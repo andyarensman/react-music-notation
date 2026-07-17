@@ -1,13 +1,16 @@
 import {
+  CSSProperties,
   Children,
   ReactElement,
   ReactNode,
   cloneElement,
+  forwardRef,
   isValidElement,
   useEffect,
   useRef,
   useState,
 } from "react";
+import { mergeRefs } from "./mergeRefs";
 import "./GrandStaff.css";
 import "../global.css";
 import { CurveOverlay } from "./CurveOverlay";
@@ -28,6 +31,10 @@ import {
 
 interface GrandStaffProps extends NoteInteractionHandlers {
   children?: ReactNode;
+  /** Extra class name(s) appended to the grand-staff container. */
+  className?: string;
+  /** Extra styles applied to the grand-staff container. */
+  style?: CSSProperties;
 }
 
 interface AnnotatedGrandMeasure {
@@ -64,11 +71,11 @@ const BRACE_WIDTH_SS = 2;
  * </GrandStaff>
  * ```
  */
-export const GrandStaff = ({
-  children,
-  onNoteClick,
-  onNoteHover,
-}: GrandStaffProps) => {
+export const GrandStaff = forwardRef<HTMLDivElement, GrandStaffProps>(
+  function GrandStaff(
+    { children, onNoteClick, onNoteHover, className, style },
+    ref
+  ) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [widthSs, setWidthSs] = useState(0);
   const [staffSpacePx, setStaffSpacePx] = useState(8);
@@ -184,10 +191,11 @@ export const GrandStaff = ({
 
   const content = (
     <div
-      className="grand-staff-container"
+      className={"grand-staff-container" + (className ? ` ${className}` : "")}
       role="group"
       aria-label="Grand staff"
-      ref={containerRef}
+      ref={mergeRefs(containerRef, ref)}
+      style={style}
     >
       {systems.map((system, systemIndex) => {
         const loose =
@@ -236,4 +244,4 @@ export const GrandStaff = ({
   ) : (
     content
   );
-};
+});

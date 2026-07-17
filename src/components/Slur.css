@@ -19,5 +19,5 @@
 }
 
 .slur-svg path {
-  fill: black;
+  fill: currentColor;
 }

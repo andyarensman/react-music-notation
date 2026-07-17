@@ -4,6 +4,7 @@ import {
   KeyboardEvent,
   MouseEvent,
   SyntheticEvent,
+  forwardRef,
   useContext,
 } from "react";
 import "./Note.css";
@@ -58,7 +59,10 @@ import { CrossStaffContext, STAFF_STRIDE_VB } from "./CrossStaffContext";
  * <Note rest noteValue="quarter" dotted={1} />
  * ```
  */
-export const Note = (props: NoteProps) => {
+export const Note = forwardRef<HTMLDivElement, NoteProps>(function Note(
+  props,
+  ref
+) {
   const clef = useContext(ClefContext);
   const ottava = useContext(OttavaContext);
   const crossContext = useContext(CrossStaffContext);
@@ -290,11 +294,16 @@ export const Note = (props: NoteProps) => {
 
   return (
     <div
-      className={containerClass}
+      ref={ref}
+      className={
+        containerClass + (props.className ? ` ${props.className}` : "")
+      }
       {...interactionAttributes}
       {...curveData}
       style={
         {
+          ...props.style,
+          // layout-critical values win over user styles
           flexGrow: getNoteFlex(props),
           marginLeft: leadingMargin
             ? `calc(var(--staff-space) * ${leadingMargin})`
@@ -459,4 +468,4 @@ export const Note = (props: NoteProps) => {
         )}
     </div>
   );
-};
+});

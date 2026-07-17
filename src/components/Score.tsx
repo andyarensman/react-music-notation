@@ -1,13 +1,16 @@
 import {
+  CSSProperties,
   Children,
   ReactElement,
   ReactNode,
   cloneElement,
+  forwardRef,
   isValidElement,
   useEffect,
   useRef,
   useState,
 } from "react";
+import { mergeRefs } from "./mergeRefs";
 import "./Score.css";
 import "../global.css";
 import { CurveOverlay } from "./CurveOverlay";
@@ -34,6 +37,10 @@ interface ScoreProps extends NoteInteractionHandlers {
   partNames?: string[];
   /** The score's measures: `ScoreMeasure` elements. */
   children?: ReactNode;
+  /** Extra class name(s) appended to the score container. */
+  className?: string;
+  /** Extra styles applied to the score container. */
+  style?: CSSProperties;
 }
 
 interface AnnotatedScoreMeasure {
@@ -58,12 +65,10 @@ interface AnnotatedScoreMeasure {
  * </Score>
  * ```
  */
-export const Score = ({
-  partNames,
-  children,
-  onNoteClick,
-  onNoteHover,
-}: ScoreProps) => {
+export const Score = forwardRef<HTMLDivElement, ScoreProps>(function Score(
+  { partNames, children, onNoteClick, onNoteHover, className, style },
+  ref
+) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [widthSs, setWidthSs] = useState(0);
   const [staffSpacePx, setStaffSpacePx] = useState(8);
@@ -158,12 +163,13 @@ export const Score = ({
 
   const content = (
     <div
-      className="score-container"
+      className={"score-container" + (className ? ` ${className}` : "")}
       role="group"
       aria-label={
         partNames?.length ? `Score: ${partNames.join(", ")}` : "Score"
       }
-      ref={containerRef}
+      ref={mergeRefs(containerRef, ref)}
+      style={style}
     >
       {systems.map((system, systemIndex) => {
         const loose =
@@ -235,4 +241,4 @@ export const Score = ({
   ) : (
     content
   );
-};
+});

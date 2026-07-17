@@ -5,9 +5,9 @@
   left: 0;
   right: 0;
   height: calc(var(--staff-space) * 1.9);
-  border-top: var(--staff-line-thickness) solid black;
-  border-left: var(--staff-line-thickness) solid black;
-  border-right: var(--staff-line-thickness) solid black;
+  border-top: var(--staff-line-thickness) solid currentColor;
+  border-left: var(--staff-line-thickness) solid currentColor;
+  border-right: var(--staff-line-thickness) solid currentColor;
   pointer-events: none;
 }
 

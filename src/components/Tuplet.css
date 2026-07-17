@@ -29,19 +29,19 @@
 }
 
 .tuplet-above .tuplet-bracket-line {
-  border-top: var(--staff-line-thickness) solid black;
+  border-top: var(--staff-line-thickness) solid currentColor;
 }
 
 .tuplet-below .tuplet-bracket-line {
-  border-bottom: var(--staff-line-thickness) solid black;
+  border-bottom: var(--staff-line-thickness) solid currentColor;
 }
 
 .tuplet-bracket-line:first-child {
-  border-left: var(--staff-line-thickness) solid black;
+  border-left: var(--staff-line-thickness) solid currentColor;
 }
 
 .tuplet-bracket-line:last-child {
-  border-right: var(--staff-line-thickness) solid black;
+  border-right: var(--staff-line-thickness) solid currentColor;
 }
 
 .tuplet-number {

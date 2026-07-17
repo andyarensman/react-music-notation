@@ -35,6 +35,12 @@ export { StaffLines } from "./components/StaffLines";
 
 export type { NoteInteractionHandlers } from "./components/InteractionContext";
 
+// Contexts, for advanced composition (custom components that need to know
+// the governing clef or the active ottava displacement)
+export { ClefContext } from "./components/ClefContext";
+export { OttavaContext } from "./components/OttavaContext";
+export { mergeRefs } from "./components/mergeRefs";
+
 export {
   AccidentalContext,
   keySignatureAlterations,

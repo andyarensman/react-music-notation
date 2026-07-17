@@ -5,6 +5,7 @@ import {
   MouseEvent,
   MouseEventHandler,
   SyntheticEvent,
+  forwardRef,
   useContext,
 } from "react";
 import "./Note.css";
@@ -119,6 +120,13 @@ export interface NoteStackProps {
   onClick?: MouseEventHandler<HTMLDivElement>;
   /** Draws the chord in the selection color; state lives with the consumer. */
   selected?: boolean;
+  /** Extra class name(s) appended to the chord's container element. */
+  className?: string;
+  /**
+   * Extra styles merged onto the chord's container; layout-critical
+   * values the library computes win over conflicting user values.
+   */
+  style?: CSSProperties;
 }
 
 const STEM_LENGTH = 28; // 3.5 staff-spaces in viewBox units
@@ -141,7 +149,8 @@ const MIDDLE_LINE_STEM_Y = 64; // StemPositions["line-3"], the viewBox origin fo
  * />
  * ```
  */
-export const NoteStack = (props: NoteStackProps) => {
+export const NoteStack = forwardRef<HTMLDivElement, NoteStackProps>(
+  function NoteStack(props, ref) {
   const clef = useContext(ClefContext);
   const ottava = useContext(OttavaContext);
   const { pitches, noteValue, dotted, stemEndValue } = props;
@@ -323,7 +332,10 @@ export const NoteStack = (props: NoteStackProps) => {
 
   return (
     <div
-      className={containerClass}
+      ref={ref}
+      className={
+        containerClass + (props.className ? ` ${props.className}` : "")
+      }
       {...interactionAttributes}
       data-note-event=""
       data-stem-up={impliedStemUp ? "1" : "0"}
@@ -337,6 +349,8 @@ export const NoteStack = (props: NoteStackProps) => {
       data-slur-dir={props.slur?.direction}
       style={
         {
+          ...props.style,
+          // layout-critical values win over user styles
           flexGrow: getNoteFlex(props),
           marginLeft: leadingMargin
             ? `calc(var(--staff-space) * ${leadingMargin})`
@@ -509,4 +523,4 @@ export const NoteStack = (props: NoteStackProps) => {
       )}
     </div>
   );
-};
+});

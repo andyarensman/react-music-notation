@@ -26,16 +26,19 @@ about **quality and product scope**.
   directions, placements, positions). ✅ have
 - Accessibility by default (labels, roles, keyboard). ✅ have (Phase 16)
 - Escape hatches: `ref` forwarding, `className`/`style` passthrough on
-  every component. ❌ **missing entirely** — users can't anchor
-  tooltips, attach test ids, or extend styling without querying our DOM
+  every component. ✅ have — `Note`, `NoteStack`, `TabNote`, `Measure`,
+  `Staff`, `GrandStaff`, `Score` all forward refs and merge
+  `className`/`style` (layout-critical inline values win the merge)
 - Theming surface: CSS custom properties for ink color, selection/hover
-  colors, fonts. ❌ **missing** — everything inks hardcoded black;
-  dark mode currently cannot work. Only `--staff-space` and
-  `--staff-line-thickness` exist
+  colors. ✅ have — all marks paint `currentColor`; roots read
+  `--rmn-ink`; `--rmn-paper/-hover/-selected/-focus` cover masks and
+  interaction states (see the Theming stories). Verified pixel-identical
+  by default against all pre-theming baselines. Fonts stay fixed (the
+  engraving is metrically derived from Leland — a font knob would be a lie)
 - Custom content attachment (fingerings, editorial marks as children of
   a note). ❌ missing
-- Internals available to power users (contexts like `ClefContext`
-  exported for building note-like components). ❌ not exported
+- Internals available to power users. ✅ `ClefContext`/`OttavaContext`
+  exported, plus `mergeRefs`
 - Docs site with live, readable code per feature (the Storybook-as-wiki
   reorganization in ROADMAP.md). ❌ pending
 

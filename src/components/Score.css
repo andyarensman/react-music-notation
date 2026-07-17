@@ -36,7 +36,7 @@
 .score-system-barline {
   flex-shrink: 0;
   width: var(--staff-line-thickness);
-  background-color: black;
+  background-color: currentColor;
   margin-top: calc(
     (var(--staff-space) * 12.125 - var(--staff-line-thickness)) / 2
   );

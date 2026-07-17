@@ -19,6 +19,6 @@
 
 .hairpin-svg path {
   fill: none;
-  stroke: black;
+  stroke: currentColor;
   stroke-width: calc(var(--staff-space) * 0.14);
 }

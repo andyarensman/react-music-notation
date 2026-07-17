@@ -34,14 +34,14 @@
   position: absolute;
   right: 0;
   top: calc(var(--staff-space) * 0.15);
-  border-top: var(--staff-line-thickness) dashed black;
+  border-top: var(--staff-line-thickness) dashed currentColor;
 }
 
 .ottava-hook {
   position: absolute;
   right: 0;
   width: 0;
-  border-right: var(--staff-line-thickness) solid black;
+  border-right: var(--staff-line-thickness) solid currentColor;
   height: calc(var(--staff-space) * 0.75);
 }
 

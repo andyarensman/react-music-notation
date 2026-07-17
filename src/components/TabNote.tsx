@@ -1,4 +1,4 @@
-import { CSSProperties } from "react";
+import { CSSProperties, forwardRef } from "react";
 import "./TabNote.css";
 import { getNoteFlex } from "../helpers/helpers";
 import { NoteProps } from "../helpers/types";
@@ -21,6 +21,10 @@ interface TabNoteProps {
   noteValue: NoteProps["noteValue"];
   /** Extends the event's spacing by half, like a dotted note. */
   dotted?: 1;
+  /** Extra class name(s) appended to the event's container element. */
+  className?: string;
+  /** Extra styles merged onto the container; flex-grow wins over user values. */
+  style?: CSSProperties;
 }
 
 /**
@@ -44,7 +48,8 @@ interface TabNoteProps {
  * </Measure>
  * ```
  */
-export const TabNote = (props: TabNoteProps) => {
+export const TabNote = forwardRef<HTMLDivElement, TabNoteProps>(
+  function TabNote(props, ref) {
   const { frets, noteValue, dotted } = props;
   const ariaLabel =
     frets.length === 0
@@ -54,10 +59,16 @@ export const TabNote = (props: TabNoteProps) => {
           .join(", ")}, ${dotted ? "dotted " : ""}${noteValue}`;
   return (
     <div
-      className="note-container tab-note"
+      ref={ref}
+      className={
+        "note-container tab-note" +
+        (props.className ? ` ${props.className}` : "")
+      }
       role="img"
       aria-label={ariaLabel}
-      style={{ flexGrow: getNoteFlex(props) } as CSSProperties}
+      style={
+        { ...props.style, flexGrow: getNoteFlex(props) } as CSSProperties
+      }
     >
       {frets.map(({ string, fret }) => (
         <div
@@ -74,4 +85,4 @@ export const TabNote = (props: TabNoteProps) => {
       ))}
     </div>
   );
-};
+});
