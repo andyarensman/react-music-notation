@@ -3,7 +3,12 @@ import "./Score.css";
 import { MeasureProps } from "./Measure";
 import { Barline, BarlineType } from "./MeasureMeta/Barline";
 import { ClefType, KeyRange } from "../helpers/types";
-import { getOnsetBoundaries, unionBoundaries } from "./layout";
+import {
+  getOnsetBoundaries,
+  getOnsetMargins,
+  unionBoundaries,
+  unionMargins,
+} from "./layout";
 
 // Vertical distance from one part's staff to the next (their 16.125
 // staff-space line boxes overlap by 4, leaving an 8 staff-space gap)
@@ -76,6 +81,18 @@ export const ScoreMeasure = ({
     .map((part) => getOnsetBoundaries(part.props.children))
     .reduce(unionBoundaries);
 
+  // union accidental/grace/clef margins per onset across all parts, so no
+  // staff's noteheads skew right of the others' at a shared onset
+  const margins = parts
+    .map((part, index) =>
+      getOnsetMargins(
+        part.props.children,
+        boundaries,
+        part.props.clef ?? inheritedClefs?.[index] ?? "gClef"
+      )
+    )
+    .reduce(unionMargins);
+
   // Repeat-end dots belong on each staff individually
   const perStaffBarline = barline === "repeatEnd";
   const barlineHeight = `calc(var(--staff-space) * ${
@@ -101,6 +118,7 @@ export const ScoreMeasure = ({
         >
           {cloneElement(part, {
             grid: boundaries,
+            gridMargins: margins,
             barline: perStaffBarline ? "repeatEnd" : "none",
             startRepeat,
             inheritedClef: inheritedClefs?.[index],

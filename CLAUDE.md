@@ -57,10 +57,17 @@ a smaller model via the Agent tool — verify its output before committing.
   not intuition. When placement looks wrong, check the book first.
 - Beamed groups use margin-exact geometry (Phase 23): every source of
   leading margin on a beamed event (accidental columns, graces,
-  mid-measure clefs) must go through the shared helpers in `layout.tsx`
-  (`leadingMarginSs`/`stackAccidentalMargin`) so stems and beam segments
-  compute identical x positions. A new margin source added anywhere else
-  detaches stems from beams.
+  mid-measure clefs) must go through the shared helpers
+  (`helpers.leadingMarginSs`/`stackAccidentalMargin`) so stems and beam
+  segments compute identical x positions. A new margin source added
+  anywhere else detaches stems from beams.
+- The onset grid is margin-exact too (Phase 24): every interval is a
+  [margin][duration] track pair (margin col of interval i = 2i+1), the
+  margin track sized by `layout.eventLeadingMargin` — a static mirror
+  of the components' own margin math. If a component's rendered margin
+  ever diverges from `eventLeadingMargin`, cross-staff noteheads skew.
+  A new margin source must land in BOTH `leadingMarginSs` and the
+  components, never just one.
 - Ties/slurs are drawn by `CurveOverlay` from `data-*` attributes that
   notes publish (anchors/obstacles in staff-spaces below staff top,
   measured at the container). A new component with noteheads only

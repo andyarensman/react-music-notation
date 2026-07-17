@@ -1,6 +1,8 @@
 import { Children, ReactElement, ReactNode, isValidElement } from "react";
 import {
+  getChordStem,
   getNoteFlex,
+  leadingMarginSs,
   positionIndex,
   resolvePosition,
 } from "../helpers/helpers";
@@ -187,10 +189,164 @@ export const wrapWithClefs = (
 export const unionBoundaries = (a: number[], b: number[]): number[] =>
   Array.from(new Set([...a, ...b].map(round3))).sort((x, y) => x - y);
 
-export const gridTemplateFromBoundaries = (boundaries: number[]): string =>
+/* ----------------------- onset-margin columns ----------------------- */
+
+/*
+  Accidentals, grace notes, and mid-measure clefs give a note a fixed
+  leading margin (staff-spaces). On a shared onset grid that margin must
+  not come out of the note's own proportional column, or its notehead
+  lands right of the other staff's simultaneous notehead (the "margin
+  skew"). The grid therefore gets a fixed-width margin track before every
+  duration track, sized to the widest margin any staff/voice needs at
+  that onset; events whose own margin is narrower are padded up to it
+  (placeEventsOnGrid), so simultaneous noteheads align at their duration
+  track's left edge.
+*/
+
+/*
+  The leading margin the FIRST notehead of an event will render with —
+  a static mirror of Note/NoteStack/BeamContainer's own margin math
+  (helpers.leadingMarginSs). Ottava/cross-staff re-resolution is ignored
+  here; it can only alter the chord seconds-flip clearance in rare
+  corners. `voiceStem` is the stem a surrounding Voice would force.
+*/
+export const eventLeadingMargin =
+  (clef: ClefType, voiceStem?: "upStem" | "downStem") =>
+  (node: ReactNode): number => {
+    if (!isValidElement(node)) return 0;
+    const role = getMusicRole(node);
+    const props = node.props as {
+      noteValue?: NoteProps["noteValue"];
+      stem?: "upStem" | "downStem" | "noStem";
+      pitches?: StackedNote[];
+      children?: ReactNode;
+    };
+    const resolve = (note: StackedNote) => resolvePosition(note, clef);
+    if (node.type === BeamContainer) {
+      const groupStem = props.stem ?? voiceStem ?? "upStem";
+      const first = Children.toArray(props.children).find(
+        (child) =>
+          isValidElement(child) &&
+          (child.props as { noteValue?: unknown }).noteValue !== undefined
+      ) as ReactElement | undefined;
+      return first
+        ? leadingMarginSs(
+            first.props as Parameters<typeof leadingMarginSs>[0],
+            resolve,
+            groupStem === "upStem"
+          )
+        : 0;
+    }
+    if (role === "tuplet") {
+      const first = Children.toArray(props.children)[0];
+      return eventLeadingMargin(clef, voiceStem)(first);
+    }
+    if (props.noteValue === undefined) return 0;
+    // chord stacks flip seconds by stem direction, which widens the margin
+    const walkUp =
+      props.pitches && props.pitches.length > 0
+        ? (props.noteValue === "whole"
+            ? "noStem"
+            : props.stem ??
+              voiceStem ??
+              getChordStem(props.pitches.map(resolve))) !== "downStem"
+        : true;
+    return leadingMarginSs(
+      props as Parameters<typeof leadingMarginSs>[0],
+      resolve,
+      walkUp
+    );
+  };
+
+/*
+  Per-column leading margins for one staff (or one voice): entry i is the
+  margin of the event starting at boundaries[i], 0 when nothing with a
+  margin starts there. Traversal mirrors getOnsetBoundaries (transparent
+  slur/hairpin/ottava wrappers contribute their interior events; tuplets
+  are opaque). A measure containing Voice layers unions its voices.
+*/
+export const getOnsetMargins = (
+  children: ReactNode,
+  boundaries: number[],
+  clef: ClefType,
+  voiceStem?: "upStem" | "downStem"
+): number[] => {
+  const childArray = Children.toArray(children);
+  const voices = childArray.filter(isVoiceElement);
+  if (voices.length > 0) {
+    return voices
+      .map((voice) => {
+        const voiceProps = (
+          voice as ReactElement<{
+            stem?: "upStem" | "downStem";
+            children?: ReactNode;
+          }>
+        ).props;
+        return getOnsetMargins(
+          voiceProps.children,
+          boundaries,
+          clef,
+          voiceProps.stem
+        );
+      })
+      .reduce(unionMargins);
+  }
+
+  const margins = new Array<number>(Math.max(boundaries.length - 1, 0)).fill(
+    0
+  );
+  const columnIndex = new Map(
+    boundaries.map((boundary, index) => [round3(boundary), index])
+  );
+  const marginOf = eventLeadingMargin(clef, voiceStem);
+  let onset = 0;
+  const walk = (nodes: ReactNode) => {
+    Children.toArray(nodes).forEach((child) => {
+      const role = getMusicRole(child);
+      if (role === "slur" || role === "hairpin" || role === "ottava") {
+        walk((child as ReactElement<{ children?: ReactNode }>).props.children);
+        return;
+      }
+      const flex = getEventFlex(child);
+      if (flex > 0) {
+        const index = columnIndex.get(round3(onset));
+        if (index !== undefined && index < margins.length) {
+          margins[index] = Math.max(margins[index], round3(marginOf(child)));
+        }
+        onset = round3(onset + flex);
+      }
+    });
+  };
+  walk(childArray);
+  return margins;
+};
+
+// max per column across staves/voices (arrays may differ in length only
+// when a staff doesn't share every boundary; missing entries count as 0)
+export const unionMargins = (a: number[], b: number[]): number[] =>
+  (a.length >= b.length ? a : b).map((_, index) =>
+    Math.max(a[index] ?? 0, b[index] ?? 0)
+  );
+
+/*
+  Column template: every onset interval becomes a [margin][duration] track
+  pair. The fixed margin track holds the union leading margin at that
+  onset so the fr tracks stay purely rhythmic; intervals without margins
+  get a 0px track, keeping column numbering uniform (margin column of
+  interval i = 2i+1, duration column = 2i+2).
+*/
+export const gridTemplateFromBoundaries = (
+  boundaries: number[],
+  margins?: number[]
+): string =>
   boundaries
     .slice(1)
-    .map((boundary, index) => `${round3(boundary - boundaries[index])}fr`)
+    .map((boundary, index) => {
+      const margin = margins?.[index] ?? 0;
+      const marginTrack =
+        margin > 0 ? `calc(var(--staff-space) * ${round3(margin)})` : "0px";
+      return `${marginTrack} ${round3(boundary - boundaries[index])}fr`;
+    })
     .join(" ");
 
 // Flex of the last leaf note inside a group (slurs/hairpins end their spans
@@ -213,21 +369,28 @@ export const getLastLeafFlex = (nodes: ReactNode): number => {
   return 0;
 };
 
-// Wrap each event in a grid item spanning its onset columns. The wrapper is
-// a flex row, so the event's own flex-grow just fills it. `collisionShifts`
-// (onset → staff-spaces) nudges single note events sideways with a paint
-// transform, so the grid columns — and every other voice/staff aligned to
-// them — are untouched.
+// Wrap each event in a grid item spanning its onset columns (each onset
+// owns a [margin][duration] track pair — an event's span starts at its
+// onset's margin track, which its own leading margin fills; events whose
+// margin is narrower than the column's union margin get the difference as
+// padding, so simultaneous noteheads align at the duration track edge).
+// `collisionShifts` (onset → staff-spaces) nudges single note events
+// sideways with a paint transform, so the grid columns — and every other
+// voice/staff aligned to them — are untouched.
 export const placeEventsOnGrid = (
   children: ReactNode,
   boundaries: number[],
+  margins?: number[],
+  // computes the event's own rendered leading margin for the padding
+  // top-up (eventLeadingMargin(clef, voiceStem))
+  marginOf?: (child: ReactNode) => number,
   collisionShifts?: Map<number, number>,
   // render-time decoration (e.g. mid-measure clef providers); applied
   // inside the grid wrapper so flex math still sees the raw child
   decorate?: (child: ReactNode, index: number) => ReactNode
 ): ReactNode[] => {
   const columnOf = new Map(
-    boundaries.map((boundary, index) => [round3(boundary), index + 1])
+    boundaries.map((boundary, index) => [round3(boundary), 2 * index + 1])
   );
   let onset = 0;
   return Children.toArray(children).map((child, index) => {
@@ -243,6 +406,8 @@ export const placeEventsOnGrid = (
       : undefined;
     const start = columnOf.get(round3(onset));
     const end = columnOf.get(round3(onset + flex));
+    const sharedMargin =
+      start !== undefined ? margins?.[(start - 1) / 2] ?? 0 : 0;
     onset = round3(onset + flex);
     const rendered = decorate ? decorate(child, index) : child;
     if (start === undefined || end === undefined) {
@@ -250,12 +415,19 @@ export const placeEventsOnGrid = (
       // totals); let it flow and keep rendering
       return rendered;
     }
+    const topUp = round3(
+      Math.max(sharedMargin - (marginOf?.(child) ?? 0), 0)
+    );
     return (
       <div
         key={index}
         className="grid-event"
         style={{
           gridColumn: `${start} / ${end}`,
+          paddingLeft:
+            topUp > 0
+              ? `calc(var(--staff-space) * ${topUp})`
+              : undefined,
           transform: shift
             ? `translateX(calc(var(--staff-space) * ${shift}))`
             : undefined,

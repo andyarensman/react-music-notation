@@ -152,15 +152,13 @@ afternoon) can handle. Grounded against the
 Ordered by (risk × geometry complexity). Everything else in this file
 follows established patterns; these don't.
 
-1. **Onset-grid column margin skew** — the last known core geometry
-   defect. When staves share an onset grid and one staff carries
-   accidentals/graces at a shared onset, that staff's noteheads shift
-   right inside their grid column while the other staff's don't, so
-   simultaneous notes disagree in x. The fix is the grid-column
-   analogue of Phase 23's margin-exact beams (union the margins into
-   the column template or compensate per cell) and touches
-   `layout.tsx`'s grid math — the most invariant-dense file in the
-   repo.
+1. ~~**Onset-grid column margin skew**~~ — shipped (Phase 24): the
+   shared grid inserts a fixed margin track per onset (union of every
+   staff's/voice's leading margin there) and pads narrower events up
+   to it, so simultaneous noteheads align exactly. Still open: onsets
+   *interior* to a spanning beam group/tuplet don't get top-ups when
+   the other staff's margin there is wider (the group's internal flex
+   can't be padded without threading extra margins into the notes).
 2. **Ties on chord noteheads** — the importer skips them today and 4 of
    the 12 corpus files hit the warning, so it's the most common
    real-world gap. Needs per-notehead anchors from `NoteStack`

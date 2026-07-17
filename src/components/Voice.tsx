@@ -10,6 +10,7 @@ import { ClefContext } from "./ClefContext";
 import { GridContext } from "./GridContext";
 import {
   clefSequence,
+  eventLeadingMargin,
   getMusicRole,
   gridTemplateFromBoundaries,
   placeEventsOnGrid,
@@ -47,7 +48,7 @@ interface StemmableProps {
 }
 
 const VoiceComponent = ({ stem, collisionShifts, children }: VoiceProps) => {
-  const boundaries = useContext(GridContext);
+  const grid = useContext(GridContext);
   const clef = useContext(ClefContext);
 
   const applyVoiceDefaults = (nodes: ReactNode): ReactNode =>
@@ -92,7 +93,7 @@ const VoiceComponent = ({ stem, collisionShifts, children }: VoiceProps) => {
   // mid-measure clef changes within this voice's events
   const clefs = clefSequence(stemmedChildren, clef);
 
-  if (!boundaries) {
+  if (!grid) {
     // Not inside a voice-aware measure: behave like a plain flex row
     return (
       <div className="voice-layer" style={{ display: "flex", flexGrow: 1 }}>
@@ -106,17 +107,26 @@ const VoiceComponent = ({ stem, collisionShifts, children }: VoiceProps) => {
       className="voice-layer"
       style={{
         display: "grid",
-        gridTemplateColumns: gridTemplateFromBoundaries(boundaries),
+        gridTemplateColumns: gridTemplateFromBoundaries(
+          grid.boundaries,
+          grid.margins
+        ),
       }}
     >
-      {placeEventsOnGrid(stemmedChildren, boundaries, collisionShifts, (child, index) =>
-        clefs[index] === clef ? (
-          child
-        ) : (
-          <ClefContext.Provider value={clefs[index]}>
-            {child}
-          </ClefContext.Provider>
-        )
+      {placeEventsOnGrid(
+        stemmedChildren,
+        grid.boundaries,
+        grid.margins,
+        eventLeadingMargin(clef, stem),
+        collisionShifts,
+        (child, index) =>
+          clefs[index] === clef ? (
+            child
+          ) : (
+            <ClefContext.Provider value={clefs[index]}>
+              {child}
+            </ClefContext.Provider>
+          )
       )}
     </div>
   );

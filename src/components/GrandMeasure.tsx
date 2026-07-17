@@ -3,7 +3,12 @@ import "./GrandStaff.css";
 import { MeasureProps } from "./Measure";
 import { Barline, BarlineType } from "./MeasureMeta/Barline";
 import { ClefType, KeyRange } from "../helpers/types";
-import { getOnsetBoundaries, unionBoundaries } from "./layout";
+import {
+  getOnsetBoundaries,
+  getOnsetMargins,
+  unionBoundaries,
+  unionMargins,
+} from "./layout";
 import { CrossStaffContext } from "./CrossStaffContext";
 
 export interface GrandMeasureProps {
@@ -97,6 +102,13 @@ export const GrandMeasure = ({
   const upperActiveClef = upper.props.clef ?? inheritedUpperClef ?? "gClef";
   const lowerActiveClef = lower.props.clef ?? inheritedLowerClef ?? "fClef";
 
+  // union accidental/grace/clef margins per onset, so neither staff's
+  // noteheads skew right of the other's at a shared onset
+  const margins = unionMargins(
+    getOnsetMargins(upper.props.children, boundaries, upperActiveClef),
+    getOnsetMargins(lower.props.children, boundaries, lowerActiveClef)
+  );
+
   return (
     <div className="grand-measure" style={style}>
       <CrossStaffContext.Provider
@@ -104,6 +116,7 @@ export const GrandMeasure = ({
       >
         {cloneElement(upper, {
           grid: boundaries,
+          gridMargins: margins,
           barline: perStaffBarline ? "repeatEnd" : "none",
           startRepeat,
           inheritedClef: inheritedUpperClef,
@@ -119,6 +132,7 @@ export const GrandMeasure = ({
         >
           {cloneElement(lower, {
             grid: boundaries,
+            gridMargins: margins,
             barline: perStaffBarline ? "repeatEnd" : "none",
             startRepeat,
             inheritedClef: inheritedLowerClef,

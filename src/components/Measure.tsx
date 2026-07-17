@@ -21,7 +21,9 @@ import { GridContext } from "./GridContext";
 import { MeasureNumberContext } from "./MeasureNumberContext";
 import {
   clefSequence,
+  eventLeadingMargin,
   getOnsetBoundaries,
+  getOnsetMargins,
   getVoiceCollisionShifts,
   gridTemplateFromBoundaries,
   hasVoices,
@@ -100,6 +102,13 @@ export interface MeasureProps {
    */
   grid?: number[];
   /**
+   * @internal Union leading margins (staff-spaces) per grid column,
+   * matching `grid`; set by `GrandMeasure`/`ScoreMeasure` so accidental/
+   * grace/clef margins become fixed columns shared by every staff instead
+   * of skewing one staff's noteheads. Not usually set manually.
+   */
+  gridMargins?: number[];
+  /**
    * @internal Which staff of a grand measure / score measure this is
    * (upper = 0, lower = 1, or the part index); set by `GrandMeasure`/
    * `ScoreMeasure` so the curve overlay can pair cross-measure ties and
@@ -145,6 +154,7 @@ export const Measure = forwardRef<HTMLDivElement, MeasureProps>(
       barline,
       startRepeat,
       grid,
+      gridMargins,
       staffTrack,
       children,
     },
@@ -159,6 +169,11 @@ export const Measure = forwardRef<HTMLDivElement, MeasureProps>(
   const voiceBoundaries = voiceMode
     ? grid ?? getOnsetBoundaries(children)
     : null;
+  const voiceMargins =
+    voiceMode && voiceBoundaries
+      ? gridMargins ??
+        getOnsetMargins(children, voiceBoundaries, activeClef)
+      : null;
   const gridMode = !voiceMode && grid !== undefined && grid.length > 1;
   // governing clef per direct child (mid-measure clef changes)
   const clefs = clefSequence(children, activeClef);
@@ -227,24 +242,38 @@ export const Measure = forwardRef<HTMLDivElement, MeasureProps>(
               gridMode
                 ? {
                     display: "grid",
-                    gridTemplateColumns: gridTemplateFromBoundaries(grid),
+                    gridTemplateColumns: gridTemplateFromBoundaries(
+                      grid,
+                      gridMargins
+                    ),
                   }
                 : undefined
             }
           >
             {voiceMode ? (
-              <GridContext.Provider value={voiceBoundaries}>
+              <GridContext.Provider
+                value={{
+                  boundaries: voiceBoundaries!,
+                  margins: voiceMargins!,
+                }}
+              >
                 {voiceChildren}
               </GridContext.Provider>
             ) : gridMode ? (
-              placeEventsOnGrid(children, grid, undefined, (child, index) =>
-                clefs[index] === activeClef ? (
-                  child
-                ) : (
-                  <ClefContext.Provider value={clefs[index]}>
-                    {child}
-                  </ClefContext.Provider>
-                )
+              placeEventsOnGrid(
+                children,
+                grid,
+                gridMargins,
+                eventLeadingMargin(activeClef),
+                undefined,
+                (child, index) =>
+                  clefs[index] === activeClef ? (
+                    child
+                  ) : (
+                    <ClefContext.Provider value={clefs[index]}>
+                      {child}
+                    </ClefContext.Provider>
+                  )
               )
             ) : (
               wrapWithClefs(children, activeClef)
