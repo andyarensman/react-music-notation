@@ -147,6 +147,30 @@ afternoon) can handle. Grounded against the
   pause/seek, velocity from dynamics, MIDI file export on top of the
   same extraction, richer default instrument.
 
+## Fable-tier — do these while Fable is available
+
+Ordered by (risk × geometry complexity). Everything else in this file
+follows established patterns; these don't.
+
+1. **Onset-grid column margin skew** — the last known core geometry
+   defect. When staves share an onset grid and one staff carries
+   accidentals/graces at a shared onset, that staff's noteheads shift
+   right inside their grid column while the other staff's don't, so
+   simultaneous notes disagree in x. The fix is the grid-column
+   analogue of Phase 23's margin-exact beams (union the margins into
+   the column template or compensate per cell) and touches
+   `layout.tsx`'s grid math — the most invariant-dense file in the
+   repo.
+2. **Ties on chord noteheads** — the importer skips them today and 4 of
+   the 12 corpus files hit the warning, so it's the most common
+   real-world gap. Needs per-notehead anchors from `NoteStack`
+   published to `CurveOverlay` (today ties anchor per event), plus
+   Gould's rules for tie stacking/direction in chords.
+3. **Collisions inside beamed groups** (down-stem voice) — deferred
+   from Phase 14 because sideways-shifting a beamed head must not
+   detach it from Phase 23's margin-exact stem/beam math; solve them
+   together or not at all.
+
 ## Post-Fable friendly (well-scoped, follow existing patterns)
 
 - **Richer default instrument** — the built-in synth is confirmed
