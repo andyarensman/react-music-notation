@@ -23,6 +23,7 @@ SOFTWARE.
 ---
 
 This package bundles the Leland music font
-(https://github.com/MuseScoreFonts/Leland), copyright (c) 2020 MuseScore BVBA
-and others, licensed under the SIL Open Font License, Version 1.1
-(https://scripts.sil.org/OFL). The font is embedded in dist/style.css.
+(https://github.com/MuseScoreFonts/Leland), copyright (c) MuseScore BVBA,
+with Reserved Font Name "Leland", licensed under the SIL Open Font License,
+Version 1.1 — full text in LICENSE-Leland.txt (also at
+https://scripts.sil.org/OFL). The font is embedded in dist/style.css.

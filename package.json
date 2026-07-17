@@ -41,7 +41,8 @@
     "./styles.css": "./dist/style.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "LICENSE-Leland.txt"
   ],
   "sideEffects": [
     "**/*.css"
